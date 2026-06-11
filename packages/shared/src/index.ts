@@ -1,5 +1,6 @@
 export * from "./auth.js";
 export * from "./backups.js";
+export * from "./dashboard.js";
 export * from "./permissions.js";
 export * from "./pipeline-run.js";
 export * from "./pipeline-state.js";
@@ -7,6 +8,7 @@ export * from "./pipeline-yaml.js";
 export * from "./pipelines.js";
 export * from "./pull-requests.js";
 export * from "./repository.js";
+export * from "./search.js";
 export * from "./stats.js";
 export * from "./svn.js";
 export * from "./teams.js";

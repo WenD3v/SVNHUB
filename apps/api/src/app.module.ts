@@ -9,6 +9,7 @@ import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RepoRoleGuard } from "./auth/guards/repo-role.guard";
 import { BackupsModule } from "./backups/backups.module";
 import { BranchesModule } from "./branches/branches.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
 import { HealthModule } from "./health/health.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -16,6 +17,7 @@ import { PipelinesModule } from "./pipelines/pipelines.module";
 import { PullRequestsModule } from "./prs/pull-requests.module";
 import { QueuesModule } from "./queues/queues.module";
 import { RepositoriesModule } from "./repositories/repositories.module";
+import { SearchModule } from "./search/search.module";
 import { TeamsModule } from "./teams/teams.module";
 import { UsersModule } from "./users/users.module";
 import { WebhooksModule } from "./webhooks/webhooks.module";
@@ -38,6 +40,8 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     PipelinesModule,
     WebhooksModule,
     UsersModule,
+    DashboardModule,
+    SearchModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
