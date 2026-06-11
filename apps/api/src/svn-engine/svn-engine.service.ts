@@ -56,8 +56,10 @@ export class SvnEngineService {
     return path.resolve(this.config.reposRoot);
   }
 
+  // Directory name must equal the slug: Apache resolves the repo name from the
+  // SVNParentPath dir, which must match checkoutUrl (/svn/{slug}) and authz [slug:/path].
   resolveRepoPath(repoName: string): string {
-    return path.join(this.getReposRoot(), `${repoName}.svn`);
+    return path.join(this.getReposRoot(), repoName);
   }
 
   fileUrl(repoPath: string, svnPath = "/"): string {

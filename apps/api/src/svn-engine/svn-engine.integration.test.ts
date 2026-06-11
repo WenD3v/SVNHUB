@@ -30,7 +30,7 @@ describeIfSvn("SvnEngineService integration", () => {
   it("creates repository with standard layout and reads tree/log", async () => {
     const repoName = "demo-repo";
     const repoPath = await engine.createRepository(repoName);
-    expect(repoPath).toContain(`${repoName}.svn`);
+    expect(repoPath).toContain(repoName);
 
     const info = await engine.info(repoPath);
     expect(info.revision).toBeGreaterThanOrEqual(1);
