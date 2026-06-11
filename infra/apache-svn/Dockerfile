@@ -14,7 +14,7 @@ RUN apt-get update \
 
 # Basic Auth only (see apache-svn.conf). LDAP modules require extra packages
 # (libapache2-mod-ldap, libapache2-mod-authnz-ldap) — add when LDAP_URL is used.
-RUN a2enmod dav dav_svn authz \
+RUN a2enmod dav dav_svn authz_svn \
   && printf '%s\n' 'ServerName localhost' >> /etc/apache2/apache2.conf
 
 COPY apache-svn.conf /etc/apache2/sites-available/000-default.conf
