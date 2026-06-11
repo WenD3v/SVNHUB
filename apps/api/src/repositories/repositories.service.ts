@@ -33,6 +33,7 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { BackupsService } from "../backups/backups.service";
 import { AuthzService } from "../permissions/authz.service";
+import { SvnCliError } from "../svn-engine/svn-cli.executor";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
 import { ensureApacheRepoOwnership } from "../svn-engine/svn-repo-ownership";
 import { PipelinesService } from "../pipelines/pipelines.service";
@@ -170,10 +171,11 @@ export class RepositoriesService {
       headRevision,
     );
 
-    const readme = await this.tryReadReadme(
+    const { readme, readmeFilename } = await this.tryReadReadme(
       repository.svnPath,
       svnPath,
       headRevision,
+      entries,
     );
 
     return {
@@ -185,6 +187,7 @@ export class RepositoriesService {
         path: svnPathToUiPath(entry.path, ref, kind),
       })),
       readme,
+      readmeFilename,
     };
   }
 
@@ -200,11 +203,20 @@ export class RepositoriesService {
     const headRevision =
       revision ?? (await this.svnEngine.info(repository.svnPath, undefined)).revision;
 
-    const { content, isBinary } = await this.svnEngine.cat(
-      repository.svnPath,
-      svnPath,
-      headRevision,
-    );
+    let content: Buffer;
+    let isBinary: boolean;
+    try {
+      ({ content, isBinary } = await this.svnEngine.cat(
+        repository.svnPath,
+        svnPath,
+        headRevision,
+      ));
+    } catch (error) {
+      if (error instanceof SvnCliError && error.stderr.includes("W160013")) {
+        throw new NotFoundException(`Path not found: ${uiPath}`);
+      }
+      throw error;
+    }
 
     const mimeType = isBinary ? "application/octet-stream" : guessMimeType(uiPath);
 
@@ -436,11 +448,19 @@ export class RepositoriesService {
     repoPath: string,
     svnPath: string,
     revision: number,
-  ): Promise<string | null> {
-    const candidates = ["README.md", "readme.md", "README", "Readme.md"];
-    for (const name of candidates) {
+    entries: Array<{ name: string; kind: string }>,
+  ): Promise<{ readme: string | null; readmeFilename: string | null }> {
+    const priority = ["readme.md", "readme.markdown", "readme.txt", "readme"];
+    const files = entries.filter((entry) => entry.kind === "file");
+    for (const candidate of priority) {
+      const match = files.find(
+        (entry) => entry.name.toLowerCase() === candidate,
+      );
+      if (!match) continue;
       const candidatePath =
-        svnPath === "/" || svnPath === "" ? `/${name}` : `${svnPath}/${name}`;
+        svnPath === "/" || svnPath === ""
+          ? `/${match.name}`
+          : `${svnPath}/${match.name}`;
       try {
         const { content, isBinary } = await this.svnEngine.cat(
           repoPath,
@@ -448,13 +468,16 @@ export class RepositoriesService {
           revision,
         );
         if (!isBinary) {
-          return content.toString("utf8");
+          return {
+            readme: content.toString("utf8"),
+            readmeFilename: match.name,
+          };
         }
       } catch {
-        // try next candidate
+        // entry listed but unreadable — treat as absent
       }
     }
-    return null;
+    return { readme: null, readmeFilename: null };
   }
 }
 

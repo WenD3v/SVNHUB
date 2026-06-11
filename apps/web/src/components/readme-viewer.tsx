@@ -16,7 +16,7 @@ interface ReadmeViewerProps {
   format?: ReadmeFormat;
   filename?: string;
   slug: string;
-  ref: string;
+  branchRef: string;
   revision?: number;
 }
 
@@ -92,7 +92,7 @@ export function ReadmeViewer({
   format = "markdown",
   filename = "README.md",
   slug,
-  ref,
+  branchRef,
   revision,
 }: ReadmeViewerProps) {
   const { resolvedTheme } = useTheme();
@@ -190,7 +190,7 @@ export function ReadmeViewer({
       },
       img: ({ src, alt }) => {
         const srcString = typeof src === "string" ? src : undefined;
-        const resolved = resolveImageUrl(srcString, slug, ref, revision);
+        const resolved = resolveImageUrl(srcString, slug, branchRef, revision);
         if (!resolved) return null;
         // README images are served dynamically from the SVN content API.
         // eslint-disable-next-line @next/next/no-img-element
@@ -212,7 +212,7 @@ export function ReadmeViewer({
         );
       },
     }),
-    [highlighter, isDark, slug, ref, revision],
+    [highlighter, isDark, slug, branchRef, revision],
   );
 
   return (

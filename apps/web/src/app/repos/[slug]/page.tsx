@@ -58,7 +58,7 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
     ),
   ]);
 
-  const readme = await resolveReadme(slug, ref, tree.revision, tree.readme);
+  const readme = resolveReadme(tree);
   const latestPipeline = pipelines.pipelines[0] ?? null;
 
   return (
@@ -96,7 +96,7 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
                 format={readme.format}
                 filename={readme.filename}
                 slug={slug}
-                ref={ref}
+                branchRef={ref}
                 revision={tree.revision}
               />
             ) : null}

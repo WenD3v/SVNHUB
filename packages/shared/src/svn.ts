@@ -84,6 +84,7 @@ export interface RepositoryTreeResponse {
   path: string;
   entries: SvnTreeEntry[];
   readme: string | null;
+  readmeFilename: string | null;
 }
 
 export interface RepositoryFileContentResponse {
