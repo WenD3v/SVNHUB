@@ -12,6 +12,9 @@ const WEBHOOK_EVENTS = [
   "REVISION_INDEXED",
   "PIPELINE_COMPLETED",
   "PR_MERGED",
+  "ISSUE_OPENED",
+  "ISSUE_CLOSED",
+  "ISSUE_COMMENTED",
 ] as const;
 
 export class CreateWebhookDto {

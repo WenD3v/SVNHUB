@@ -36,6 +36,7 @@ import { AuthzService } from "../permissions/authz.service";
 import { SvnCliError } from "../svn-engine/svn-cli.executor";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
 import { ensureApacheRepoOwnership } from "../svn-engine/svn-repo-ownership";
+import { IssueCrossRefService } from "../issues/issue-cross-ref.service";
 import { PipelinesService } from "../pipelines/pipelines.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 import { HooksService } from "./hooks.service";
@@ -59,6 +60,7 @@ export class RepositoriesService {
     private readonly authzService: AuthzService,
     private readonly pipelinesService: PipelinesService,
     private readonly webhooksService: WebhooksService,
+    private readonly issueCrossRefService: IssueCrossRefService,
   ) {}
 
   async list(userId?: string): Promise<RepositorySummary[]> {
@@ -415,6 +417,16 @@ export class RepositoriesService {
       revision,
       changedPaths,
     );
+
+    if (indexed) {
+      await this.issueCrossRefService.processIndexedRevision({
+        repositoryId: repository.id,
+        repositorySlug: repository.slug,
+        revision,
+        author: indexed.author,
+        message: indexed.message,
+      });
+    }
   }
 
   private async requireRepository(slug: string) {

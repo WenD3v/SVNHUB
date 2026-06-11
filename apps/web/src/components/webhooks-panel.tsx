@@ -11,6 +11,9 @@ const EVENT_OPTIONS: WebhookEventType[] = [
   "REVISION_INDEXED",
   "PIPELINE_COMPLETED",
   "PR_MERGED",
+  "ISSUE_OPENED",
+  "ISSUE_CLOSED",
+  "ISSUE_COMMENTED",
 ];
 
 interface WebhooksPanelProps {

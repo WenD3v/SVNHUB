@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { BackupsModule } from "../backups/backups.module";
 import { BranchesModule } from "../branches/branches.module";
 import { AuthModule } from "../auth/auth.module";
+import { IssuesModule } from "../issues/issues.module";
 import { PipelinesModule } from "../pipelines/pipelines.module";
 import { PermissionsModule } from "../permissions/permissions.module";
 import { SvnEngineModule } from "../svn-engine/svn-engine.module";
@@ -16,7 +17,7 @@ import { RevisionIndexService } from "./revision-index.service";
 import { StatsService } from "./stats.service";
 
 @Module({
-  imports: [SvnEngineModule, BackupsModule, BranchesModule, PermissionsModule, PipelinesModule, WebhooksModule, AuthModule],
+  imports: [SvnEngineModule, BackupsModule, BranchesModule, PermissionsModule, PipelinesModule, WebhooksModule, AuthModule, IssuesModule],
   controllers: [RepositoriesController, InternalRepositoriesController],
   providers: [RepositoriesService, RevisionIndexService, HooksService, StatsService, ChangelogService],
   exports: [RepositoriesService],

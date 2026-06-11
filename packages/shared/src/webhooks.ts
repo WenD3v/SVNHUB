@@ -3,7 +3,10 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export type WebhookEventType =
   | "REVISION_INDEXED"
   | "PIPELINE_COMPLETED"
-  | "PR_MERGED";
+  | "PR_MERGED"
+  | "ISSUE_OPENED"
+  | "ISSUE_CLOSED"
+  | "ISSUE_COMMENTED";
 
 export interface WebhookSummary {
   id: string;

@@ -11,6 +11,7 @@ import { BackupsModule } from "./backups/backups.module";
 import { BranchesModule } from "./branches/branches.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { HealthModule } from "./health/health.module";
+import { IssuesModule } from "./issues/issues.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { PipelinesModule } from "./pipelines/pipelines.module";
@@ -37,6 +38,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     PermissionsModule,
     TeamsModule,
     PullRequestsModule,
+    IssuesModule,
     PipelinesModule,
     WebhooksModule,
     UsersModule,

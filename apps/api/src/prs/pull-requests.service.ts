@@ -22,6 +22,7 @@ import {
 
 import { AuditService } from "../audit/audit.service";
 import { BranchesService } from "../branches/branches.service";
+import { IssueCrossRefService } from "../issues/issue-cross-ref.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
@@ -43,6 +44,7 @@ export class PullRequestsService {
     private readonly branchesService: BranchesService,
     private readonly auditService: AuditService,
     private readonly webhooksService: WebhooksService,
+    private readonly issueCrossRefService: IssueCrossRefService,
   ) {}
 
   async list(
@@ -296,6 +298,22 @@ export class PullRequestsService {
         sourceRef: pullRequest.sourceRef,
         targetRef: pullRequest.targetRef,
       },
+    });
+
+    const commitMessages = await this.svnEngine
+      .log(repo.svnPath, { path: pullRequest.sourcePath, limit: 100 })
+      .then((entries) => entries.map((entry) => entry.message));
+
+    await this.issueCrossRefService.closeIssuesFromPullRequestMerge({
+      repositoryId: repo.id,
+      repositorySlug: repo.slug,
+      pullRequestNumber: number,
+      targetRef: pullRequest.targetRef,
+      defaultBranch: repo.defaultBranch,
+      title: pullRequest.title,
+      description: pullRequest.description,
+      commitMessages,
+      actorUserId: actorUserId,
     });
 
     return {

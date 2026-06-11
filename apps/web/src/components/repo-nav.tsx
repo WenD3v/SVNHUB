@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import {
   BarChart3,
+  CircleDot,
   Code2,
   GitBranch,
   GitCommitHorizontal,
@@ -24,9 +27,11 @@ interface RepoNavProps {
     | "branches"
     | "tags"
     | "compare"
+    | "issues"
     | "pulls"
     | "pipelines"
     | "settings";
+  openIssueCount?: number;
 }
 
 const TABS = [
@@ -48,6 +53,13 @@ const TABS = [
     label: "Changelog",
     href: (slug: string) => `/repos/${slug}/changelog`,
     icon: ScrollText,
+  },
+  {
+    id: "issues" as const,
+    label: "Issues",
+    href: (slug: string) => `/repos/${slug}/issues`,
+    icon: CircleDot,
+    showOpenCount: true,
   },
   {
     id: "pulls" as const,
@@ -87,7 +99,7 @@ const TABS = [
   },
 ];
 
-export function RepoNav({ slug, active }: RepoNavProps) {
+export function RepoNav({ slug, active, openIssueCount }: RepoNavProps) {
   return (
     <nav aria-label="Navegação do repositório" className="border-b border-border">
       <div className="-mb-px flex gap-1 overflow-x-auto">
@@ -108,6 +120,11 @@ export function RepoNav({ slug, active }: RepoNavProps) {
             >
               <Icon className="size-4" aria-hidden />
               {tab.label}
+              {"showOpenCount" in tab && tab.showOpenCount && openIssueCount !== undefined ? (
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-normal">
+                  {openIssueCount}
+                </span>
+              ) : null}
             </Link>
           );
         })}

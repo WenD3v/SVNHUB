@@ -74,6 +74,14 @@ enum WebhookEventType {
   REVISION_INDEXED
   PIPELINE_COMPLETED
   PR_MERGED
+  ISSUE_OPENED
+  ISSUE_CLOSED
+  ISSUE_COMMENTED
+}
+
+enum IssueStatus {
+  OPEN
+  CLOSED
 }
 
 enum PRCommentSide {
@@ -119,6 +127,9 @@ model User {
   mergedPullRequests   PullRequest[] @relation("PullRequestMergedBy")
   prComments           PRComment[]
   prReviews            PRReview[]
+  authoredIssues       Issue[]         @relation("IssueAuthor")
+  assignedIssues       Issue[]         @relation("IssueAssignee")
+  issueComments        IssueComment[]
 }
 
 model Group {
@@ -165,6 +176,8 @@ model Repository {
   policy          RepoPolicy?
   pathPermissions PathPermission[]
   pullRequests    PullRequest[]
+  issues          Issue[]
+  labels          Label[]
   pipelines       Pipeline[]
   webhooks        Webhook[]
   backups         RepositoryBackup[]
@@ -476,6 +489,73 @@ model RepositoryHealth {
   updatedAt      DateTime     @updatedAt
 
   repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+}
+
+model Issue {
+  id               String      @id @default(cuid())
+  repositoryId     String
+  number           Int
+  title            String
+  body             String?
+  status           IssueStatus @default(OPEN)
+  authorId         String
+  assigneeId       String?
+  closedAt         DateTime?
+  closedByPrNumber Int?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  repository Repository     @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  author     User           @relation("IssueAuthor", fields: [authorId], references: [id])
+  assignee   User?          @relation("IssueAssignee", fields: [assigneeId], references: [id])
+  comments   IssueComment[]
+  labels     IssueLabel[]
+
+  @@unique([repositoryId, number])
+  @@index([repositoryId, status])
+  @@index([authorId])
+  @@index([assigneeId])
+}
+
+model IssueComment {
+  id        String   @id @default(cuid())
+  issueId   String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issue  Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id])
+
+  @@index([issueId])
+}
+
+model Label {
+  id           String   @id @default(cuid())
+  repositoryId String
+  name         String
+  color        String
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  issues     IssueLabel[]
+
+  @@unique([repositoryId, name])
+  @@index([repositoryId])
+}
+
+model IssueLabel {
+  issueId String
+  labelId String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, labelId])
+  @@index([labelId])
 }
 
 model AuditLog {
