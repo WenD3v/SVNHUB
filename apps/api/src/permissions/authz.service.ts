@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -16,11 +16,19 @@ import {
 } from "./authz.compiler";
 
 @Injectable()
-export class AuthzService {
+export class AuthzService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    if (process.env.NODE_ENV !== "production") {
+      return;
+    }
+
+    await this.rebuildAll();
+  }
 
   async rebuildAll(): Promise<void> {
     await withMutex(async () => {
@@ -52,6 +60,11 @@ export class AuthzService {
       },
     });
 
+    const admins = await this.prisma.user.findMany({
+      where: { isAdmin: true },
+      select: { username: true },
+    });
+
     const userIds = new Set<string>();
     for (const repo of repositories) {
       for (const permission of repo.pathPermissions) {
@@ -81,6 +94,10 @@ export class AuthzService {
         existing.push({ principal, access });
         rulesMap.set(normalized, existing);
       };
+
+      for (const admin of admins) {
+        addRule("/", admin.username, "rw");
+      }
 
       for (const member of repo.members) {
         addRule("/", member.user.username, repoRoleDefaultAccess(member.role));
