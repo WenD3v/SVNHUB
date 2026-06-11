@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
+import { EmailModule } from "./email/email.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RepoRoleGuard } from "./auth/guards/repo-role.guard";
 import { BackupsModule } from "./backups/backups.module";
@@ -12,6 +13,7 @@ import { BranchesModule } from "./branches/branches.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { HealthModule } from "./health/health.module";
 import { IssuesModule } from "./issues/issues.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { PipelinesModule } from "./pipelines/pipelines.module";
@@ -30,6 +32,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     PrismaModule,
     QueuesModule,
     AuditModule,
+    EmailModule,
     HealthModule,
     AuthModule,
     BackupsModule,
@@ -39,6 +42,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     TeamsModule,
     PullRequestsModule,
     IssuesModule,
+    NotificationsModule,
     PipelinesModule,
     WebhooksModule,
     UsersModule,

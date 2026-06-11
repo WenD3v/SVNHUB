@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { AuthorDistributionChart } from "@/components/author-distribution-chart";
 import { CommitActivityChart } from "@/components/commit-activity-chart";
+import { MonthlyTrendChart } from "@/components/monthly-trend-chart";
 import { PageShell } from "@/components/page-shell";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
@@ -9,8 +11,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import type {
   RepositoryActivityResponse,
+  RepositoryAuthorDistributionResponse,
   RepositoryContributorsResponse,
   RepositoryDetail,
+  RepositoryMonthlyActivityResponse,
 } from "@svnhub/shared";
 
 interface InsightsPageProps {
@@ -20,11 +24,17 @@ interface InsightsPageProps {
 export default async function InsightsPage({ params }: InsightsPageProps) {
   const { slug } = await params;
 
-  const [repo, activity, contributors] = await Promise.all([
+  const [repo, activity, monthly, authorDistribution, contributors] = await Promise.all([
     apiFetch<RepositoryDetail>(`/repositories/${slug}`),
     apiFetch<RepositoryActivityResponse>(`/repositories/${slug}/stats/activity?weeks=52`).catch(
       () => ({ weeks: [], total: 0 }),
     ),
+    apiFetch<RepositoryMonthlyActivityResponse>(`/repositories/${slug}/stats/monthly?months=12`).catch(
+      () => ({ months: [], total: 0 }),
+    ),
+    apiFetch<RepositoryAuthorDistributionResponse>(
+      `/repositories/${slug}/stats/author-distribution`,
+    ).catch(() => ({ authors: [], total: 0 })),
     apiFetch<RepositoryContributorsResponse>(`/repositories/${slug}/stats/contributors`).catch(
       () => ({ contributors: [] }),
     ),
@@ -47,6 +57,8 @@ export default async function InsightsPage({ params }: InsightsPageProps) {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <CommitActivityChart data={activity} />
+          <MonthlyTrendChart data={monthly} />
+          <AuthorDistributionChart data={authorDistribution} />
           <Card>
             <CardContent className="p-0">
               <div className="border-b border-border px-4 py-3">

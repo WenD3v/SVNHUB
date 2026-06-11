@@ -23,6 +23,28 @@ export interface RepositoryContributorsResponse {
   contributors: RepositoryContributor[];
 }
 
+export interface RepositoryMonthlyActivityMonth {
+  monthStart: string;
+  count: number;
+}
+
+export interface RepositoryMonthlyActivityResponse {
+  months: RepositoryMonthlyActivityMonth[];
+  total: number;
+}
+
+export interface RepositoryAuthorDistributionEntry {
+  author: string;
+  hasProfile: boolean;
+  commits: number;
+  percentage: number;
+}
+
+export interface RepositoryAuthorDistributionResponse {
+  authors: RepositoryAuthorDistributionEntry[];
+  total: number;
+}
+
 export interface ChangelogSection {
   name: string;
   kind: "tag" | "unreleased";

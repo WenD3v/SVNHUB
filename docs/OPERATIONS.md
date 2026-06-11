@@ -153,6 +153,7 @@ Eventos administrativos são registrados em `AuditLog`:
 |---|---|
 | Rate limiting | Login limitado a 5 req/min por IP (`@nestjs/throttler`) |
 | JWT + refresh | Sessão web; tokens pessoais para CLI/CI |
+| PAT scopes | `repo:read`, `repo:write`, `admin` (legado `api` concede tudo) |
 | Helmet | Headers HTTP de segurança na API |
 | Guards | JWT, repo role, admin, hook secret, runner secret |
 | CI runners | Containers isolados; sem rede privilegiada por padrão |
@@ -166,6 +167,18 @@ Eventos administrativos são registrados em `AuditLog`:
 | Hook não dispara CI | Conferir `INTERNAL_HOOK_SECRET` e conectividade hook → API |
 | LDAP falha | Validar `LDAP_*` e bind; testar com conta local como fallback |
 | CLI timeout | Aumentar `SVN_CLI_TIMEOUT_MS` para repos grandes |
+| E-mail não enviado | Verificar `SMTP_ENABLED=true`, credenciais e logs da fila `webhooks` |
+
+## Notificações in-app
+
+O sininho no header consulta `GET /notifications` com polling de 60s. Eventos gerados:
+
+- PR aberto aguardando review (membros DEVELOPER+ do repositório)
+- Issue atribuída
+- Pipeline com falha (MAINTAINER/OWNER)
+- Menção `@username` em comentários
+
+Marcar como lida: `POST /notifications/:id/read` ou `POST /notifications/read-all`.
 
 ## Referências
 

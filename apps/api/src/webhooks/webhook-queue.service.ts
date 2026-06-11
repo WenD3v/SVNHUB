@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Queue, Worker } from "bullmq";
 
@@ -14,10 +14,21 @@ export interface WebhookDeliveryJob {
   payload: WebhookDeliveryPayload;
 }
 
+export interface EmailJob {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+}
+
+type EmailDeliverer = (job: EmailJob) => Promise<void>;
+
 @Injectable()
 export class WebhookQueueService implements OnModuleDestroy {
+  private readonly logger = new Logger(WebhookQueueService.name);
   private readonly queue: Queue;
   private readonly worker: Worker;
+  private emailDeliverer: EmailDeliverer | null = null;
 
   constructor(private readonly configService: ConfigService) {
     const redisUrl = this.configService.get<string>("REDIS_URL") ?? "redis://localhost:6379";
@@ -26,12 +37,29 @@ export class WebhookQueueService implements OnModuleDestroy {
     this.queue = new Queue(WEBHOOKS_QUEUE, { connection });
     this.worker = new Worker(
       WEBHOOKS_QUEUE,
-      async (job) => this.deliver(job.data as WebhookDeliveryJob),
+      async (job) => {
+        if (job.name === "send-email") {
+          if (!this.emailDeliverer) {
+            throw new Error("Email delivery is not configured");
+          }
+          await this.emailDeliverer(job.data as EmailJob);
+          return;
+        }
+        await this.deliverWebhook(job.data as WebhookDeliveryJob);
+      },
       {
         connection,
         concurrency: 5,
       },
     );
+
+    this.worker.on("failed", (job, error) => {
+      this.logger.error(`Queue job ${job?.name ?? "unknown"} failed: ${error.message}`);
+    });
+  }
+
+  registerEmailDeliverer(deliverer: EmailDeliverer): void {
+    this.emailDeliverer = deliverer;
   }
 
   async enqueueDelivery(data: WebhookDeliveryJob): Promise<void> {
@@ -41,7 +69,14 @@ export class WebhookQueueService implements OnModuleDestroy {
     });
   }
 
-  private async deliver(data: WebhookDeliveryJob): Promise<void> {
+  async enqueueEmail(data: EmailJob): Promise<void> {
+    await this.queue.add("send-email", data, {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 2000 },
+    });
+  }
+
+  private async deliverWebhook(data: WebhookDeliveryJob): Promise<void> {
     const body = JSON.stringify(data.payload);
     const signature = signWebhookPayload(data.secret, body);
     const response = await fetch(data.url, {

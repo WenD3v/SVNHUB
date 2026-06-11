@@ -144,11 +144,16 @@ describe("IssuesService concurrent numbering", () => {
 
     const auditService = { log: vi.fn() };
     const webhooksService = { enqueueDeliveries: vi.fn() };
+    const notificationsService = {
+      notifyIssueAssigned: vi.fn(),
+      notifyMentions: vi.fn(),
+    };
 
     const service = new IssuesService(
       prisma as never,
       auditService as never,
       webhooksService as never,
+      notificationsService as never,
     );
 
     const result = await service.create(

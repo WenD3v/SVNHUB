@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import type { AuditLogResponse } from "@svnhub/shared";
+import type { AuditLogDomain, AuditLogResponse } from "@svnhub/shared";
+import { auditDomainWhere } from "@svnhub/shared";
 
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -31,9 +32,16 @@ export class AuditService {
     });
   }
 
-  async listGlobal(limit = 50, offset = 0): Promise<AuditLogResponse> {
+  async listGlobal(
+    limit = 50,
+    offset = 0,
+    domain?: AuditLogDomain,
+  ): Promise<AuditLogResponse> {
+    const where = domain ? auditDomainWhere(domain) : undefined;
+
     const [rows, total] = await Promise.all([
       this.prisma.auditLog.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
@@ -42,7 +50,7 @@ export class AuditService {
           repository: { select: { slug: true } },
         },
       }),
-      this.prisma.auditLog.count(),
+      this.prisma.auditLog.count({ where }),
     ]);
 
     return {

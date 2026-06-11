@@ -24,6 +24,7 @@ import { hasMinimumRepoRole, maxRepoRole } from "../auth/repo-role-level";
 import type { RepoRole } from "@svnhub/shared";
 
 import { AuditService } from "../audit/audit.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 
@@ -35,6 +36,7 @@ export class IssuesService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly webhooksService: WebhooksService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async list(
@@ -138,6 +140,23 @@ export class IssuesService {
       },
     });
 
+    if (input.assigneeId && input.assigneeId !== authorId) {
+      const author = await this.prisma.user.findUnique({
+        where: { id: authorId },
+        select: { username: true },
+      });
+      if (author) {
+        await this.notificationsService.notifyIssueAssigned({
+          repositorySlug: repo.slug,
+          issueNumber: issue.number,
+          issueTitle: issue.title,
+          assigneeId: input.assigneeId,
+          assignerId: authorId,
+          assignerUsername: author.username,
+        });
+      }
+    }
+
     return this.toDetail(issue);
   }
 
@@ -227,7 +246,7 @@ export class IssuesService {
     const repo = await this.requireRepo(slug);
     const issue = await this.loadIssue(repo.id, number);
 
-    await this.prisma.issueComment.create({
+    const comment = await this.prisma.issueComment.create({
       data: {
         issueId: issue.id,
         authorId,
@@ -251,6 +270,23 @@ export class IssuesService {
         authorId,
       },
     });
+
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { username: true },
+    });
+    if (author) {
+      await this.notificationsService.notifyMentions({
+        repositorySlug: repo.slug,
+        context: "issue",
+        contextNumber: number,
+        contextTitle: issue.title,
+        commentId: comment.id,
+        authorId,
+        authorUsername: author.username,
+        body: input.body,
+      });
+    }
 
     const reloaded = await this.loadIssue(repo.id, number);
     return this.toDetail(reloaded);
@@ -490,6 +526,23 @@ export class IssuesService {
         resourceId: String(issue.number),
         metadata: { assigneeId: input.input.assigneeId },
       });
+
+      if (input.input.assigneeId) {
+        const assigner = await this.prisma.user.findUnique({
+          where: { id: actorUserId },
+          select: { username: true },
+        });
+        if (assigner) {
+          await this.notificationsService.notifyIssueAssigned({
+            repositorySlug: repo.slug,
+            issueNumber: issue.number,
+            issueTitle: issue.title,
+            assigneeId: input.input.assigneeId,
+            assignerId: actorUserId,
+            assignerUsername: assigner.username,
+          });
+        }
+      }
     }
 
     if (input.input.labelIds !== undefined) {

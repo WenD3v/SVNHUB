@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from "@nestjs/common";
+import { patHasScope } from "@svnhub/shared";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import type { AuthenticatedUser } from "../strategies/jwt.strategy";
@@ -27,6 +28,10 @@ export class AdminGuard implements CanActivate {
 
     if (!dbUser?.isAdmin) {
       throw new ForbiddenException("Admin access required");
+    }
+
+    if (user.tokenScopes && !patHasScope(user.tokenScopes, "admin")) {
+      throw new ForbiddenException("Insufficient token scope");
     }
 
     return true;

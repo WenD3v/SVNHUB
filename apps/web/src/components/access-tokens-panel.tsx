@@ -6,24 +6,40 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 import type { AccessTokenCreated, AccessTokenSummary } from "@svnhub/shared";
+import { PAT_SCOPES } from "@svnhub/shared/access-token-scopes";
 
 interface AccessTokensPanelProps {
   initialTokens: AccessTokenSummary[];
 }
 
+const SCOPE_LABELS: Record<string, string> = {
+  "repo:read": "Leitura de repositórios",
+  "repo:write": "Escrita em repositórios",
+  admin: "Administração",
+};
+
 export function AccessTokensPanel({ initialTokens }: AccessTokensPanelProps) {
   const router = useRouter();
   const [tokens, setTokens] = useState(initialTokens);
   const [name, setName] = useState("");
+  const [scopes, setScopes] = useState<string[]>(["repo:read", "repo:write"]);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function toggleScope(scope: string) {
+    setScopes((current) =>
+      current.includes(scope)
+        ? current.filter((entry) => entry !== scope)
+        : [...current, scope],
+    );
+  }
 
   async function handleCreate() {
     setLoading(true);
     try {
       const created = await apiFetch<AccessTokenCreated>("/access-tokens", {
         method: "POST",
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, scopes }),
       });
       setNewToken(created.token);
       setName("");
@@ -63,9 +79,21 @@ export function AccessTokensPanel({ initialTokens }: AccessTokensPanelProps) {
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome do token (ex.: CI local)"
         />
-        <Button onClick={handleCreate} disabled={loading || !name}>
+        <Button onClick={handleCreate} disabled={loading || !name || scopes.length === 0}>
           Criar token
         </Button>
+      </div>
+      <div className="flex flex-wrap gap-3 text-sm">
+        {PAT_SCOPES.map((scope) => (
+          <label key={scope} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={scopes.includes(scope)}
+              onChange={() => toggleScope(scope)}
+            />
+            <span>{SCOPE_LABELS[scope] ?? scope}</span>
+          </label>
+        ))}
       </div>
       {newToken ? (
         <div className="rounded-md border border-amber-500/50 bg-amber-500/10 p-3 text-sm">
@@ -79,7 +107,8 @@ export function AccessTokensPanel({ initialTokens }: AccessTokensPanelProps) {
             <div>
               <p className="font-medium">{token.name}</p>
               <p className="text-xs text-muted-foreground">
-                Criado {new Date(token.createdAt).toLocaleString("pt-BR")}
+                {token.scopes.join(", ") || "sem escopos"} · criado{" "}
+                {new Date(token.createdAt).toLocaleString("pt-BR")}
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={() => handleRevoke(token.id)}>

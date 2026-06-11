@@ -3,6 +3,7 @@ import { GitBranch } from "lucide-react";
 
 import { AuthHeaderActions } from "@/components/auth-header-actions";
 import { GlobalSearch } from "@/components/global-search";
+import { NotificationsBell } from "@/components/notifications-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppHeader() {
@@ -21,6 +22,7 @@ export function AppHeader() {
 
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
+          <NotificationsBell />
           <AuthHeaderActions />
         </div>
       </div>

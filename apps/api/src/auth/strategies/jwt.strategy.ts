@@ -7,6 +7,8 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   username: string;
+  /** Present only for personal access token authentication. */
+  tokenScopes?: string[];
 }
 
 @Injectable()

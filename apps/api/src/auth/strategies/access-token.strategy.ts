@@ -45,6 +45,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, "access-toke
       id: stored.user.id,
       email: stored.user.email,
       username: stored.user.username,
+      tokenScopes: stored.scopes,
     };
   }
 }

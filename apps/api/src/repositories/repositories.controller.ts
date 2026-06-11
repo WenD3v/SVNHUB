@@ -30,6 +30,7 @@ import {
   ActivityQueryDto,
   ChangelogQueryDto,
   ContributorsQueryDto,
+  MonthlyActivityQueryDto,
 } from "./dto/stats-query.dto";
 import { RepositoriesService } from "./repositories.service";
 import { StatsService } from "./stats.service";
@@ -115,6 +116,20 @@ export class RepositoriesController {
   @RepoRole("READER")
   contributors(@Param("slug") slug: string, @Query() query: ContributorsQueryDto) {
     return this.statsService.getContributors(slug, query);
+  }
+
+  @Get(":slug/stats/monthly")
+  @RepoRole("READER")
+  @Header("Cache-Control", "public, max-age=60")
+  monthly(@Param("slug") slug: string, @Query() query: MonthlyActivityQueryDto) {
+    return this.statsService.getMonthlyActivity(slug, query.months ?? 12);
+  }
+
+  @Get(":slug/stats/author-distribution")
+  @RepoRole("READER")
+  @Header("Cache-Control", "public, max-age=60")
+  authorDistribution(@Param("slug") slug: string) {
+    return this.statsService.getAuthorDistribution(slug);
   }
 
   @Get(":slug/changelog")

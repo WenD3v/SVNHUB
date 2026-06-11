@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import type { RepoRole } from "@svnhub/shared";
+import { patHasScope, requiredPatScopeForRepoRole } from "@svnhub/shared";
 
 import { REPO_ROLE_KEY } from "../../common/decorators/repo-role.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -95,6 +96,13 @@ export class RepoRoleGuard implements CanActivate {
 
     if (!effectiveRole || !hasMinimumRepoRole(effectiveRole, requiredRole)) {
       throw new ForbiddenException("Insufficient repository permissions");
+    }
+
+    if (user.tokenScopes) {
+      const requiredScope = requiredPatScopeForRepoRole(requiredRole);
+      if (!patHasScope(user.tokenScopes, requiredScope)) {
+        throw new ForbiddenException("Insufficient token scope");
+      }
     }
 
     return true;

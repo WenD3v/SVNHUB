@@ -15,6 +15,16 @@
       "types": "./dist/svn-path.d.ts",
       "import": "./dist/svn-path.js",
       "default": "./dist/svn-path.js"
+    },
+    "./access-token-scopes": {
+      "types": "./dist/access-token-scopes.d.ts",
+      "import": "./dist/access-token-scopes.js",
+      "default": "./dist/access-token-scopes.js"
+    },
+    "./permissions": {
+      "types": "./dist/permissions.d.ts",
+      "import": "./dist/permissions.js",
+      "default": "./dist/permissions.js"
     }
   },
   "scripts": {

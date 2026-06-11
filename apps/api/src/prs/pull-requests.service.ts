@@ -23,6 +23,7 @@ import {
 import { AuditService } from "../audit/audit.service";
 import { BranchesService } from "../branches/branches.service";
 import { IssueCrossRefService } from "../issues/issue-cross-ref.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
@@ -45,6 +46,7 @@ export class PullRequestsService {
     private readonly auditService: AuditService,
     private readonly webhooksService: WebhooksService,
     private readonly issueCrossRefService: IssueCrossRefService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async list(
@@ -133,6 +135,21 @@ export class PullRequestsService {
       metadata: { sourceRef: input.sourceRef, targetRef },
     });
 
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { username: true },
+    });
+    if (author) {
+      await this.notificationsService.notifyPrReviewRequested({
+        repositoryId: repo.id,
+        repositorySlug: repo.slug,
+        pullRequestNumber: number,
+        pullRequestTitle: input.title,
+        authorId,
+        authorUsername: author.username,
+      });
+    }
+
     const preview = await this.loadPreview(pullRequest);
     return this.toDetail(pullRequest, preview);
   }
@@ -179,7 +196,7 @@ export class PullRequestsService {
       }
     }
 
-    await this.prisma.pRComment.create({
+    const comment = await this.prisma.pRComment.create({
       data: {
         pullRequestId: pullRequest.id,
         authorId,
@@ -189,6 +206,23 @@ export class PullRequestsService {
         side: input.side ?? null,
       },
     });
+
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { username: true },
+    });
+    if (author) {
+      await this.notificationsService.notifyMentions({
+        repositorySlug: repo.slug,
+        context: "pull_request",
+        contextNumber: number,
+        contextTitle: pullRequest.title,
+        commentId: comment.id,
+        authorId,
+        authorUsername: author.username,
+        body: input.body,
+      });
+    }
 
     const updated = await this.loadPullRequest(repo.id, number);
     const preview = await this.loadPreview(updated);

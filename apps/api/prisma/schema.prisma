@@ -84,6 +84,13 @@ enum IssueStatus {
   CLOSED
 }
 
+enum NotificationType {
+  PR_REVIEW_REQUESTED
+  ISSUE_ASSIGNED
+  PIPELINE_FAILED
+  MENTION
+}
+
 enum PRCommentSide {
   LEFT
   RIGHT
@@ -130,6 +137,7 @@ model User {
   authoredIssues       Issue[]         @relation("IssueAuthor")
   assignedIssues       Issue[]         @relation("IssueAssignee")
   issueComments        IssueComment[]
+  notifications        Notification[]
 }
 
 model Group {
@@ -575,4 +583,19 @@ model AuditLog {
   @@index([userId])
   @@index([repositoryId])
   @@index([createdAt])
+  @@index([resourceType])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
 }

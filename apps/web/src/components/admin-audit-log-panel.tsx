@@ -1,6 +1,7 @@
 "use client";
 
-import type { AuditLogResponse } from "@svnhub/shared";
+import type { AuditLogDomain, AuditLogResponse } from "@svnhub/shared";
+import { AUDIT_LOG_DOMAINS } from "@svnhub/shared/permissions";
 import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,21 +12,36 @@ import { apiFetch } from "@/lib/api-client";
 
 const PAGE_SIZE = 50;
 
+const DOMAIN_LABELS: Record<AuditLogDomain, string> = {
+  users: "Usuários",
+  teams: "Teams",
+  issues: "Issues",
+  avatar: "Avatar",
+  notifications: "Notificações",
+  repositories: "Repositórios",
+  auth: "Autenticação",
+  other: "Outros",
+};
+
 export function AdminAuditLogPanel() {
   const [data, setData] = useState<AuditLogResponse | null>(null);
   const [offset, setOffset] = useState(0);
+  const [domain, setDomain] = useState<AuditLogDomain | "all">("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load(pageOffset: number) {
+  async function load(pageOffset: number, selectedDomain: AuditLogDomain | "all") {
     setLoading(true);
     setError(null);
     try {
+      const domainQuery =
+        selectedDomain === "all" ? "" : `&domain=${encodeURIComponent(selectedDomain)}`;
       const response = await apiFetch<AuditLogResponse>(
-        `/admin/audit-log?limit=${PAGE_SIZE}&offset=${pageOffset}`,
+        `/admin/audit-log?limit=${PAGE_SIZE}&offset=${pageOffset}${domainQuery}`,
       );
       setData(response);
       setOffset(pageOffset);
+      setDomain(selectedDomain);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao carregar auditoria");
     } finally {
@@ -34,7 +50,7 @@ export function AdminAuditLogPanel() {
   }
 
   useEffect(() => {
-    void load(0);
+    void load(0, "all");
   }, []);
 
   const total = data?.total ?? 0;
@@ -53,6 +69,26 @@ export function AdminAuditLogPanel() {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={domain === "all" ? "default" : "outline"}
+          onClick={() => void load(0, "all")}
+        >
+          Todos
+        </Button>
+        {AUDIT_LOG_DOMAINS.map((entry) => (
+          <Button
+            key={entry}
+            size="sm"
+            variant={domain === entry ? "default" : "outline"}
+            onClick={() => void load(0, entry)}
+          >
+            {DOMAIN_LABELS[entry]}
+          </Button>
+        ))}
+      </div>
+
       <Card className="divide-y divide-border overflow-hidden">
         {(data?.entries ?? []).map((entry) => (
           <div key={entry.id} className="px-4 py-3 text-sm">
@@ -62,6 +98,9 @@ export function AdminAuditLogPanel() {
                 {entry.resourceType}
                 {entry.resourceId ? ` / ${entry.resourceId}` : ""}
               </span>
+              {entry.repositorySlug ? (
+                <span className="text-xs text-muted-foreground">· {entry.repositorySlug}</span>
+              ) : null}
             </div>
             <p className="text-xs text-muted-foreground">
               {entry.username ?? "sistema"} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
@@ -89,7 +128,7 @@ export function AdminAuditLogPanel() {
             size="sm"
             variant="outline"
             disabled={!hasPrev || loading}
-            onClick={() => void load(Math.max(0, offset - PAGE_SIZE))}
+            onClick={() => void load(Math.max(0, offset - PAGE_SIZE), domain)}
           >
             Anterior
           </Button>
@@ -97,7 +136,7 @@ export function AdminAuditLogPanel() {
             size="sm"
             variant="outline"
             disabled={!hasNext || loading}
-            onClick={() => void load(offset + PAGE_SIZE)}
+            onClick={() => void load(offset + PAGE_SIZE, domain)}
           >
             Próxima
           </Button>

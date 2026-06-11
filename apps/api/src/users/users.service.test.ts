@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import * as argon2 from "argon2";
 
 import type { AuditService } from "../audit/audit.service";
+import type { EmailService } from "../email/email.service";
 import type { AuthzService } from "../permissions/authz.service";
 import type { HtpasswdService } from "../permissions/htpasswd.service";
 import type { PrismaService } from "../prisma/prisma.service";
@@ -19,6 +20,7 @@ function createService(deps: {
   htpasswd?: Partial<HtpasswdService>;
   authz?: Partial<AuthzService>;
   audit?: Partial<AuditService>;
+  email?: Partial<EmailService>;
 }) {
   return new UsersService(
     deps.prisma as PrismaService,
@@ -35,6 +37,10 @@ function createService(deps: {
       log: vi.fn(),
       ...deps.audit,
     } as unknown as AuditService,
+    {
+      sendPasswordResetEmail: vi.fn(),
+      ...deps.email,
+    } as unknown as EmailService,
   );
 }
 

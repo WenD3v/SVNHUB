@@ -20,6 +20,15 @@ export class ContributorsQueryDto {
   until?: string;
 }
 
+export class MonthlyActivityQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(24)
+  months?: number;
+}
+
 export class ChangelogQueryDto {
   @IsOptional()
   @Type(() => Number)

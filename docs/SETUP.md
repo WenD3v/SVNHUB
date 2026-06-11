@@ -163,6 +163,22 @@ LDAP_SEARCH_FILTER=(|(mail={email})(userPrincipalName={email}))
 
 O filtro `{email}` é substituído pelo e-mail informado no login.
 
+## E-mail (SMTP, opcional)
+
+Desabilitado por padrão. Quando ativo, a API envia e-mails de **reset de senha pelo admin** e **menções `@username`** em comentários de PR/issue. Os envios usam a fila BullMQ existente (`webhooks`), sem fila dedicada.
+
+```env
+SMTP_ENABLED=false
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=svnhub@example.com
+```
+
+Defina `SMTP_ENABLED=true` e configure host/porta/remetente. Credenciais são opcionais para relays internos sem autenticação.
+
 ### Contas locais
 
 Usuários com `isLocal: true` no banco autenticam com senha hash Argon2 na web. O primeiro admin é criado com `pnpm db:seed`. A senha em texto plano do seed também é gravada em `data/svn-passwd` para checkout SVN via Apache (formatos diferentes: Argon2 na web, APR1 no htpasswd).

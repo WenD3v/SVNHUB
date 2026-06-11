@@ -29,6 +29,7 @@ import {
 
 import { PrismaService } from "../prisma/prisma.service";
 import { RedisService } from "../queues/redis.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 import { PipelineQueueService } from "./pipeline-queue.service";
@@ -42,6 +43,7 @@ export class PipelinesService {
     private readonly redisService: RedisService,
     private readonly webhooksService: WebhooksService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async list(slug: string, limit = 50): Promise<PipelineListResponse> {
@@ -462,6 +464,16 @@ export class PipelinesService {
         status: pipeline.status,
       },
     });
+
+    if (pipeline.status === "FAILURE") {
+      await this.notificationsService.notifyPipelineFailed({
+        repositoryId: pipeline.repositoryId,
+        repositorySlug: pipeline.repository.slug,
+        pipelineId: pipeline.id,
+        branchPath: pipeline.branchPath,
+        revision: pipeline.revision,
+      });
+    }
   }
 
   private async updatePrStatusChecks(

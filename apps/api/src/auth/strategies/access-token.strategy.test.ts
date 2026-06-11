@@ -8,6 +8,7 @@ import type { PrismaService } from "../../prisma/prisma.service";
 describe("AccessTokenStrategy", () => {
   function createStrategy(storedToken: {
     id: string;
+    scopes: string[];
     user: { id: string; email: string; username: string };
   } | null) {
     const prisma = {
@@ -44,6 +45,7 @@ describe("AccessTokenStrategy", () => {
     const tokenHash = createHash("sha256").update(rawToken).digest("hex");
     const strategy = createStrategy({
       id: "token-1",
+      scopes: ["repo:read", "repo:write"],
       user: { id: "user-1", email: "dev@svnhub.local", username: "dev" },
     });
 
@@ -53,6 +55,7 @@ describe("AccessTokenStrategy", () => {
       id: "user-1",
       email: "dev@svnhub.local",
       username: "dev",
+      tokenScopes: ["repo:read", "repo:write"],
     });
 
     expect(tokenHash).toHaveLength(64);

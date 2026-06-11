@@ -333,7 +333,7 @@ export class AccessTokensService {
   async create(
     userId: string,
     name: string,
-    scopes: string[] = ["api"],
+    scopes: string[] = ["repo:read", "repo:write"],
     expiresAt?: string,
   ): Promise<AccessTokenCreated> {
     const rawToken = `svnhub_${randomBytes(32).toString("hex")}`;

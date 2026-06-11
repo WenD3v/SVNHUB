@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type {
   RepositoryActivityResponse,
+  RepositoryAuthorDistributionResponse,
   RepositoryContributorsResponse,
+  RepositoryMonthlyActivityResponse,
 } from "@svnhub/shared";
 
 import { PrismaService } from "../prisma/prisma.service";
@@ -41,6 +43,51 @@ export class StatsService {
     const total = activityWeeks.reduce((sum, week) => sum + week.count, 0);
 
     return { weeks: activityWeeks, total };
+  }
+
+  async getMonthlyActivity(
+    slug: string,
+    months = 12,
+  ): Promise<RepositoryMonthlyActivityResponse> {
+    const repository = await this.requireRepository(slug);
+    const startDate = this.monthsAgo(months);
+
+    const rows = await this.prisma.$queryRaw<Array<{ month_start: Date; count: bigint }>>`
+      SELECT date_trunc('month', date) AS month_start, COUNT(*)::bigint AS count
+      FROM "RevisionIndex"
+      WHERE "repositoryId" = ${repository.id}
+        AND date >= ${startDate}
+      GROUP BY 1
+      ORDER BY 1 ASC
+    `;
+
+    const countByMonth = new Map(
+      rows.map((row) => [this.toMonthKey(row.month_start), Number(row.count)]),
+    );
+
+    const monthStarts = this.buildMonthRange(startDate, months);
+    const activityMonths = monthStarts.map((monthStart) => ({
+      monthStart: monthStart.toISOString(),
+      count: countByMonth.get(this.toMonthKey(monthStart)) ?? 0,
+    }));
+
+    const total = activityMonths.reduce((sum, month) => sum + month.count, 0);
+    return { months: activityMonths, total };
+  }
+
+  async getAuthorDistribution(slug: string): Promise<RepositoryAuthorDistributionResponse> {
+    const contributors = await this.getContributors(slug);
+    const total = contributors.contributors.reduce((sum, entry) => sum + entry.commits, 0);
+
+    return {
+      total,
+      authors: contributors.contributors.map((entry) => ({
+        author: entry.author,
+        hasProfile: entry.hasProfile,
+        commits: entry.commits,
+        percentage: total > 0 ? Math.round((entry.commits / total) * 1000) / 10 : 0,
+      })),
+    };
   }
 
   async getContributors(
@@ -131,5 +178,35 @@ export class StatsService {
 
   private toWeekKey(date: Date): string {
     return this.startOfWeek(date).toISOString();
+  }
+
+  private monthsAgo(months: number): Date {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() - months + 1);
+    return date;
+  }
+
+  private buildMonthRange(startDate: Date, months: number): Date[] {
+    const result: Date[] = [];
+    const cursor = new Date(startDate);
+    cursor.setUTCDate(1);
+    const end = new Date();
+    end.setUTCDate(1);
+
+    while (cursor <= end && result.length < months + 1) {
+      result.push(new Date(cursor));
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+
+    return result;
+  }
+
+  private toMonthKey(date: Date): string {
+    const normalized = new Date(date);
+    normalized.setUTCDate(1);
+    normalized.setUTCHours(0, 0, 0, 0);
+    return normalized.toISOString();
   }
 }

@@ -19,6 +19,7 @@ import type {
 import * as argon2 from "argon2";
 
 import { AuditService } from "../audit/audit.service";
+import { EmailService } from "../email/email.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthzService } from "../permissions/authz.service";
 import { HtpasswdService } from "../permissions/htpasswd.service";
@@ -30,6 +31,7 @@ export class UsersService {
     private readonly htpasswdService: HtpasswdService,
     private readonly authzService: AuthzService,
     private readonly auditService: AuditService,
+    private readonly emailService: EmailService,
   ) {}
 
   async listAdmin(input: {
@@ -236,6 +238,12 @@ export class UsersService {
       resourceType: "user",
       resourceId: user.id,
       ipAddress,
+    });
+
+    await this.emailService.sendPasswordResetEmail({
+      email: user.email,
+      username: user.username,
+      password: input.password,
     });
 
     const lastLogins = await this.getLastLoginMap([user.id]);
