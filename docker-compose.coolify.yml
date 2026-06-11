@@ -6,11 +6,10 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${SERVICE_URL_API:-http://localhost:4000}
     environment:
-      - SERVICE_URL_WEB_3000
-      - 'WEB_ORIGIN=${SERVICE_URL_WEB}'
-      - 'NEXT_PUBLIC_API_URL=${SERVICE_URL_API}'
-      - 'PORT=3000'
-      - 'HOSTNAME=0.0.0.0'
+      WEB_ORIGIN: '${SERVICE_URL_WEB}'
+      NEXT_PUBLIC_API_URL: '${SERVICE_URL_API}'
+      PORT: '3000'
+      HOSTNAME: '0.0.0.0'
     expose:
       - '3000'
     depends_on:
@@ -30,33 +29,32 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.api
     environment:
-      - SERVICE_URL_API_4000
-      - 'API_PORT=4000'
-      - 'WEB_ORIGIN=${SERVICE_URL_WEB}'
-      - 'DATABASE_URL=postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-svnhub}?schema=public'
-      - 'REDIS_URL=redis://redis:6379'
-      - 'JWT_SECRET=${SERVICE_PASSWORD_JWT}'
-      - 'JWT_ACCESS_TTL_SECONDS=${JWT_ACCESS_TTL_SECONDS:-900}'
-      - 'JWT_REFRESH_TTL_DAYS=${JWT_REFRESH_TTL_DAYS:-30}'
-      - 'INTERNAL_HOOK_SECRET=${SERVICE_PASSWORD_HOOK}'
-      - 'RUNNER_SECRET=${SERVICE_PASSWORD_RUNNER}'
-      - 'API_INTERNAL_URL=http://api:4000'
-      - 'SVN_REPOS_ROOT=data/repos'
-      - 'SVN_AUTHZ_PATH=data/svn-authz'
-      - 'SVN_PASSWD_PATH=data/svn-passwd'
-      - 'SVN_HTTP_URL=${SERVICE_URL_SVN}/svn'
-      - 'SVN_SVN_URL=${SVN_SVN_URL:-svn://svn/svn}'
-      - 'SVN_CLI_TIMEOUT_MS=${SVN_CLI_TIMEOUT_MS:-120000}'
-      - 'ARTIFACTS_STORAGE_PATH=data/artifacts'
-      - 'LDAP_URL=${LDAP_URL:-}'
-      - 'LDAP_BIND_DN=${LDAP_BIND_DN:-}'
-      - 'LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD:-}'
-      - 'LDAP_SEARCH_BASE=${LDAP_SEARCH_BASE:-}'
-      - 'LDAP_SEARCH_FILTER=${LDAP_SEARCH_FILTER:-(|(mail={email})(userPrincipalName={email}))}'
-      - 'ADMIN_EMAIL=${ADMIN_EMAIL:-admin@svnhub.local}'
-      - 'ADMIN_USERNAME=${ADMIN_USERNAME:-admin}'
-      - 'ADMIN_INITIAL_PASSWORD=${SERVICE_PASSWORD_ADMIN}'
-      - 'ADMIN_DISPLAY_NAME=${ADMIN_DISPLAY_NAME:-SVNHUB Admin}'
+      API_PORT: '4000'
+      WEB_ORIGIN: '${SERVICE_URL_WEB}'
+      DATABASE_URL: 'postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-svnhub}?schema=public'
+      REDIS_URL: 'redis://redis:6379'
+      JWT_SECRET: '${SERVICE_PASSWORD_JWT}'
+      JWT_ACCESS_TTL_SECONDS: '${JWT_ACCESS_TTL_SECONDS:-900}'
+      JWT_REFRESH_TTL_DAYS: '${JWT_REFRESH_TTL_DAYS:-30}'
+      INTERNAL_HOOK_SECRET: '${SERVICE_PASSWORD_HOOK}'
+      RUNNER_SECRET: '${SERVICE_PASSWORD_RUNNER}'
+      API_INTERNAL_URL: 'http://api:4000'
+      SVN_REPOS_ROOT: 'data/repos'
+      SVN_AUTHZ_PATH: 'data/svn-authz'
+      SVN_PASSWD_PATH: 'data/svn-passwd'
+      SVN_HTTP_URL: '${SERVICE_URL_SVN}/svn'
+      SVN_SVN_URL: '${SVN_SVN_URL:-svn://svn/svn}'
+      SVN_CLI_TIMEOUT_MS: '${SVN_CLI_TIMEOUT_MS:-120000}'
+      ARTIFACTS_STORAGE_PATH: 'data/artifacts'
+      LDAP_URL: '${LDAP_URL:-}'
+      LDAP_BIND_DN: '${LDAP_BIND_DN:-}'
+      LDAP_BIND_PASSWORD: '${LDAP_BIND_PASSWORD:-}'
+      LDAP_SEARCH_BASE: '${LDAP_SEARCH_BASE:-}'
+      LDAP_SEARCH_FILTER: '${LDAP_SEARCH_FILTER:-(|(mail={email})(userPrincipalName={email}))}'
+      ADMIN_EMAIL: '${ADMIN_EMAIL:-admin@svnhub.local}'
+      ADMIN_USERNAME: '${ADMIN_USERNAME:-admin}'
+      ADMIN_INITIAL_PASSWORD: '${SERVICE_PASSWORD_ADMIN}'
+      ADMIN_DISPLAY_NAME: '${ADMIN_DISPLAY_NAME:-SVNHUB Admin}'
     volumes:
       - 'svnhub_data:/app/data'
     expose:
@@ -80,12 +78,12 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.runner
     environment:
-      - 'REDIS_URL=redis://redis:6379'
-      - 'API_INTERNAL_URL=http://api:4000'
-      - 'RUNNER_SECRET=${SERVICE_PASSWORD_RUNNER}'
-      - 'RUNNER_POLL_INTERVAL_MS=${RUNNER_POLL_INTERVAL_MS:-5000}'
-      - 'ARTIFACTS_STORAGE_PATH=data/artifacts'
-      - 'RUNNER_USE_DOCKER=true'
+      REDIS_URL: 'redis://redis:6379'
+      API_INTERNAL_URL: 'http://api:4000'
+      RUNNER_SECRET: '${SERVICE_PASSWORD_RUNNER}'
+      RUNNER_POLL_INTERVAL_MS: '${RUNNER_POLL_INTERVAL_MS:-5000}'
+      ARTIFACTS_STORAGE_PATH: 'data/artifacts'
+      RUNNER_USE_DOCKER: 'true'
     volumes:
       - 'svnhub_data:/app/data'
       - '/var/run/docker.sock:/var/run/docker.sock'
@@ -98,9 +96,8 @@ services:
   svn:
     build: ./infra/apache-svn
     environment:
-      - SERVICE_URL_SVN_80
-      - 'SVN_REPOS_DIR=/var/svn/repos'
-      - 'SVN_DATA_ROOT=/mnt/svnhub-data'
+      SVN_REPOS_DIR: '/var/svn/repos'
+      SVN_DATA_ROOT: '/mnt/svnhub-data'
     volumes:
       - 'svnhub_data:/mnt/svnhub-data'
     expose:
@@ -141,9 +138,9 @@ services:
       - '-c'
       - max_connections=200
     environment:
-      - 'POSTGRES_USER=${SERVICE_USER_POSTGRES}'
-      - 'POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}'
-      - 'POSTGRES_DB=${POSTGRES_DB:-svnhub}'
+      POSTGRES_USER: '${SERVICE_USER_POSTGRES}'
+      POSTGRES_PASSWORD: '${SERVICE_PASSWORD_POSTGRES}'
+      POSTGRES_DB: '${POSTGRES_DB:-svnhub}'
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
     healthcheck:
