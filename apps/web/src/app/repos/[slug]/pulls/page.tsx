@@ -4,6 +4,7 @@ import { PageShell } from "@/components/page-shell";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/user-avatar";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { PullRequestListResponse, RepositoryDetail } from "@svnhub/shared";
@@ -111,7 +112,21 @@ export default async function PullRequestsPage({
                       {" → "}
                       <code className="rounded bg-muted px-1 font-mono text-xs">{pr.targetRef}</code>
                     </TableCell>
-                    <TableCell>{pr.author.username}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <UserAvatar
+                          username={pr.author.username}
+                          avatarUrl={pr.author.avatarUrl}
+                          className="size-7"
+                        />
+                        <Link
+                          href={`/users/${pr.author.username}`}
+                          className="hover:underline"
+                        >
+                          {pr.author.username}
+                        </Link>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={STATUS_VARIANTS[pr.status] ?? "muted"}>{pr.status}</Badge>
                     </TableCell>

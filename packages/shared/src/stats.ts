@@ -12,6 +12,7 @@ export interface RepositoryActivityResponse {
 
 export interface RepositoryContributor {
   author: string;
+  hasProfile: boolean;
   commits: number;
   firstRevision: number;
   lastRevision: number;

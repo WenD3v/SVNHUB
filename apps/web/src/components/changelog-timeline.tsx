@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GitCompare, Tag } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -59,9 +59,7 @@ export function ChangelogTimeline({ slug, sections }: ChangelogTimelineProps) {
                 <CardContent className="divide-y divide-border p-0">
                   {section.entries.map((entry) => (
                     <div key={entry.revision} className="flex items-start gap-3 px-4 py-3">
-                      <Avatar className="mt-0.5 size-7">
-                        <AvatarFallback username={entry.author} />
-                      </Avatar>
+                      <UserAvatar username={entry.author} className="mt-0.5 size-7" />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <Link

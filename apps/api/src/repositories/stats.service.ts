@@ -70,9 +70,20 @@ export class StatsService {
       orderBy: { _count: { revision: "desc" } },
     });
 
+    const authors = groups.map((group) => group.author);
+    const profileUsers =
+      authors.length > 0
+        ? await this.prisma.user.findMany({
+            where: { username: { in: authors }, isActive: true },
+            select: { username: true },
+          })
+        : [];
+    const profileUsernames = new Set(profileUsers.map((user) => user.username));
+
     return {
       contributors: groups.map((group) => ({
         author: group.author,
+        hasProfile: profileUsernames.has(group.author),
         commits: group._count.revision,
         firstRevision: group._min.revision ?? 0,
         lastRevision: group._max.revision ?? 0,

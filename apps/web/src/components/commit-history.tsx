@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight, GitCommitHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { CopyRevisionButton } from "@/components/copy-revision-button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -106,9 +106,7 @@ export function CommitHistory({ slug, entries }: CommitHistoryProps) {
                 href={`/repos/${slug}/commit/${entry.revision}`}
                 className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
               >
-                <Avatar className="mt-0.5 size-8">
-                  <AvatarFallback username={entry.author} />
-                </Avatar>
+                <UserAvatar username={entry.author} className="mt-0.5 size-8" />
                 <div className="min-w-0 flex-1">
                   <CommitMessage message={entry.message} />
                   <p className="mt-1 text-xs text-muted-foreground">

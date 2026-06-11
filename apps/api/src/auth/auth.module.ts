@@ -9,6 +9,7 @@ import { AuthService } from "./auth.service";
 import { AdminGuard } from "./guards/admin.guard";
 import { InternalHookGuard } from "./guards/internal-hook.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { OptionalJwtAuthGuard } from "./guards/optional-jwt-auth.guard";
 import { RepoRoleGuard } from "./guards/repo-role.guard";
 import { RunnerSecretGuard } from "./guards/runner-secret.guard";
 import { LdapService } from "./ldap.service";
@@ -36,6 +37,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
     JwtStrategy,
     AccessTokenStrategy,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RepoRoleGuard,
     InternalHookGuard,
     RunnerSecretGuard,
@@ -46,6 +48,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
     JwtModule,
     PassportModule,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RepoRoleGuard,
     InternalHookGuard,
     RunnerSecretGuard,

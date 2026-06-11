@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Archive, LogOut, ScrollText, Shield, User, Users } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,9 +38,11 @@ export function AuthHeaderActions() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="size-8 rounded-full p-0" aria-label="Menu do usuário">
-          <Avatar className="size-8">
-            <AvatarFallback username={user.username} />
-          </Avatar>
+          <UserAvatar
+            username={user.username}
+            avatarUrl={user.avatarUrl}
+            className="size-8"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
@@ -51,9 +53,11 @@ export function AuthHeaderActions() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <User className="size-4" />
-          Perfil
+        <DropdownMenuItem asChild>
+          <Link href="/settings/profile">
+            <User className="size-4" />
+            Perfil
+          </Link>
         </DropdownMenuItem>
         {user.isAdmin ? (
           <>

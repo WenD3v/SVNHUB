@@ -26,6 +26,9 @@ function createService(options: {
     revisionIndex: {
       groupBy: vi.fn().mockResolvedValue(options.contributorGroups ?? []),
     },
+    user: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
   } as unknown as PrismaService;
 
   return { service: new StatsService(prisma), prisma };
@@ -80,6 +83,7 @@ describe("StatsService", () => {
     expect(result.contributors).toEqual([
       {
         author: "alice",
+        hasProfile: false,
         commits: 12,
         firstRevision: 1,
         lastRevision: 40,
@@ -87,6 +91,7 @@ describe("StatsService", () => {
       },
       {
         author: "bob",
+        hasProfile: false,
         commits: 5,
         firstRevision: 3,
         lastRevision: 20,

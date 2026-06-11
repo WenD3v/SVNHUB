@@ -13,4 +13,5 @@ export * from "./teams.js";
 export * from "./svn-path.js";
 export * from "./user.js";
 export * from "./users-admin.js";
+export * from "./users-profile.js";
 export * from "./webhooks.js";

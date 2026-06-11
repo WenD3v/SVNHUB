@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { UserAvatar } from "@/components/user-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -41,7 +42,14 @@ export function BlameViewer({ slug, lines }: BlameViewerProps) {
                     r{line.revision}
                   </Link>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{line.author}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <UserAvatar username={line.author} className="size-6" />
+                    <Link href={`/users/${line.author}`} className="truncate hover:underline">
+                      {line.author}
+                    </Link>
+                  </div>
+                </TableCell>
                 <TableCell className="whitespace-pre">{line.text}</TableCell>
               </TableRow>
             ))}

@@ -1,8 +1,10 @@
+import Link from "next/link";
+
 import { CommitActivityChart } from "@/components/commit-activity-chart";
 import { PageShell } from "@/components/page-shell";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import type {
@@ -56,12 +58,19 @@ export default async function InsightsPage({ params }: InsightsPageProps) {
               <div className="divide-y divide-border">
                 {contributors.contributors.map((contributor) => (
                   <div key={contributor.author} className="flex items-center gap-3 px-4 py-3">
-                    <Avatar className="size-8">
-                      <AvatarFallback username={contributor.author} />
-                    </Avatar>
+                    <UserAvatar username={contributor.author} className="size-8" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2 text-sm">
-                        <span className="truncate font-medium">{contributor.author}</span>
+                        {contributor.hasProfile ? (
+                          <Link
+                            href={`/users/${contributor.author}`}
+                            className="truncate font-medium hover:underline"
+                          >
+                            {contributor.author}
+                          </Link>
+                        ) : (
+                          <span className="truncate font-medium">{contributor.author}</span>
+                        )}
                         <span className="shrink-0 text-muted-foreground">
                           {contributor.commits} commit{contributor.commits === 1 ? "" : "s"}
                         </span>

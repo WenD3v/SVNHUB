@@ -242,6 +242,26 @@ export class UsersService {
     return this.toAdminEntry(user, lastLogins.get(user.id) ?? null);
   }
 
+  async getProfile(userId: string): Promise<UserProfile> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return user;
+  }
+
   async updateProfile(userId: string, input: UpdateProfileRequest): Promise<UserProfile> {
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -305,6 +325,19 @@ export class UsersService {
       resourceId: userId,
       ipAddress,
     });
+  }
+
+  async findByUsername(username: string): Promise<{ id: string; username: string } | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { username: username.toLowerCase() },
+      select: { id: true, username: true, isActive: true },
+    });
+
+    if (!user?.isActive) {
+      return null;
+    }
+
+    return { id: user.id, username: user.username };
   }
 
   private async handleDeactivation(userId: string, username: string, isLocal: boolean): Promise<void> {

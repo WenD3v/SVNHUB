@@ -5,11 +5,13 @@ import type {
   PullRequestDetail,
   PullRequestCommitsResponse,
 } from "@svnhub/shared";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DiffViewer } from "@/components/diff-viewer";
 import { PipelineStatusBadge } from "@/components/pipeline-status-badge";
+import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
 
@@ -122,11 +124,24 @@ export function PullRequestDetailPanel({
               #{pullRequest.number} · {pullRequest.status}
             </p>
             <h2 className="text-xl font-semibold">{pullRequest.title}</h2>
-            <p className="mt-1 text-sm">
-              <span className="font-medium">{pullRequest.author.username}</span> quer mergear{" "}
-              <code className="rounded bg-muted px-1">{pullRequest.sourceRef}</code> em{" "}
-              <code className="rounded bg-muted px-1">{pullRequest.targetRef}</code>
-            </p>
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <UserAvatar
+                username={pullRequest.author.username}
+                avatarUrl={pullRequest.author.avatarUrl}
+                className="size-7"
+              />
+              <span>
+                <Link
+                  href={`/users/${pullRequest.author.username}`}
+                  className="font-medium hover:underline"
+                >
+                  {pullRequest.author.username}
+                </Link>{" "}
+                quer mergear{" "}
+                <code className="rounded bg-muted px-1">{pullRequest.sourceRef}</code> em{" "}
+                <code className="rounded bg-muted px-1">{pullRequest.targetRef}</code>
+              </span>
+            </div>
             {pullRequest.description ? (
               <p className="mt-3 whitespace-pre-wrap text-sm">{pullRequest.description}</p>
             ) : null}
@@ -244,7 +259,19 @@ export function PullRequestDetailPanel({
         <div className="space-y-4">
           {pullRequest.comments.map((comment) => (
             <article key={comment.id} className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium">{comment.author.username}</p>
+              <div className="flex items-center gap-2">
+                <UserAvatar
+                  username={comment.author.username}
+                  avatarUrl={comment.author.avatarUrl}
+                  className="size-7"
+                />
+                <Link
+                  href={`/users/${comment.author.username}`}
+                  className="text-sm font-medium hover:underline"
+                >
+                  {comment.author.username}
+                </Link>
+              </div>
               {comment.path ? (
                 <p className="text-xs text-muted-foreground">
                   {comment.path}:{comment.line} ({comment.side})
@@ -256,9 +283,22 @@ export function PullRequestDetailPanel({
 
           {pullRequest.reviews.map((review) => (
             <article key={review.id} className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium">
-                {review.author.username} · {review.decision}
-              </p>
+              <div className="flex items-center gap-2">
+                <UserAvatar
+                  username={review.author.username}
+                  avatarUrl={review.author.avatarUrl}
+                  className="size-7"
+                />
+                <p className="text-sm font-medium">
+                  <Link
+                    href={`/users/${review.author.username}`}
+                    className="hover:underline"
+                  >
+                    {review.author.username}
+                  </Link>{" "}
+                  · {review.decision}
+                </p>
+              </div>
               {review.body ? <p className="mt-2 whitespace-pre-wrap text-sm">{review.body}</p> : null}
             </article>
           ))}
@@ -339,7 +379,14 @@ export function PullRequestDetailPanel({
               {commits.commits.map((commit) => (
                 <tr key={commit.revision} className="border-t border-border">
                   <td className="px-4 py-3">r{commit.revision}</td>
-                  <td className="px-4 py-3">{commit.author}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <UserAvatar username={commit.author} className="size-6" />
+                      <Link href={`/users/${commit.author}`} className="hover:underline">
+                        {commit.author}
+                      </Link>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">{commit.message.trim() || "(sem mensagem)"}</td>
                 </tr>
               ))}

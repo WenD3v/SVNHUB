@@ -97,6 +97,7 @@ async function main(): Promise<void> {
     recursive: true,
   });
   await mkdir(resolveDataPath("data/artifacts"), { recursive: true });
+  await mkdir(resolveDataPath("data/avatars"), { recursive: true });
 
   console.log("SVNHUB seed completed.");
   console.log(`Admin user: ${user.email} (username: ${user.username})`);

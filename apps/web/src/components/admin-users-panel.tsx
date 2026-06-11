@@ -9,7 +9,7 @@ import type {
 import { useCallback, useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -257,9 +257,11 @@ export function AdminUsersPanel() {
               <TableRow key={user.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Avatar className="size-8">
-                      <AvatarFallback username={user.username} />
-                    </Avatar>
+                    <UserAvatar
+                      username={user.username}
+                      avatarUrl={user.avatarUrl}
+                      className="size-8"
+                    />
                     <div>
                       <p className="font-medium">{user.displayName ?? user.username}</p>
                       <p className="text-xs text-muted-foreground">@{user.username}</p>

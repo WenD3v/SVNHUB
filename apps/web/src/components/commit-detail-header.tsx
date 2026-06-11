@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { CopyRevisionButton } from "@/components/copy-revision-button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,15 +55,16 @@ export function CommitDetailHeader({
       {entry ? (
         <Card>
           <CardContent className="flex items-start gap-3 p-4">
-            <Avatar className="size-10">
-              <AvatarFallback username={entry.author} />
-            </Avatar>
+            <UserAvatar username={entry.author} className="size-10" />
             <div className="min-w-0 flex-1 space-y-2">
               <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
                 {entry.message || "(sem mensagem)"}
               </pre>
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{entry.author}</span> commitou em{" "}
+                <Link href={`/users/${entry.author}`} className="font-medium text-foreground hover:underline">
+                  {entry.author}
+                </Link>{" "}
+                commitou em{" "}
                 {new Date(entry.date).toLocaleString("pt-BR")}
                 {entry.paths.length > 0 ? ` · ${entry.paths.length} arquivo(s) alterado(s)` : ""}
               </p>

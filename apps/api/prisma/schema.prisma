@@ -186,6 +186,7 @@ model RevisionIndex {
   @@unique([repositoryId, revision])
   @@index([repositoryId, date(sort: Desc)])
   @@index([repositoryId, author])
+  @@index([author, date])
 }
 
 model RepoMember {
