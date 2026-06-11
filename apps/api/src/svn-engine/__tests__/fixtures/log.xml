@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log>
+<logentry revision="2">
+<author>dev</author>
+<date>2024-01-02T10:00:00.000000Z</date>
+<msg>Add README</msg>
+<paths>
+<path action="A">/trunk/README.md</path>
+</paths>
+</logentry>
+<logentry revision="1">
+<author>dev</author>
+<date>2024-01-01T10:00:00.000000Z</date>
+<msg>Initial repository layout</msg>
+<paths>
+<path action="A">/trunk</path>
+<path action="A">/branches</path>
+<path action="A">/tags</path>
+</paths>
+</logentry>
+</log>

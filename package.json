@@ -1,0 +1,23 @@
+{
+  "name": "svnhub",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,api,runner -c blue,green,yellow \"pnpm --filter @svnhub/web dev\" \"pnpm --filter @svnhub/api dev\" \"pnpm --filter @svnhub/runner dev\"",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @svnhub/api db:generate",
+    "db:migrate": "pnpm --filter @svnhub/api db:migrate",
+    "db:push": "pnpm --filter @svnhub/api db:push",
+    "db:seed": "pnpm --filter @svnhub/api db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}

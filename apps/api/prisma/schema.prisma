@@ -1,0 +1,478 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GroupRole {
+  MEMBER
+  ADMIN
+}
+
+enum RepoRole {
+  OWNER
+  MAINTAINER
+  DEVELOPER
+  READER
+}
+
+enum PathAccess {
+  READ
+  WRITE
+  NONE
+}
+
+enum PrincipalType {
+  USER
+  GROUP
+}
+
+enum PullRequestStatus {
+  OPEN
+  MERGED
+  CLOSED
+}
+
+enum PRReviewDecision {
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum PRStatusCheckStatus {
+  PENDING
+  SUCCESS
+  FAILURE
+}
+
+enum PipelineStatus {
+  PENDING
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILURE
+  CANCELED
+}
+
+enum PipelineTrigger {
+  PUSH
+  PR
+  MANUAL
+}
+
+enum PipelineJobStatus {
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILURE
+  CANCELED
+}
+
+enum WebhookEventType {
+  REVISION_INDEXED
+  PIPELINE_COMPLETED
+  PR_MERGED
+}
+
+enum PRCommentSide {
+  LEFT
+  RIGHT
+}
+
+enum HealthStatus {
+  UNKNOWN
+  HEALTHY
+  UNHEALTHY
+  VERIFYING
+}
+
+enum BackupStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String?
+  displayName  String?
+  avatarUrl    String?
+  ldapDn       String?
+  isLocal      Boolean  @default(true)
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  groupMembers       GroupMember[]
+  repoMembers        RepoMember[]
+  accessTokens       AccessToken[]
+  refreshTokens      RefreshToken[]
+  auditLogs          AuditLog[]
+  authoredPullRequests PullRequest[] @relation("PullRequestAuthor")
+  mergedPullRequests   PullRequest[] @relation("PullRequestMergedBy")
+  prComments           PRComment[]
+  prReviews            PRReview[]
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members GroupMember[]
+}
+
+model GroupMember {
+  id        String    @id @default(cuid())
+  userId    String
+  groupId   String
+  role      GroupRole @default(MEMBER)
+  createdAt DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+}
+
+model Repository {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  slug          String   @unique
+  description   String?
+  svnPath       String
+  defaultBranch String   @default("main")
+  isArchived    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  members        RepoMember[]
+  auditLogs      AuditLog[]
+  revisionIndex  RevisionIndex[]
+  policy          RepoPolicy?
+  pathPermissions PathPermission[]
+  pullRequests    PullRequest[]
+  pipelines       Pipeline[]
+  webhooks        Webhook[]
+  backups         RepositoryBackup[]
+  health          RepositoryHealth?
+}
+
+model RevisionIndex {
+  id           String   @id @default(cuid())
+  repositoryId String
+  revision     Int
+  author       String
+  date         DateTime
+  message      String   @default("")
+  changedPaths Json
+  createdAt    DateTime @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([repositoryId, revision])
+  @@index([repositoryId, date(sort: Desc)])
+  @@index([repositoryId, author])
+}
+
+model RepoMember {
+  id           String   @id @default(cuid())
+  userId       String
+  repositoryId String
+  role         RepoRole @default(READER)
+  createdAt    DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repository   Repository   @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, repositoryId])
+  @@index([repositoryId])
+}
+
+model AccessToken {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  tokenHash  String
+  scopes     String[]  @default([])
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model RepoPolicy {
+  id                     String   @id @default(cuid())
+  repositoryId           String   @unique
+  blockTrunkDirectCommit Boolean  @default(true)
+  blockTagsWrite         Boolean  @default(true)
+  requireCommitMessage   Boolean  @default(true)
+  commitMessageRegex     String?
+  maxFileSizeBytes       Int?
+  minApprovals           Int      @default(1)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+}
+
+model PullRequest {
+  id            String            @id @default(cuid())
+  number        Int
+  repositoryId  String
+  sourceRef     String
+  sourcePath    String
+  targetRef     String
+  targetPath    String
+  title         String
+  description   String?
+  status        PullRequestStatus @default(OPEN)
+  authorId      String
+  mergeRevision Int?
+  mergedAt      DateTime?
+  mergedById    String?
+  closedAt      DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  repository   Repository      @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  author       User            @relation("PullRequestAuthor", fields: [authorId], references: [id])
+  mergedBy     User?           @relation("PullRequestMergedBy", fields: [mergedById], references: [id])
+  comments     PRComment[]
+  reviews      PRReview[]
+  statusChecks PRStatusCheck[]
+
+  @@unique([repositoryId, number])
+  @@index([repositoryId, status])
+  @@index([authorId])
+}
+
+model PRComment {
+  id            String         @id @default(cuid())
+  pullRequestId String
+  authorId      String
+  body          String
+  path          String?
+  line          Int?
+  side          PRCommentSide?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id])
+
+  @@index([pullRequestId])
+}
+
+model PRReview {
+  id            String           @id @default(cuid())
+  pullRequestId String
+  authorId      String
+  decision      PRReviewDecision
+  body          String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id])
+
+  @@unique([pullRequestId, authorId])
+  @@index([pullRequestId])
+}
+
+model PRStatusCheck {
+  id             String              @id @default(cuid())
+  pullRequestId  String
+  name           String
+  status         PRStatusCheckStatus @default(PENDING)
+  targetRevision Int?
+  detailsUrl     String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  @@index([pullRequestId])
+}
+
+model PathPermission {
+  id             String         @id @default(cuid())
+  repositoryId   String
+  path           String
+  principalType  PrincipalType
+  principalId    String
+  access         PathAccess
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([repositoryId, path, principalType, principalId])
+  @@index([repositoryId])
+}
+
+model Pipeline {
+  id           String          @id @default(cuid())
+  repositoryId String
+  revision     Int
+  branchPath   String
+  trigger      PipelineTrigger @default(PUSH)
+  status       PipelineStatus  @default(PENDING)
+  configYaml   String?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  canceledAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  repository Repository    @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  jobs       PipelineJob[]
+  artifacts  Artifact[]
+
+  @@index([repositoryId, createdAt(sort: Desc)])
+  @@index([repositoryId, status])
+}
+
+model PipelineJob {
+  id         String            @id @default(cuid())
+  pipelineId String
+  stageName  String
+  name       String
+  status     PipelineJobStatus @default(QUEUED)
+  exitCode   Int?
+  image      String?
+  config     Json?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  pipeline  Pipeline   @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  logs      JobLog[]
+  artifacts Artifact[]
+
+  @@index([pipelineId])
+}
+
+model JobLog {
+  id        String   @id @default(cuid())
+  jobId     String
+  sequence  Int
+  content   String
+  createdAt DateTime @default(now())
+
+  job PipelineJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, sequence])
+  @@index([jobId, sequence])
+}
+
+model Artifact {
+  id             String    @id @default(cuid())
+  pipelineId     String
+  jobId          String?
+  name           String
+  path           String
+  sizeBytes      BigInt
+  retentionUntil DateTime?
+  createdAt      DateTime  @default(now())
+
+  pipeline Pipeline     @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  job      PipelineJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([pipelineId])
+  @@index([jobId])
+}
+
+model Webhook {
+  id           String             @id @default(cuid())
+  repositoryId String
+  url          String
+  secret       String
+  events       WebhookEventType[]
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([repositoryId])
+}
+
+model InstanceSettings {
+  id                   String   @id @default("default")
+  backupCron           String   @default("0 2 * * *")
+  backupRetentionCount Int      @default(7)
+  verifyCron           String   @default("0 3 * * 0")
+  updatedAt            DateTime @updatedAt
+}
+
+model RepositoryBackup {
+  id           String       @id @default(cuid())
+  repositoryId String
+  path         String
+  sizeBytes    BigInt?
+  status       BackupStatus @default(PENDING)
+  error        String?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([repositoryId, createdAt(sort: Desc)])
+}
+
+model RepositoryHealth {
+  repositoryId   String       @id
+  status         HealthStatus @default(UNKNOWN)
+  lastVerifiedAt DateTime?
+  lastError      String?
+  verifyOutput   String?
+  updatedAt      DateTime     @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  repositoryId String?
+  action       String
+  resourceType String
+  resourceId   String?
+  metadata     Json?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  user       User?       @relation(fields: [userId], references: [id])
+  repository Repository? @relation(fields: [repositoryId], references: [id])
+
+  @@index([userId])
+  @@index([repositoryId])
+  @@index([createdAt])
+}

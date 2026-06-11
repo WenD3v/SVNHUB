@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: svnhub
+      POSTGRES_PASSWORD: svnhub
+      POSTGRES_DB: svnhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U svnhub -d svnhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  svn:
+    build: ./infra/apache-svn
+    ports:
+      - "8080:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data/repos:/var/svn/repos
+      - ./data/svn-authz:/etc/apache2/svn-authz
+      - ./data/svn-passwd:/etc/apache2/dav_svn.passwd
+    environment:
+      SVN_REPOS_DIR: /var/svn/repos
+
+volumes:
+  postgres_data:

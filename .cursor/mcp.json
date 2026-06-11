@@ -1,0 +1,17 @@
+{
+    "mcpServers":  {
+                       "ag-kit-bridge":  {
+                                             "command":  "node",
+                                             "args":  [
+                                                          "D:/cursorKit/packages/ag-kit-bridge/dist/index.js"
+                                                      ],
+                                             "env":  {
+                                                         "AGKIT_ROOT":  "D:/Projetos/SVNHUB/",
+                                                         "AGKIT_KIT_ROOT":  "D:/cursorKit",
+                                                         "AGKIT_BRIDGE_ENABLED":  "true",
+                                                         "CURSOR_API_KEY":  "crsr_7517567fd1edb33d1878c37c5c1d49e603c82fce72176aeba46500624d52c54e",
+                                                         "CLAUDE_CODE_BIN":  "claude"
+                                                     }
+                                         }
+                   }
+}
