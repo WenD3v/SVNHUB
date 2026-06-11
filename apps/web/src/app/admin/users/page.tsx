@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { AdminAuditLogPanel } from "@/components/admin-audit-log-panel";
 import { AdminNav } from "@/components/admin-nav";
+import { AdminUsersPanel } from "@/components/admin-users-panel";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 
-export default function AdminAuditLogPage() {
+export default function AdminUsersPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
@@ -41,9 +41,9 @@ export default function AdminAuditLogPage() {
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Auditoria global</h1>
+            <h1 className="text-2xl font-bold">Usuários</h1>
             <p className="text-sm text-muted-foreground">
-              Eventos administrativos de toda a instância SVNHUB.
+              Gestão de contas locais e LDAP da instância SVNHUB.
             </p>
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -52,7 +52,7 @@ export default function AdminAuditLogPage() {
         </div>
 
         <AdminNav />
-        <AdminAuditLogPanel />
+        <AdminUsersPanel />
       </section>
     </PageShell>
   );

@@ -8,9 +8,11 @@ import {
   Post,
   Put,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 
 import type { AuthenticatedUser } from "../auth/strategies/jwt.strategy";
+import { AdminGuard } from "../auth/guards/admin.guard";
 import { RepoRole } from "../common/decorators/repo-role.decorator";
 import {
   AddGroupMemberDto,
@@ -127,11 +129,13 @@ export class GroupsController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   create(@Body() dto: CreateGroupDto, @Req() req: { user?: AuthenticatedUser }) {
     return this.permissionsService.createGroup(dto.name, dto.description, req.user?.id);
   }
 
   @Patch(":id")
+  @UseGuards(AdminGuard)
   update(
     @Param("id") id: string,
     @Body() dto: UpdateGroupDto,
@@ -141,11 +145,13 @@ export class GroupsController {
   }
 
   @Delete(":id")
+  @UseGuards(AdminGuard)
   remove(@Param("id") id: string, @Req() req: { user?: AuthenticatedUser }) {
     return this.permissionsService.deleteGroup(id, req.user?.id);
   }
 
   @Post(":id/members")
+  @UseGuards(AdminGuard)
   addMember(
     @Param("id") id: string,
     @Body() dto: AddGroupMemberDto,
@@ -155,6 +161,7 @@ export class GroupsController {
   }
 
   @Delete(":id/members/:memberId")
+  @UseGuards(AdminGuard)
   removeMember(
     @Param("id") id: string,
     @Param("memberId") memberId: string,

@@ -16,6 +16,7 @@ import { PipelinesModule } from "./pipelines/pipelines.module";
 import { PullRequestsModule } from "./prs/pull-requests.module";
 import { QueuesModule } from "./queues/queues.module";
 import { RepositoriesModule } from "./repositories/repositories.module";
+import { UsersModule } from "./users/users.module";
 import { WebhooksModule } from "./webhooks/webhooks.module";
 
 @Module({
@@ -34,6 +35,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     PullRequestsModule,
     PipelinesModule,
     WebhooksModule,
+    UsersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

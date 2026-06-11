@@ -83,6 +83,27 @@ Requer papel **OWNER** no repositório. Registra auditoria `repo.recover`.
 
 Admins de instância (`User.isAdmin = true`) têm acesso total.
 
+## Autenticação SVN (htpasswd × LDAP)
+
+O Apache valida credenciais SVN de duas formas, conforme configuração da instância:
+
+| Origem da conta | `User.isLocal` | Fonte de senha SVN | Arquivo `data/svn-passwd` |
+|---|---|---|---|
+| Conta local (CRUD admin) | `true` | htpasswd (apr1) | Entrada obrigatória enquanto ativa |
+| Conta LDAP | `false` | LDAP direto no Apache | Não utilizada (fallback apenas para locais) |
+
+**Sincronização automática (contas locais):**
+
+- Criação ou redefinição de senha → `HtpasswdService.upsertUser`
+- Desativação (`isActive = false`) → remoção do htpasswd + rebuild do authz
+- Boot em produção → reconciliação remove entradas obsoletas no htpasswd
+
+Contas desativadas não conseguem login web (tokens refresh revogados na desativação).
+
+**API admin:** `GET/POST/PATCH /admin/users`, `POST /admin/users/:id/reset-password`
+
+**Autosserviço:** `PATCH /users/me`, `POST /users/me/password` (contas locais)
+
 ### Permissões por path
 
 A UI compila permissões granulares (usuário/grupo × path × read/write) para o arquivo **authz** do SVN. Toda alteração regenera authz de forma atômica.

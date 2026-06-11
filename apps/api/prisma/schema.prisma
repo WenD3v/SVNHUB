@@ -105,6 +105,8 @@ model User {
   ldapDn       String?
   isLocal      Boolean  @default(true)
   isAdmin      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  bio          String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

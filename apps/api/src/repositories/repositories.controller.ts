@@ -12,6 +12,7 @@ import {
   Query,
   Req,
   Res,
+  UseGuards,
 } from "@nestjs/common";
 import type { Response } from "express";
 import { createReadStream } from "node:fs";
@@ -20,6 +21,7 @@ import { rm } from "node:fs/promises";
 import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
 
 import type { AuthenticatedUser } from "../auth/strategies/jwt.strategy";
+import { AdminGuard } from "../auth/guards/admin.guard";
 import { RepoRole } from "../common/decorators/repo-role.decorator";
 import { ChangelogService } from "./changelog.service";
 import { CreateRepositoryDto } from "./dto/create-repository.dto";
@@ -46,6 +48,7 @@ export class RepositoriesController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   create(
     @Body() dto: CreateRepositoryDto,
     @Req() req: { user?: AuthenticatedUser },

@@ -11,4 +11,5 @@ export * from "./stats.js";
 export * from "./svn.js";
 export * from "./svn-path.js";
 export * from "./user.js";
+export * from "./users-admin.js";
 export * from "./webhooks.js";

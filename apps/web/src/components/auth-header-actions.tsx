@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Shield, User } from "lucide-react";
+import { Archive, LogOut, ScrollText, Shield, User, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,12 +56,39 @@ export function AuthHeaderActions() {
           Perfil
         </DropdownMenuItem>
         {user.isAdmin ? (
-          <DropdownMenuItem asChild>
-            <Link href="/admin/audit-log">
-              <Shield className="size-4" />
-              Admin · Auditoria
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Shield className="size-4" />
+                Administração
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/users">
+                    <Users className="size-4" />
+                    Usuários
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <Users className="size-4" />
+                  Teams
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/audit-log">
+                    <ScrollText className="size-4" />
+                    Auditoria
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/backups">
+                    <Archive className="size-4" />
+                    Backups
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </>
         ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void logout()}>

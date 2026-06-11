@@ -50,6 +50,7 @@ export class AuthService {
         },
       });
 
+      this.assertUserIsActive(user.isActive);
       return this.issueTokens(user, ipAddress);
     }
 
@@ -57,6 +58,8 @@ export class AuthService {
     if (!user?.passwordHash || !user.isLocal) {
       throw new UnauthorizedException("Invalid credentials");
     }
+
+    this.assertUserIsActive(user.isActive);
 
     const valid = await argon2.verify(user.passwordHash, password);
     if (!valid) {
@@ -79,6 +82,8 @@ export class AuthService {
     if (!stored) {
       throw new UnauthorizedException("Invalid refresh token");
     }
+
+    this.assertUserIsActive(stored.user.isActive);
 
     await this.prisma.refreshToken.delete({ where: { id: stored.id } });
 
@@ -122,9 +127,11 @@ export class AuthService {
       displayName: string | null;
       avatarUrl: string | null;
       isAdmin?: boolean;
+      isActive?: boolean;
     },
     ipAddress?: string | null,
   ): Promise<AuthResponse> {
+    this.assertUserIsActive(user.isActive ?? true);
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -186,5 +193,11 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash("sha256").update(token).digest("hex");
+  }
+
+  private assertUserIsActive(isActive: boolean): void {
+    if (!isActive) {
+      throw new UnauthorizedException("Account is deactivated");
+    }
   }
 }
