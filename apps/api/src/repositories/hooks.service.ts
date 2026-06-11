@@ -85,7 +85,7 @@ case "$HTTP_CODE" in
   2??) exit 0 ;;
 esac
 
-REASON=$(echo "$BODY" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+REASON=$(echo "$BODY" | sed -n 's/.*"message":"\\([^"]*\\)".*/\\1/p')
 if [ -n "$REASON" ]; then
   echo "SVNHUB: $REASON" 1>&2
 else
