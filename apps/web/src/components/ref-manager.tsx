@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { apiFetch } from "@/lib/api-client";
 
 interface CreateRefFormProps {
@@ -43,30 +47,33 @@ export function CreateRefForm({ slug, kind }: CreateRefFormProps) {
   const label = kind === "branch" ? "branch" : "tag";
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4">
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Nome da {label}</label>
-        <input
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={kind === "branch" ? "feature-x" : "v1.0.0"}
-          required
-        />
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Origem</label>
-        <input
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-          value={sourceRef}
-          onChange={(e) => setSourceRef(e.target.value)}
-        />
-      </div>
-      <Button type="submit" disabled={loading}>
-        {loading ? "Criando…" : `Criar ${label}`}
-      </Button>
-      {error ? <p className="w-full text-sm text-red-400">{error}</p> : null}
-    </form>
+    <Card>
+      <CardContent className="flex flex-wrap items-end gap-3 p-4">
+        <form onSubmit={handleSubmit} className="flex w-full flex-wrap items-end gap-3">
+          <div className="space-y-1.5">
+            <Label>Nome da {label}</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={kind === "branch" ? "feature-x" : "v1.0.0"}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Origem</Label>
+            <Input value={sourceRef} onChange={(e) => setSourceRef(e.target.value)} />
+          </div>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Criando…" : `Criar ${label}`}
+          </Button>
+        </form>
+        {error ? (
+          <Alert variant="destructive" className="w-full">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 

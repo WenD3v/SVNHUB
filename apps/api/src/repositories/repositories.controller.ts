@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Patch,
@@ -20,13 +21,24 @@ import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
 
 import type { AuthenticatedUser } from "../auth/strategies/jwt.strategy";
 import { RepoRole } from "../common/decorators/repo-role.decorator";
+import { ChangelogService } from "./changelog.service";
 import { CreateRepositoryDto } from "./dto/create-repository.dto";
 import { DiffPathsQueryDto, LogQueryDto, TreeQueryDto } from "./dto/query.dto";
+import {
+  ActivityQueryDto,
+  ChangelogQueryDto,
+  ContributorsQueryDto,
+} from "./dto/stats-query.dto";
 import { RepositoriesService } from "./repositories.service";
+import { StatsService } from "./stats.service";
 
 @Controller("repositories")
 export class RepositoriesController {
-  constructor(private readonly repositoriesService: RepositoriesService) {}
+  constructor(
+    private readonly repositoriesService: RepositoriesService,
+    private readonly statsService: StatsService,
+    private readonly changelogService: ChangelogService,
+  ) {}
 
   @Get()
   list() {
@@ -87,6 +99,25 @@ export class RepositoriesController {
       query.revision,
       query.kind ?? "branch",
     );
+  }
+
+  @Get(":slug/stats/activity")
+  @RepoRole("READER")
+  @Header("Cache-Control", "public, max-age=60")
+  activity(@Param("slug") slug: string, @Query() query: ActivityQueryDto) {
+    return this.statsService.getWeeklyActivity(slug, query.weeks ?? 52);
+  }
+
+  @Get(":slug/stats/contributors")
+  @RepoRole("READER")
+  contributors(@Param("slug") slug: string, @Query() query: ContributorsQueryDto) {
+    return this.statsService.getContributors(slug, query);
+  }
+
+  @Get(":slug/changelog")
+  @RepoRole("READER")
+  changelog(@Param("slug") slug: string, @Query() query: ChangelogQueryDto) {
+    return this.changelogService.getChangelog(slug, query.limit ?? 100);
   }
 
   @Get(":slug/log")

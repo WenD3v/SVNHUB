@@ -1,14 +1,26 @@
 import Link from "next/link";
 
-import { AppHeader } from "@/components/app-header";
-import { CheckoutInstructions } from "@/components/checkout-instructions";
+import { CommitActivityChart } from "@/components/commit-activity-chart";
 import { FileBrowser } from "@/components/file-browser";
-import { ReadmeViewer } from "@/components/readme-viewer";
-import { HealthStatusBadge } from "@/components/health-status-badge";
+import { PageShell } from "@/components/page-shell";
 import { PipelineStatusBadge } from "@/components/pipeline-status-badge";
+import { ReadmeViewer } from "@/components/readme-viewer";
+import { RepoAboutCard } from "@/components/repo-about-card";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
+import { RepoContributors } from "@/components/repo-contributors";
 import { RepoNav } from "@/components/repo-nav";
+import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api";
-import type { PipelineListResponse, RepositoryDetail, RepositoryTreeResponse } from "@svnhub/shared";
+import { resolveReadme } from "@/lib/readme";
+import type {
+  PipelineListResponse,
+  RefListResponse,
+  RepositoryActivityResponse,
+  RepositoryContributorsResponse,
+  RepositoryDetail,
+  RepositoryLogResponse,
+  RepositoryTreeResponse,
+} from "@svnhub/shared";
 import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
 
 interface RepoPageProps {
@@ -22,7 +34,7 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
   const ref = query.ref ?? DEFAULT_BRANCH_UI;
   const revision = query.revision ? Number(query.revision) : undefined;
 
-  const [repo, tree, pipelines] = await Promise.all([
+  const [repo, tree, pipelines, branches, tags, log, activity, contributors] = await Promise.all([
     apiFetch<RepositoryDetail>(`/repositories/${slug}`),
     apiFetch<RepositoryTreeResponse>(
       `/repositories/${slug}/tree?ref=${ref}${revision ? `&revision=${revision}` : ""}`,
@@ -31,44 +43,63 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
       pipelines: [],
       total: 0,
     })),
+    apiFetch<RefListResponse>(`/repositories/${slug}/branches`).catch(() => ({ refs: [] })),
+    apiFetch<RefListResponse>(`/repositories/${slug}/tags`).catch(() => ({ refs: [] })),
+    apiFetch<RepositoryLogResponse>(`/repositories/${slug}/log?limit=1`).catch(() => ({
+      entries: [],
+      total: 0,
+      hasMore: false,
+    })),
+    apiFetch<RepositoryActivityResponse>(`/repositories/${slug}/stats/activity?weeks=52`).catch(
+      () => ({ weeks: [], total: 0 }),
+    ),
+    apiFetch<RepositoryContributorsResponse>(`/repositories/${slug}/stats/contributors`).catch(
+      () => ({ contributors: [] }),
+    ),
   ]);
 
+  const readme = await resolveReadme(slug, ref, tree.revision, tree.readme);
   const latestPipeline = pipelines.pipelines[0] ?? null;
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          {repo.description ? (
-            <p className="text-sm text-muted-foreground">{repo.description}</p>
-          ) : null}
-          <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>
-              HEAD r{repo.headRevision} · branch padrão {repo.defaultBranch}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              Saúde
-              <HealthStatusBadge status={repo.health.status} />
-            </span>
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-semibold">{repo.name}</h1>
+            {repo.isArchived ? <Badge variant="muted">Arquivado</Badge> : null}
+            <Badge variant="outline" className="font-mono">
+              r{repo.headRevision}
+            </Badge>
             {latestPipeline ? (
               <Link
                 href={`/repos/${slug}/pipelines/${latestPipeline.id}`}
-                className="inline-flex items-center gap-1 hover:underline"
+                className="inline-flex items-center gap-1 text-sm hover:underline"
               >
                 CI
                 <PipelineStatusBadge status={latestPipeline.status} />
               </Link>
             ) : null}
-          </p>
+          </div>
         </div>
 
         <RepoNav slug={slug} active="code" />
 
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <CommitActivityChart data={activity} />
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div className="space-y-4">
-            {tree.readme ? <ReadmeViewer content={tree.readme} /> : null}
+            {readme ? (
+              <ReadmeViewer
+                content={readme.content}
+                format={readme.format}
+                filename={readme.filename}
+                slug={slug}
+                ref={ref}
+                revision={tree.revision}
+              />
+            ) : null}
             <FileBrowser
               slug={slug}
               branchRef={ref}
@@ -77,22 +108,22 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
               entries={tree.entries}
             />
           </div>
-          <CheckoutInstructions
-            slug={slug}
-            checkoutUrl={repo.checkoutUrl}
-            svnUrl={repo.svnUrl}
-            branchRef={ref}
-          />
+          <div className="space-y-4">
+            <RepoAboutCard
+              slug={slug}
+              description={repo.description}
+              checkoutUrl={repo.checkoutUrl}
+              svnUrl={repo.svnUrl}
+              branchRef={ref}
+              healthStatus={repo.health.status}
+              branchCount={branches.refs.length}
+              tagCount={tags.refs.length}
+              revisionCount={log.total}
+            />
+            <RepoContributors slug={slug} contributors={contributors.contributors} />
+          </div>
         </div>
-
-        <p className="text-xs text-muted-foreground">
-          Navegue por pastas em{" "}
-          <Link href={`/repos/${slug}/tree?ref=${ref}`} className="underline">
-            /tree
-          </Link>
-          .
-        </p>
       </section>
-    </main>
+    </PageShell>
   );
 }

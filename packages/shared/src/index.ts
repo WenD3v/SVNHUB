@@ -7,6 +7,7 @@ export * from "./pipeline-yaml.js";
 export * from "./pipelines.js";
 export * from "./pull-requests.js";
 export * from "./repository.js";
+export * from "./stats.js";
 export * from "./svn.js";
 export * from "./svn-path.js";
 export * from "./user.js";

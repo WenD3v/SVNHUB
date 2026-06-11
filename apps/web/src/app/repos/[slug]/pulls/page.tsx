@@ -1,14 +1,33 @@
 import Link from "next/link";
 
-import { AppHeader } from "@/components/app-header";
+import { PageShell } from "@/components/page-shell";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { PullRequestListResponse, RepositoryDetail } from "@svnhub/shared";
 
 interface PullRequestsPageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ status?: string }>;
 }
+
+const STATUS_VARIANTS: Record<string, "default" | "success" | "destructive" | "muted"> = {
+  OPEN: "default",
+  MERGED: "success",
+  CLOSED: "destructive",
+};
 
 export default async function PullRequestsPage({
   params,
@@ -24,87 +43,92 @@ export default async function PullRequestsPage({
   ]);
 
   const filters = [
-    { label: "Open", value: "OPEN" },
-    { label: "Merged", value: "MERGED" },
-    { label: "Closed", value: "CLOSED" },
+    { label: "Todos", href: `/repos/${slug}/pulls`, active: !query.status },
+    { label: "Open", href: `/repos/${slug}/pulls?status=OPEN`, active: query.status === "OPEN" },
+    {
+      label: "Merged",
+      href: `/repos/${slug}/pulls?status=MERGED`,
+      active: query.status === "MERGED",
+    },
+    {
+      label: "Closed",
+      href: `/repos/${slug}/pulls?status=CLOSED`,
+      active: query.status === "CLOSED",
+    },
   ];
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          <p className="text-sm text-muted-foreground">Pull requests</p>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <h1 className="text-xl font-semibold">Pull requests</h1>
         </div>
 
         <RepoNav slug={slug} active="pulls" />
 
-        <div className="flex gap-2">
-          <Link
-            href={`/repos/${slug}/pulls`}
-            className={
-              !query.status
-                ? "rounded-md bg-primary px-3 py-1 text-sm text-primary-foreground"
-                : "rounded-md border border-border px-3 py-1 text-sm"
-            }
-          >
-            Todos
-          </Link>
+        <div className="flex flex-wrap gap-2">
           {filters.map((filter) => (
-            <Link
-              key={filter.value}
-              href={`/repos/${slug}/pulls?status=${filter.value}`}
-              className={
-                query.status === filter.value
-                  ? "rounded-md bg-primary px-3 py-1 text-sm text-primary-foreground"
-                  : "rounded-md border border-border px-3 py-1 text-sm"
-              }
+            <Button
+              key={filter.label}
+              variant={filter.active ? "default" : "outline"}
+              size="sm"
+              asChild
             >
-              {filter.label}
-            </Link>
+              <Link href={filter.href} className={cn(!filter.active && "text-muted-foreground")}>
+                {filter.label}
+              </Link>
+            </Button>
           ))}
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
-              <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Título</th>
-                <th className="px-4 py-2">Branch</th>
-                <th className="px-4 py-2">Autor</th>
-                <th className="px-4 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pullRequests.pullRequests.map((pr) => (
-                <tr key={pr.id} className="border-t border-border">
-                  <td className="px-4 py-3">{pr.number}</td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/repos/${slug}/pulls/${pr.number}`}
-                      className="font-medium hover:underline"
-                    >
-                      {pr.title}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">
-                    <code className="rounded bg-muted px-1">{pr.sourceRef}</code>
-                    {" → "}
-                    <code className="rounded bg-muted px-1">{pr.targetRef}</code>
-                  </td>
-                  <td className="px-4 py-3">{pr.author.username}</td>
-                  <td className="px-4 py-3">{pr.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {pullRequests.pullRequests.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-muted-foreground">Nenhum pull request encontrado.</p>
-          ) : null}
-        </div>
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>#</TableHead>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Branch</TableHead>
+                  <TableHead>Autor</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pullRequests.pullRequests.map((pr) => (
+                  <TableRow key={pr.id}>
+                    <TableCell className="text-muted-foreground">{pr.number}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/repos/${slug}/pulls/${pr.number}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {pr.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <code className="rounded bg-muted px-1 font-mono text-xs">{pr.sourceRef}</code>
+                      {" → "}
+                      <code className="rounded bg-muted px-1 font-mono text-xs">{pr.targetRef}</code>
+                    </TableCell>
+                    <TableCell>{pr.author.username}</TableCell>
+                    <TableCell>
+                      <Badge variant={STATUS_VARIANTS[pr.status] ?? "muted"}>{pr.status}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {pullRequests.pullRequests.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                      Nenhum pull request encontrado.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </section>
-    </main>
+    </PageShell>
   );
 }

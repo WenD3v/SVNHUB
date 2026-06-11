@@ -1,42 +1,71 @@
 "use client";
 
 import Link from "next/link";
+import { LogOut, Shield, User } from "lucide-react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 
 export function AuthHeaderActions() {
   const { user, loading, logout } = useAuth();
 
   if (loading) {
-    return <span className="text-xs text-muted-foreground">…</span>;
+    return <Skeleton className="size-8 rounded-full" />;
   }
 
   if (!user) {
     return (
-      <Link
-        href="/login"
-        className="inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
-      >
-        Entrar
-      </Link>
+      <Button variant="outline" size="sm" asChild>
+        <Link href="/login">Entrar</Link>
+      </Button>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {user.isAdmin ? (
-        <Link
-          href="/admin/audit-log"
-          className="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
-        >
-          Admin
-        </Link>
-      ) : null}
-      <span className="hidden text-sm text-muted-foreground sm:inline">{user.username}</span>
-      <Button variant="outline" size="sm" onClick={() => void logout()}>
-        Sair
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="size-8 rounded-full p-0" aria-label="Menu do usuário">
+          <Avatar className="size-8">
+            <AvatarFallback username={user.username} />
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium">{user.username}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled>
+          <User className="size-4" />
+          Perfil
+        </DropdownMenuItem>
+        {user.isAdmin ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin/audit-log">
+              <Shield className="size-4" />
+              Admin · Auditoria
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => void logout()}>
+          <LogOut className="size-4" />
+          Sair
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

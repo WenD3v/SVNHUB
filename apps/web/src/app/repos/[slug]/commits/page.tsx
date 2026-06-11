@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 
-import { AppHeader } from "@/components/app-header";
 import { CommitFilters } from "@/components/commit-filters";
-import { CommitHistory } from "@/components/commit-history";
+import { CommitHistoryPanel } from "@/components/commit-history-panel";
+import { PageShell } from "@/components/page-shell";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import type { RepositoryDetail, RepositoryLogResponse } from "@svnhub/shared";
 import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
@@ -28,16 +30,23 @@ export default async function CommitsPage({ params, searchParams }: CommitsPageP
   ]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <h1 className="text-2xl font-bold">{repo.name}</h1>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <h1 className="text-xl font-semibold">Commits</h1>
+        </div>
         <RepoNav slug={slug} active="commits" />
-        <Suspense>
+        <Suspense fallback={<Skeleton className="h-20 w-full" />}>
           <CommitFilters slug={slug} />
         </Suspense>
-        <CommitHistory slug={slug} entries={log.entries} />
+        <CommitHistoryPanel
+          slug={slug}
+          initialEntries={log.entries}
+          initialHasMore={log.hasMore}
+          queryString={paramsQuery.toString()}
+        />
       </section>
-    </main>
+    </PageShell>
   );
 }

@@ -1,15 +1,35 @@
 "use client";
 
+import Link from "next/link";
+import { FolderGit2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { RepositoryList } from "@/components/repository-list";
+import { RepositoryList, type RepositoryListItem } from "@/components/repository-list";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth-context";
-import type { RepositorySummary } from "@svnhub/shared";
+import type { RefListResponse, RepositoryDetail, RepositorySummary } from "@svnhub/shared";
+
+function RepositoryListSkeleton() {
+  return (
+    <div className="grid gap-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="rounded-lg border border-border p-4">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-2 h-4 w-full max-w-md" />
+          <Skeleton className="mt-3 h-3 w-56" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function RepositoryListLoader() {
   const { user, loading: authLoading } = useAuth();
-  const [repositories, setRepositories] = useState<RepositorySummary[]>([]);
+  const [repositories, setRepositories] = useState<RepositoryListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +49,30 @@ export function RepositoryListLoader() {
     setError(null);
 
     void apiFetch<RepositorySummary[]>("/repositories")
-      .then((data) => {
+      .then(async (summaries) => {
+        const enriched = await Promise.all(
+          summaries.map(async (summary): Promise<RepositoryListItem> => {
+            try {
+              const [detail, branches] = await Promise.all([
+                apiFetch<RepositoryDetail>(`/repositories/${summary.slug}`),
+                apiFetch<RefListResponse>(`/repositories/${summary.slug}/branches`).catch(
+                  () => ({ refs: [] }),
+                ),
+              ]);
+              return {
+                ...summary,
+                headRevision: detail.headRevision,
+                healthStatus: detail.health.status,
+                branchCount: branches.refs.length,
+                updatedAt: detail.updatedAt,
+              };
+            } catch {
+              return summary;
+            }
+          }),
+        );
         if (!cancelled) {
-          setRepositories(data);
+          setRepositories(enriched);
         }
       })
       .catch((fetchError) => {
@@ -54,26 +95,39 @@ export function RepositoryListLoader() {
   }, [authLoading, user]);
 
   if (authLoading || loading) {
-    return (
-      <p className="rounded-lg border border-border p-6 text-sm text-muted-foreground">
-        Carregando repositórios…
-      </p>
-    );
+    return <RepositoryListSkeleton />;
   }
 
   if (!user) {
     return (
-      <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-        Faça login para ver seus repositórios.
-      </p>
+      <EmptyState
+        icon={FolderGit2}
+        title="Faça login para ver seus repositórios"
+        description="Entre com sua conta para acessar a lista de repositórios."
+        action={
+          <Button asChild>
+            <Link href="/login">Entrar</Link>
+          </Button>
+        }
+      />
     );
   }
 
   if (error) {
     return (
-      <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive">
-        {error}
-      </p>
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (repositories.length === 0) {
+    return (
+      <EmptyState
+        icon={FolderGit2}
+        title="Nenhum repositório ainda"
+        description="Crie o primeiro repositório usando o formulário ao lado."
+      />
     );
   }
 

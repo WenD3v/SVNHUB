@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { apiFetch } from "@/lib/api-client";
 import type { PullRequestDetail } from "@svnhub/shared";
 
@@ -51,29 +55,34 @@ export function CreatePullRequestForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-border p-4">
-      <h3 className="text-sm font-medium">Abrir Pull Request</h3>
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Título</label>
-        <input
-          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Descrição</label>
-        <textarea
-          className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <Button type="submit" disabled={loading}>
-        Criar Pull Request
-      </Button>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Abrir Pull Request</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Título</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+          </div>
+          <div className="space-y-2">
+            <Label>Descrição</Label>
+            <textarea
+              className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+          <Button type="submit" disabled={loading}>
+            Criar Pull Request
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

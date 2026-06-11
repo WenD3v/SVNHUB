@@ -1,10 +1,16 @@
-import { AppHeader } from "@/components/app-header";
-import { CheckoutInstructions } from "@/components/checkout-instructions";
 import { FileBrowser } from "@/components/file-browser";
+import { PageShell } from "@/components/page-shell";
+import { RepoAboutCard } from "@/components/repo-about-card";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
 import { apiFetch } from "@/lib/api";
 import { joinPathSegments } from "@/lib/paths";
-import type { RepositoryDetail, RepositoryTreeResponse } from "@svnhub/shared";
+import type {
+  RefListResponse,
+  RepositoryDetail,
+  RepositoryLogResponse,
+  RepositoryTreeResponse,
+} from "@svnhub/shared";
 import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
 
 interface TreePageProps {
@@ -19,20 +25,29 @@ export default async function TreePage({ params, searchParams }: TreePageProps) 
   const ref = query.ref ?? DEFAULT_BRANCH_UI;
   const revision = query.revision ? Number(query.revision) : undefined;
 
-  const [repo, tree] = await Promise.all([
+  const [repo, tree, branches, tags, log] = await Promise.all([
     apiFetch<RepositoryDetail>(`/repositories/${slug}`),
     apiFetch<RepositoryTreeResponse>(
       `/repositories/${slug}/tree?ref=${ref}&path=${encodeURIComponent(uiPath)}${revision ? `&revision=${revision}` : ""}`,
     ),
+    apiFetch<RefListResponse>(`/repositories/${slug}/branches`).catch(() => ({ refs: [] })),
+    apiFetch<RefListResponse>(`/repositories/${slug}/tags`).catch(() => ({ refs: [] })),
+    apiFetch<RepositoryLogResponse>(`/repositories/${slug}/log?limit=1`).catch(() => ({
+      entries: [],
+      total: 0,
+      hasMore: false,
+    })),
   ]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <h1 className="text-2xl font-bold">{repo.name}</h1>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
+          <h1 className="text-xl font-semibold">{repo.name}</h1>
+        </div>
         <RepoNav slug={slug} active="code" />
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <FileBrowser
             slug={slug}
             branchRef={ref}
@@ -40,14 +55,19 @@ export default async function TreePage({ params, searchParams }: TreePageProps) 
             revision={tree.revision}
             entries={tree.entries}
           />
-          <CheckoutInstructions
+          <RepoAboutCard
             slug={slug}
+            description={repo.description}
             checkoutUrl={repo.checkoutUrl}
             svnUrl={repo.svnUrl}
             branchRef={ref}
+            healthStatus={repo.health.status}
+            branchCount={branches.refs.length}
+            tagCount={tags.refs.length}
+            revisionCount={log.total}
           />
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

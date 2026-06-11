@@ -3,7 +3,10 @@
 import type { AuditLogResponse } from "@svnhub/shared";
 import { useEffect, useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api-client";
 
 const PAGE_SIZE = 50;
@@ -38,11 +41,21 @@ export function AdminAuditLogPanel() {
   const hasPrev = offset > 0;
   const hasNext = offset + PAGE_SIZE < total;
 
+  if (loading && !data) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <ul className="divide-y divide-border rounded-lg border border-border text-sm">
+      <Card className="divide-y divide-border overflow-hidden">
         {(data?.entries ?? []).map((entry) => (
-          <li key={entry.id} className="px-4 py-3">
+          <div key={entry.id} className="px-4 py-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{entry.action}</span>
               <span className="text-muted-foreground">
@@ -54,16 +67,16 @@ export function AdminAuditLogPanel() {
               {entry.username ?? "sistema"} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
             </p>
             {entry.metadata ? (
-              <pre className="mt-1 overflow-x-auto text-xs text-muted-foreground">
+              <pre className="mt-1 overflow-x-auto rounded-md bg-muted p-2 font-mono text-xs text-muted-foreground">
                 {JSON.stringify(entry.metadata, null, 2)}
               </pre>
             ) : null}
-          </li>
+          </div>
         ))}
         {(data?.entries.length ?? 0) === 0 && !loading ? (
-          <li className="px-4 py-6 text-muted-foreground">Nenhum evento registrado.</li>
+          <p className="px-4 py-8 text-center text-muted-foreground">Nenhum evento registrado.</p>
         ) : null}
-      </ul>
+      </Card>
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
@@ -91,7 +104,11 @@ export function AdminAuditLogPanel() {
         </div>
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
     </div>
   );
 }

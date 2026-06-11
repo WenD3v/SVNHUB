@@ -1,5 +1,6 @@
-import { AppHeader } from "@/components/app-header";
+import { PageShell } from "@/components/page-shell";
 import { PipelineDetailPanel } from "@/components/pipeline-detail-panel";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
 import { apiFetch } from "@/lib/api";
 import type { JobLogChunk, PipelineDetail, RepositoryDetail } from "@svnhub/shared";
@@ -26,22 +27,17 @@ export default async function PipelineDetailPage({ params }: PipelineDetailPageP
   );
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          <p className="text-sm text-muted-foreground">Detalhe do pipeline</p>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <h1 className="text-xl font-semibold">Pipeline r{pipeline.revision}</h1>
         </div>
 
         <RepoNav slug={slug} active="pipelines" />
 
-        <PipelineDetailPanel
-          slug={slug}
-          pipeline={pipeline}
-          initialLogs={initialLogs}
-        />
+        <PipelineDetailPanel slug={slug} pipeline={pipeline} initialLogs={initialLogs} />
       </section>
-    </main>
+    </PageShell>
   );
 }

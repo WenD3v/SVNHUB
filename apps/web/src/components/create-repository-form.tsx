@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiFetch } from "@/lib/api";
 import type { RepositoryDetail } from "@svnhub/shared";
 import { slugifyRepoName } from "@svnhub/shared/svn-path";
@@ -47,15 +50,11 @@ export function CreateRepositoryForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-border p-4">
-      <h2 className="text-lg font-semibold">Novo repositório</h2>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm text-muted-foreground" htmlFor="repo-name">
-          Nome
-        </label>
-        <input
+        <Label htmlFor="repo-name">Nome</Label>
+        <Input
           id="repo-name"
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="meu-projeto"
@@ -63,19 +62,21 @@ export function CreateRepositoryForm() {
         />
       </div>
       <div className="space-y-2">
-        <label className="text-sm text-muted-foreground" htmlFor="repo-description">
-          Descrição
-        </label>
+        <Label htmlFor="repo-description">Descrição</Label>
         <textarea
           id="repo-description"
-          className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Opcional"
         />
       </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <Button type="submit" disabled={loading}>
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+      <Button type="submit" disabled={loading} className="w-full">
         {loading ? "Criando..." : "Criar repositório"}
       </Button>
     </form>

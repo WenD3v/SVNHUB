@@ -1,5 +1,6 @@
-import { AppHeader } from "@/components/app-header";
+import { PageShell } from "@/components/page-shell";
 import { PipelinesPanel } from "@/components/pipelines-panel";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
 import { apiFetch } from "@/lib/api";
 import type { PipelineListResponse, RepositoryDetail } from "@svnhub/shared";
@@ -17,18 +18,18 @@ export default async function PipelinesPage({ params }: PipelinesPageProps) {
   ]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          <p className="text-sm text-muted-foreground">Pipelines CI/CD</p>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <h1 className="text-xl font-semibold">Pipelines</h1>
+          <p className="text-sm text-muted-foreground">CI/CD automatizado via `.svnhub-ci.yml`</p>
         </div>
 
         <RepoNav slug={slug} active="pipelines" />
 
         <PipelinesPanel slug={slug} initial={pipelines} />
       </section>
-    </main>
+    </PageShell>
   );
 }

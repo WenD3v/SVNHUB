@@ -1,8 +1,11 @@
 import Link from "next/link";
 
-import { AppHeader } from "@/components/app-header";
 import { CodeViewer } from "@/components/code-viewer";
+import { PageShell } from "@/components/page-shell";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import { extensionToLanguage, joinPathSegments } from "@/lib/paths";
 import type { RepositoryDetail, RepositoryFileContentResponse } from "@svnhub/shared";
@@ -27,29 +30,41 @@ export default async function BlobPage({ params, searchParams }: BlobPageProps) 
     ),
   ]);
 
+  const parentPath = uiPath.split("/").slice(0, -1).join("/");
+
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          <p className="font-mono text-sm">{uiPath}</p>
-          <div className="flex gap-3 text-sm">
-            <Link href={`/repos/${slug}/blame/${uiPath}?ref=${ref}`} className="underline">
-              Blame
-            </Link>
-            <Link href={`/repos/${slug}/tree/${uiPath.split("/").slice(0, -1).join("/")}?ref=${ref}`} className="underline">
-              Voltar
-            </Link>
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/repos/${slug}/blame/${uiPath}?ref=${ref}`}>Blame</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={
+                  parentPath
+                    ? `/repos/${slug}/tree/${parentPath}?ref=${ref}`
+                    : `/repos/${slug}?ref=${ref}`
+                }
+              >
+                Voltar
+              </Link>
+            </Button>
           </div>
         </div>
         <RepoNav slug={slug} active="code" />
         {file.isBinary ? (
-          <p className="text-sm text-muted-foreground">Arquivo binário ({file.size} bytes).</p>
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              Arquivo binário ({file.size.toLocaleString("pt-BR")} bytes).
+            </CardContent>
+          </Card>
         ) : (
           <CodeViewer content={file.content} language={extensionToLanguage(uiPath)} />
         )}
       </section>
-    </main>
+    </PageShell>
   );
 }

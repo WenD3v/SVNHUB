@@ -1,8 +1,10 @@
-import { AppHeader } from "@/components/app-header";
-import { DiffViewer } from "@/components/diff-viewer";
 import { CompareForm } from "@/components/compare-form";
 import { CreatePullRequestForm } from "@/components/create-pull-request-form";
+import { DiffViewer } from "@/components/diff-viewer";
+import { PageShell } from "@/components/page-shell";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
+import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import type { RepositoryDetail, RepositoryDiffResponse } from "@svnhub/shared";
 
@@ -27,11 +29,11 @@ export default async function ComparePage({ params, searchParams }: ComparePageP
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        <div className="space-y-2">
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} />
+          <h1 className="text-xl font-semibold">Compare</h1>
           <p className="text-sm text-muted-foreground">Comparar branches (diff trunk ↔ branch)</p>
         </div>
 
@@ -41,22 +43,22 @@ export default async function ComparePage({ params, searchParams }: ComparePageP
 
         {diff ? (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                {diff.sourcePath} → {diff.targetPath} · {diff.files.length} arquivo(s)
-              </p>
-              <DiffViewer files={diff.files} />
-            </div>
+            <p className="text-sm text-muted-foreground">
+              {diff.sourcePath} → {diff.targetPath} · {diff.files.length} arquivo(s)
+            </p>
+            <DiffViewer files={diff.files} />
             {targetRef ? (
               <CreatePullRequestForm slug={slug} sourceRef={targetRef} targetRef={sourceRef} />
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Selecione a branch de destino para ver o diff.
-          </p>
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              Selecione a branch de destino para ver o diff.
+            </CardContent>
+          </Card>
         )}
       </section>
-    </main>
+    </PageShell>
   );
 }

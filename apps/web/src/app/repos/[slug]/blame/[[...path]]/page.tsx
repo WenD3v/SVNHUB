@@ -1,8 +1,10 @@
 import Link from "next/link";
 
-import { AppHeader } from "@/components/app-header";
 import { BlameViewer } from "@/components/blame-viewer";
+import { PageShell } from "@/components/page-shell";
+import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
+import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { joinPathSegments } from "@/lib/paths";
 import type { RepositoryBlameResponse, RepositoryDetail } from "@svnhub/shared";
@@ -28,19 +30,17 @@ export default async function BlamePage({ params, searchParams }: BlamePageProps
   ]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <PageShell>
+      <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{repo.name}</h1>
-          <p className="font-mono text-sm">Blame · {uiPath}</p>
-          <Link href={`/repos/${slug}/blob/${uiPath}?ref=${ref}`} className="text-sm underline">
-            Ver arquivo
-          </Link>
+          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/repos/${slug}/blob/${uiPath}?ref=${ref}`}>Ver arquivo</Link>
+          </Button>
         </div>
         <RepoNav slug={slug} active="code" />
         <BlameViewer slug={slug} lines={blame.lines} />
       </section>
-    </main>
+    </PageShell>
   );
 }
