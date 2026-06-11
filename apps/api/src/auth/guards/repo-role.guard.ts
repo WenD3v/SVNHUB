@@ -9,7 +9,7 @@ import type { RepoRole } from "@svnhub/shared";
 
 import { REPO_ROLE_KEY } from "../../common/decorators/repo-role.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
-import { hasMinimumRepoRole } from "../repo-role-level";
+import { hasMinimumRepoRole, maxRepoRole } from "../repo-role-level";
 import type { AuthenticatedUser } from "../strategies/jwt.strategy";
 
 @Injectable()
@@ -71,7 +71,29 @@ export class RepoRoleGuard implements CanActivate {
       },
     });
 
-    if (!membership || !hasMinimumRepoRole(membership.role, requiredRole)) {
+    const teamMemberships = await this.prisma.groupMember.findMany({
+      where: { userId: user.id },
+      select: { groupId: true },
+    });
+
+    let teamRole: RepoRole | null = null;
+    if (teamMemberships.length > 0) {
+      const repoTeams = await this.prisma.repoTeam.findMany({
+        where: {
+          repositoryId: repository.id,
+          groupId: { in: teamMemberships.map((entry) => entry.groupId) },
+        },
+        select: { role: true },
+      });
+      teamRole = maxRepoRole(...repoTeams.map((entry) => entry.role as RepoRole));
+    }
+
+    const effectiveRole = maxRepoRole(
+      membership?.role as RepoRole | undefined,
+      teamRole ?? undefined,
+    );
+
+    if (!effectiveRole || !hasMinimumRepoRole(effectiveRole, requiredRole)) {
       throw new ForbiddenException("Insufficient repository permissions");
     }
 

@@ -136,7 +136,7 @@ export function PathPermissionManager({
           }}
         >
           <option value="USER">Usuário</option>
-          <option value="GROUP">Grupo</option>
+          <option value="GROUP">Team</option>
         </select>
         <select
           className="h-9 rounded-md border border-input bg-background px-2 text-sm"

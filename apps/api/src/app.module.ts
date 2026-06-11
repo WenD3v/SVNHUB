@@ -16,6 +16,7 @@ import { PipelinesModule } from "./pipelines/pipelines.module";
 import { PullRequestsModule } from "./prs/pull-requests.module";
 import { QueuesModule } from "./queues/queues.module";
 import { RepositoriesModule } from "./repositories/repositories.module";
+import { TeamsModule } from "./teams/teams.module";
 import { UsersModule } from "./users/users.module";
 import { WebhooksModule } from "./webhooks/webhooks.module";
 
@@ -32,6 +33,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module";
     RepositoriesModule,
     BranchesModule,
     PermissionsModule,
+    TeamsModule,
     PullRequestsModule,
     PipelinesModule,
     WebhooksModule,

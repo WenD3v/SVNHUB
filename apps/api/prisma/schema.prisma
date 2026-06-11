@@ -124,11 +124,13 @@ model User {
 model Group {
   id          String   @id @default(cuid())
   name        String   @unique
+  slug        String   @unique
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members GroupMember[]
+  members  GroupMember[]
+  repoTeams RepoTeam[]
 }
 
 model GroupMember {
@@ -157,6 +159,7 @@ model Repository {
   updatedAt     DateTime @updatedAt
 
   members        RepoMember[]
+  repoTeams      RepoTeam[]
   auditLogs      AuditLog[]
   revisionIndex  RevisionIndex[]
   policy          RepoPolicy?
@@ -197,6 +200,20 @@ model RepoMember {
 
   @@unique([userId, repositoryId])
   @@index([repositoryId])
+}
+
+model RepoTeam {
+  id           String   @id @default(cuid())
+  repositoryId String
+  groupId      String
+  role         RepoRole @default(READER)
+  createdAt    DateTime @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([repositoryId, groupId])
+  @@index([groupId])
 }
 
 model AccessToken {

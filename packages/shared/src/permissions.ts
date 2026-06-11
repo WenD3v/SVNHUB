@@ -6,6 +6,7 @@ export type PrincipalType = "USER" | "GROUP";
 
 export interface GroupSummary {
   id: string;
+  slug: string;
   name: string;
   description: string | null;
   memberCount: number;

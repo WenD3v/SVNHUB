@@ -12,6 +12,8 @@ describe("RepoRoleGuard", () => {
     slug?: string;
     isAdmin?: boolean;
     membershipRole?: string;
+    teamGroupIds?: Array<{ groupId: string }>;
+    teamRepoRoles?: Array<{ role: string }>;
     repositoryExists?: boolean;
   }) {
     const reflector = {
@@ -37,6 +39,12 @@ describe("RepoRoleGuard", () => {
         findUnique: vi.fn().mockResolvedValue(
           options.membershipRole ? { role: options.membershipRole } : null,
         ),
+      },
+      groupMember: {
+        findMany: vi.fn().mockResolvedValue(options.teamGroupIds ?? []),
+      },
+      repoTeam: {
+        findMany: vi.fn().mockResolvedValue(options.teamRepoRoles ?? []),
       },
     } as unknown as PrismaService;
 
@@ -96,6 +104,34 @@ describe("RepoRoleGuard", () => {
       isAdmin: false,
       repositoryExists: true,
       membershipRole: "MAINTAINER",
+    });
+    await expect(guard.canActivate(context as never)).resolves.toBe(true);
+  });
+
+  it("allows users via team membership when direct role is insufficient", async () => {
+    const { guard, context } = createGuard({
+      requiredRole: "DEVELOPER",
+      slug: "demo",
+      user: { id: "user-1" },
+      isAdmin: false,
+      repositoryExists: true,
+      membershipRole: undefined,
+      teamGroupIds: [{ groupId: "team-1" }],
+      teamRepoRoles: [{ role: "DEVELOPER" }],
+    });
+    await expect(guard.canActivate(context as never)).resolves.toBe(true);
+  });
+
+  it("uses the highest role between direct membership and teams", async () => {
+    const { guard, context } = createGuard({
+      requiredRole: "MAINTAINER",
+      slug: "demo",
+      user: { id: "user-1" },
+      isAdmin: false,
+      repositoryExists: true,
+      membershipRole: "READER",
+      teamGroupIds: [{ groupId: "team-1" }],
+      teamRepoRoles: [{ role: "MAINTAINER" }],
     });
     await expect(guard.canActivate(context as never)).resolves.toBe(true);
   });

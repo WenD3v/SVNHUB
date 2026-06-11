@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const ADMIN_LINKS = [
   { href: "/admin/users", label: "Usuários" },
+  { href: "/teams", label: "Teams" },
   { href: "/admin/audit-log", label: "Auditoria" },
   { href: "/admin/backups", label: "Backups" },
 ] as const;
@@ -30,9 +31,6 @@ export function AdminNav() {
           {link.label}
         </Link>
       ))}
-      <span className="rounded-md px-3 py-1.5 text-sm text-muted-foreground opacity-60">
-        Teams (em breve)
-      </span>
     </nav>
   );
 }

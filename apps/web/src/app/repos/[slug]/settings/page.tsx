@@ -2,6 +2,7 @@ import { AccessTokensPanel } from "@/components/access-tokens-panel";
 import { BackupsPanel } from "@/components/backups-panel";
 import { PageShell } from "@/components/page-shell";
 import { MemberManager, PathPermissionManager } from "@/components/permissions-manager";
+import { RepoTeamManager } from "@/components/teams-panel";
 import { PolicyForm } from "@/components/repo-settings";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
@@ -13,7 +14,9 @@ import type {
   PathPermissionSummary,
   RepoMemberSummary,
   RepoPolicySettings,
+  RepoTeamSummary,
   RepositoryDetail,
+  TeamSummary,
 } from "@svnhub/shared";
 
 interface SettingsPageProps {
@@ -23,11 +26,12 @@ interface SettingsPageProps {
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { slug } = await params;
 
-  const [repo, policy, members, permissions, auditLog, tokens, users, groups] =
+  const [repo, policy, members, repoTeams, permissions, auditLog, tokens, users, teams] =
     await Promise.all([
       apiFetch<RepositoryDetail>(`/repositories/${slug}`),
       apiFetch<RepoPolicySettings>(`/repositories/${slug}/settings/policies`),
       apiFetch<RepoMemberSummary[]>(`/repositories/${slug}/members`),
+      apiFetch<RepoTeamSummary[]>(`/repositories/${slug}/teams`),
       apiFetch<PathPermissionSummary[]>(`/repositories/${slug}/permissions`),
       apiFetch<AuditLogResponse>(`/repositories/${slug}/audit-log?limit=20`),
       apiFetch<
@@ -41,9 +45,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         }>
       >("/access-tokens").catch(() => []),
       apiFetch<Array<{ id: string; username: string; email: string }>>("/users"),
-      apiFetch<
-        Array<{ id: string; name: string; description: string | null; memberCount: number }>
-      >("/groups"),
+      apiFetch<TeamSummary[]>("/teams"),
     ]);
 
   return (
@@ -67,10 +69,20 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Membros</CardTitle>
+            <CardTitle>Membros e Teams</CardTitle>
+            <CardDescription>
+              Membros individuais e teams vinculados com role no repositório.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <MemberManager slug={slug} members={members} users={users} />
+          <CardContent className="space-y-8">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">Membros</h3>
+              <MemberManager slug={slug} members={members} users={users} />
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">Teams vinculados</h3>
+              <RepoTeamManager slug={slug} teams={repoTeams} allTeams={teams} />
+            </div>
           </CardContent>
         </Card>
 
@@ -85,7 +97,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
             <PathPermissionManager
               slug={slug}
               permissions={permissions}
-              groups={groups}
+              groups={teams.map((team) => ({ id: team.id, name: team.name }))}
               users={users}
             />
           </CardContent>

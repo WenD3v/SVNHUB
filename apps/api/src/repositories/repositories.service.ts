@@ -61,8 +61,30 @@ export class RepositoriesService {
     private readonly webhooksService: WebhooksService,
   ) {}
 
-  async list(): Promise<RepositorySummary[]> {
+  async list(userId?: string): Promise<RepositorySummary[]> {
+    const user = userId
+      ? await this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { isAdmin: true },
+        })
+      : null;
+
     const repos = await this.prisma.repository.findMany({
+      where:
+        userId && !user?.isAdmin
+          ? {
+              OR: [
+                { members: { some: { userId } } },
+                {
+                  repoTeams: {
+                    some: {
+                      group: { members: { some: { userId } } },
+                    },
+                  },
+                },
+              ],
+            }
+          : undefined,
       orderBy: { updatedAt: "desc" },
     });
 

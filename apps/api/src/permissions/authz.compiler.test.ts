@@ -62,6 +62,40 @@ owners = alice
 [demo-repo:/tags]
 * = r`);
   });
+
+  it("includes RepoTeam default access by role on repository root", () => {
+    const output = compileAuthz({
+      groups: [{ name: "platform", members: ["carol"] }],
+      repos: [
+        {
+          repoSlug: "api-repo",
+          rules: [
+            {
+              path: "/",
+              entries: [
+                { principal: "@platform", access: "rw" },
+                { principal: "carol", access: "r" },
+              ],
+            },
+            {
+              path: "/tags",
+              entries: [{ principal: "*", access: "r" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const withoutTimestamp = output
+      .split("\n")
+      .filter((line) => !line.startsWith("# "))
+      .join("\n")
+      .trim();
+
+    expect(withoutTimestamp).toContain("[api-repo:/]\n@platform = rw");
+    expect(repoRoleDefaultAccess("MAINTAINER")).toBe("rw");
+    expect(repoRoleDefaultAccess("READER")).toBe("r");
+  });
 });
 
 describe("pathAccessToAuthz", () => {

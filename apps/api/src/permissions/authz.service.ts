@@ -56,6 +56,7 @@ export class AuthzService implements OnModuleInit {
     const repositories = await this.prisma.repository.findMany({
       include: {
         members: { include: { user: { select: { username: true } } } },
+        repoTeams: { include: { group: { select: { name: true } } } },
         pathPermissions: true,
       },
     });
@@ -101,6 +102,14 @@ export class AuthzService implements OnModuleInit {
 
       for (const member of repo.members) {
         addRule("/", member.user.username, repoRoleDefaultAccess(member.role));
+      }
+
+      for (const repoTeam of repo.repoTeams) {
+        addRule(
+          "/",
+          formatPrincipal("GROUP", repoTeam.group.name),
+          repoRoleDefaultAccess(repoTeam.role),
+        );
       }
 
       for (const permission of repo.pathPermissions) {

@@ -43,8 +43,8 @@ export class RepositoriesController {
   ) {}
 
   @Get()
-  list() {
-    return this.repositoriesService.list();
+  list(@Req() req: { user?: AuthenticatedUser }) {
+    return this.repositoriesService.list(req.user?.id);
   }
 
   @Post()

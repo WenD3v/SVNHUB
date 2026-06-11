@@ -138,3 +138,8 @@ export function slugifyRepoName(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/** Same rules as repository slugs — used for team URLs (/teams/[slug]). */
+export function slugifyTeamName(name: string): string {
+  return slugifyRepoName(name);
+}
