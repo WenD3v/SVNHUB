@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   ForbiddenException,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   UseGuards,
@@ -29,6 +31,7 @@ export class InternalRepositoriesController {
   }
 
   @Post(":id/validate-pre-commit")
+  @HttpCode(HttpStatus.OK)
   async validatePreCommit(@Param("id") id: string, @Body() dto: ValidatePreCommitDto) {
     const result = await this.branchesService.validatePreCommitHook(id, dto.txn);
     if (!result.allowed) {

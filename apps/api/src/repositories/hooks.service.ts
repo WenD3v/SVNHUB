@@ -1,12 +1,37 @@
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { PrismaService } from "../prisma/prisma.service";
+
 @Injectable()
-export class HooksService {
-  constructor(private readonly configService: ConfigService) {}
+export class HooksService implements OnModuleInit {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async onModuleInit(): Promise<void> {
+    if (process.env.NODE_ENV !== "production") {
+      return;
+    }
+
+    await this.reinstallAllHooks();
+  }
+
+  async reinstallAllHooks(): Promise<void> {
+    const repositories = await this.prisma.repository.findMany({
+      select: { id: true, svnPath: true },
+    });
+
+    await Promise.all(
+      repositories.map((repository) =>
+        this.installHooks(repository.svnPath, repository.id),
+      ),
+    );
+  }
 
   async installHooks(repoPath: string, repositoryId: string): Promise<void> {
     await Promise.all([
@@ -56,12 +81,17 @@ RESPONSE=$(curl -sS -w "\\n%{http_code}" -X POST "${apiUrl}/internal/repositorie
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 BODY=$(echo "$RESPONSE" | sed '$d')
 
-if [ "$HTTP_CODE" != "200" ]; then
-  echo "$BODY" 1>&2
-  exit 1
-fi
+case "$HTTP_CODE" in
+  2??) exit 0 ;;
+esac
 
-exit 0
+REASON=$(echo "$BODY" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+if [ -n "$REASON" ]; then
+  echo "SVNHUB: $REASON" 1>&2
+else
+  echo "$BODY" 1>&2
+fi
+exit 1
 `;
 
     const hookPath = path.join(hooksDir, "pre-commit");
