@@ -34,6 +34,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { BackupsService } from "../backups/backups.service";
 import { AuthzService } from "../permissions/authz.service";
 import { SvnEngineService } from "../svn-engine/svn-engine.service";
+import { ensureApacheRepoOwnership } from "../svn-engine/svn-repo-ownership";
 import { PipelinesService } from "../pipelines/pipelines.service";
 import { WebhooksService } from "../webhooks/webhooks.service";
 import { HooksService } from "./hooks.service";
@@ -42,6 +43,7 @@ import { RevisionIndexService } from "./revision-index.service";
 export interface CreateRepositoryInput {
   name: string;
   description?: string;
+  actorUserId?: string;
 }
 
 @Injectable()
@@ -99,6 +101,25 @@ export class RepositoriesService {
     });
 
     await this.hooksService.installHooks(repoPath, repository.id);
+    ensureApacheRepoOwnership(repoPath);
+
+    if (input.actorUserId) {
+      await this.prisma.repoMember.upsert({
+        where: {
+          userId_repositoryId: {
+            userId: input.actorUserId,
+            repositoryId: repository.id,
+          },
+        },
+        create: {
+          userId: input.actorUserId,
+          repositoryId: repository.id,
+          role: "OWNER",
+        },
+        update: { role: "OWNER" },
+      });
+    }
+
     await this.revisionIndexService.indexRevision(repository.id, repoPath, 1);
     await this.authzService.rebuildAll();
 

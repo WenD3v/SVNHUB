@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { resolveWorkspacePath } from "../config/workspace-paths";
 import { withMutex } from "../common/mutex";
+import { ensureApacheSvnFileOwnership } from "../svn-engine/svn-repo-ownership";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   compileAuthz,
@@ -29,6 +30,7 @@ export class AuthzService {
       const tmpPath = `${authzPath}.tmp`;
       await writeFile(tmpPath, content, "utf8");
       await rename(tmpPath, authzPath);
+      await ensureApacheSvnFileOwnership(authzPath);
     });
   }
 

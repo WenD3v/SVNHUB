@@ -4,6 +4,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 
 import { resolveWorkspacePath } from "../config/workspace-paths";
 import { withMutex } from "../common/mutex";
+import { ensureApacheSvnFileOwnership } from "../svn-engine/svn-repo-ownership";
 import {
   formatHtpasswdLine,
   parseHtpasswd,
@@ -53,5 +54,6 @@ export class HtpasswdService {
     const tmpPath = `${passwdPath}.tmp`;
     await writeFile(tmpPath, serializeHtpasswd(entries), "utf8");
     await rename(tmpPath, passwdPath);
+    await ensureApacheSvnFileOwnership(passwdPath);
   }
 }

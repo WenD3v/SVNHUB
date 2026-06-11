@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
 } from "@nestjs/common";
 import type { Response } from "express";
@@ -17,6 +18,7 @@ import { rm } from "node:fs/promises";
 
 import { DEFAULT_BRANCH_UI } from "@svnhub/shared";
 
+import type { AuthenticatedUser } from "../auth/strategies/jwt.strategy";
 import { RepoRole } from "../common/decorators/repo-role.decorator";
 import { CreateRepositoryDto } from "./dto/create-repository.dto";
 import { DiffPathsQueryDto, LogQueryDto, TreeQueryDto } from "./dto/query.dto";
@@ -32,8 +34,14 @@ export class RepositoriesController {
   }
 
   @Post()
-  create(@Body() dto: CreateRepositoryDto) {
-    return this.repositoriesService.create(dto);
+  create(
+    @Body() dto: CreateRepositoryDto,
+    @Req() req: { user?: AuthenticatedUser },
+  ) {
+    return this.repositoriesService.create({
+      ...dto,
+      actorUserId: req.user?.id,
+    });
   }
 
   @Get(":slug")
