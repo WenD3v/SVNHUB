@@ -142,7 +142,7 @@ Deixe `LDAP_URL` vazio para contas locais apenas.
 
 | Sintoma | Verificação |
 |---|---|
-| API unhealthy | Logs do serviço `api` — migrate/seed falhou? Postgres acessível? |
+| API unhealthy | Logs do serviço `api` — migrate/seed falhou? Senha Postgres com `@`/`#`/`:` quebra URL (corrigido no entrypoint). Confirme `SERVICE_PASSWORD_ADMIN` e `SERVICE_PASSWORD_POSTGRES` no Coolify. |
 | SVN 401 no healthcheck | Normal (Apache exige auth); healthcheck aceita 401 ou 200 |
 | CORS na web | `WEB_ORIGIN` deve ser exatamente `SERVICE_URL_WEB` |
 | Checkout SVN falha | `SVN_HTTP_URL` = `{SERVICE_URL_SVN}/svn` |

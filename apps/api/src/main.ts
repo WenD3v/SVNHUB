@@ -24,7 +24,8 @@ async function bootstrap() {
   });
 
   const port = Number(process.env.API_PORT ?? 4000);
-  await app.listen(port);
+  const host = process.env.HOST ?? "0.0.0.0";
+  await app.listen(port, host);
 }
 
 bootstrap();

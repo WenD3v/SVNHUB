@@ -48,7 +48,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
 
 EXPOSE 4000
 
-HEALTHCHECK --interval=10s --timeout=5s --retries=20 --start-period=60s \
+HEALTHCHECK --interval=10s --timeout=5s --retries=20 --start-period=120s \
   CMD curl -sf http://127.0.0.1:4000/health || exit 1
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

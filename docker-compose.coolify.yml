@@ -30,8 +30,13 @@ services:
       dockerfile: infra/docker/Dockerfile.api
     environment:
       API_PORT: '4000'
+      HOST: '0.0.0.0'
       WEB_ORIGIN: '${SERVICE_URL_WEB}'
-      DATABASE_URL: 'postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-svnhub}?schema=public'
+      SERVICE_USER_POSTGRES: '${SERVICE_USER_POSTGRES}'
+      SERVICE_PASSWORD_POSTGRES: '${SERVICE_PASSWORD_POSTGRES}'
+      POSTGRES_DB: '${POSTGRES_DB:-svnhub}'
+      POSTGRES_HOST: 'postgres'
+      POSTGRES_PORT: '5432'
       REDIS_URL: 'redis://redis:6379'
       JWT_SECRET: '${SERVICE_PASSWORD_JWT}'
       JWT_ACCESS_TTL_SECONDS: '${JWT_ACCESS_TTL_SECONDS:-900}'
@@ -71,7 +76,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
-      start_period: 90s
+      start_period: 120s
 
   runner:
     build:

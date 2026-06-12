@@ -125,8 +125,7 @@ export async function getAccessToken(): Promise<string | null> {
 
   const { cookies } = await import("next/headers");
   const store = await cookies();
-  const value = store.get(ACCESS_TOKEN_KEY)?.value;
-  return value ? decodeURIComponent(value) : null;
+  return store.get(ACCESS_TOKEN_KEY)?.value ?? null;
 }
 
 export async function getRefreshToken(): Promise<string | null> {
@@ -136,6 +135,5 @@ export async function getRefreshToken(): Promise<string | null> {
 
   const { cookies } = await import("next/headers");
   const store = await cookies();
-  const value = store.get(REFRESH_TOKEN_KEY)?.value;
-  return value ? decodeURIComponent(value) : null;
+  return store.get(REFRESH_TOKEN_KEY)?.value ?? null;
 }

@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
     const refreshResponse = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: decodeURIComponent(refreshToken) }),
+      body: JSON.stringify({ refreshToken }),
     });
 
     if (!refreshResponse.ok) {
