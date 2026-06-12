@@ -13,11 +13,14 @@ import {
 
 import { apiFetch } from "@/lib/api-client";
 import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-  clearAccessTokenCookie,
-  setAccessTokenCookie,
+  clearAuthTokens,
+  ensureAuthCookiesFromStorage,
+  getAccessTokenSync,
+  isAccessTokenExpired,
+  persistAuthTokens,
 } from "@/lib/auth-storage";
+import { REFRESH_TOKEN_KEY } from "@/lib/auth-constants";
+import { refreshAuthSession, syncTokensFromDocumentCookies } from "@/lib/auth-session";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -34,8 +37,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    if (!token) {
+    syncTokensFromDocumentCookies();
+    ensureAuthCookiesFromStorage();
+
+    const accessToken = getAccessTokenSync();
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!accessToken && !refreshToken) {
+      setUser(null);
+      return;
+    }
+
+    if (isAccessTokenExpired() && refreshToken) {
+      const session = await refreshAuthSession();
+      if (session) {
+        setUser(session.user);
+        return;
+      }
+      clearAuthTokens();
       setUser(null);
       return;
     }
@@ -44,36 +62,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profile = await apiFetch<AuthUser>("/auth/me");
       setUser(profile);
     } catch {
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
-      clearAccessTokenCookie();
+      const session = await refreshAuthSession();
+      if (session) {
+        setUser(session.user);
+        return;
+      }
+      clearAuthTokens();
       setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    if (token) {
-      setAccessTokenCookie(token, 900);
-    }
-
     void refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      const response = await apiFetch<AuthResponse>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (!localStorage.getItem(REFRESH_TOKEN_KEY)) {
+        return;
+      }
 
-      localStorage.setItem(ACCESS_TOKEN_KEY, response.tokens.accessToken);
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.tokens.refreshToken);
-      setAccessTokenCookie(response.tokens.accessToken, response.tokens.expiresIn);
-      setUser(response.user);
-    },
-    [],
-  );
+      if (!isAccessTokenExpired()) {
+        return;
+      }
+
+      void refreshAuthSession().then((session) => {
+        if (session) {
+          setUser(session.user);
+        }
+      });
+    }, 60_000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const response = await apiFetch<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    persistAuthTokens(response.tokens);
+    setUser(response.user);
+  }, []);
 
   const logout = useCallback(async () => {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
@@ -88,9 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    clearAccessTokenCookie();
+    clearAuthTokens();
     setUser(null);
   }, []);
 

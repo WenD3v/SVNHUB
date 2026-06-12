@@ -141,7 +141,15 @@ export class SvnEngineService {
       : this.fileUrl(repoPath);
 
     args.push(url);
-    const result = await this.executor.run(this.config.svnBin, args);
+    let result;
+    try {
+      result = await this.executor.run(this.config.svnBin, args);
+    } catch (error) {
+      if (error instanceof SvnCliError && error.stderr.includes("E160006")) {
+        return [];
+      }
+      throw error;
+    }
     const entries = parseLogXml(result.stdout);
 
     if (query.offset && query.offset > 0) {

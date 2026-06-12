@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsEnum,
@@ -41,11 +42,13 @@ export class ListIssuesQueryDto {
   order?: "asc" | "desc";
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   limit?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(0)
   offset?: number;

@@ -25,7 +25,7 @@ export default async function CommitPage({ params }: CommitPageProps) {
         ).catch(() => ({ entries: [], total: 0, hasMore: false }))
       : Promise.resolve({ entries: [], total: 0, hasMore: false }),
     apiFetch<RepositoryLogResponse>(
-      `/repositories/${slug}/log?revision=${rev + 1}:999999&limit=1`,
+      `/repositories/${slug}/log?revision=${rev + 1}:HEAD&limit=1`,
     ).catch(() => ({ entries: [], total: 0, hasMore: false })),
   ]);
 
