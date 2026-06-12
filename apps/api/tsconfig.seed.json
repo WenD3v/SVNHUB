@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "./prisma/dist-seed",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["prisma/seed.ts", "src/permissions/htpasswd.util.ts"]
+}

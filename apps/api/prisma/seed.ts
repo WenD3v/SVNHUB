@@ -1,10 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import * as argon2 from "argon2";
-import { config } from "dotenv";
+import { existsSync } from "node:fs";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-
-config({ path: path.resolve(__dirname, "../../../.env") });
 
 import {
   formatHtpasswdLine,
@@ -14,11 +12,27 @@ import {
 const prisma = new PrismaClient();
 
 function getWorkspaceRoot(): string {
+  let dir = __dirname;
+  while (dir !== path.dirname(dir)) {
+    if (existsSync(path.join(dir, "pnpm-workspace.yaml"))) {
+      return dir;
+    }
+    dir = path.dirname(dir);
+  }
+
   return path.resolve(__dirname, "../../..");
 }
 
 function resolveDataPath(relativePath: string): string {
   return path.resolve(getWorkspaceRoot(), relativePath);
+}
+
+async function ensureDataDirectories(): Promise<void> {
+  await mkdir(resolveDataPath(process.env.SVN_REPOS_ROOT ?? "data/repos"), {
+    recursive: true,
+  });
+  await mkdir(resolveDataPath("data/artifacts"), { recursive: true });
+  await mkdir(resolveDataPath("data/avatars"), { recursive: true });
 }
 
 async function writeAuthzPlaceholder(): Promise<void> {
@@ -46,19 +60,18 @@ function resolveAdminPassword(): string {
 
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "Set ADMIN_INITIAL_PASSWORD or SERVICE_PASSWORD_ADMIN before seeding in production",
+      "Set ADMIN_INITIAL_PASSWORD or SERVICE_PASSWORD_ADMIN before the first production seed",
     );
   }
 
   return "Admin@123";
 }
 
-async function main(): Promise<void> {
+async function bootstrapAdminUser(): Promise<void> {
   const email = process.env.ADMIN_EMAIL ?? "admin@svnhub.local";
   const username = process.env.ADMIN_USERNAME ?? "admin";
-  const password = resolveAdminPassword();
   const displayName = process.env.ADMIN_DISPLAY_NAME ?? "SVNHUB Admin";
-
+  const password = resolveAdminPassword();
   const passwordHash = await argon2.hash(password);
 
   const user = await prisma.user.upsert({
@@ -91,14 +104,6 @@ async function main(): Promise<void> {
   await writeFile(passwdTmp, htpasswdContent, "utf8");
   await rename(passwdTmp, passwdPath);
 
-  await writeAuthzPlaceholder();
-
-  await mkdir(resolveDataPath(process.env.SVN_REPOS_ROOT ?? "data/repos"), {
-    recursive: true,
-  });
-  await mkdir(resolveDataPath("data/artifacts"), { recursive: true });
-  await mkdir(resolveDataPath("data/avatars"), { recursive: true });
-
   console.log("SVNHUB seed completed.");
   console.log(`Admin user: ${user.email} (username: ${user.username})`);
 
@@ -113,6 +118,25 @@ async function main(): Promise<void> {
   }
 
   console.log("Use the same username/password for SVN checkout via Apache.");
+}
+
+async function main(): Promise<void> {
+  await ensureDataDirectories();
+  await writeAuthzPlaceholder();
+
+  const existingAdmin = await prisma.user.findFirst({
+    where: { isAdmin: true },
+    select: { email: true },
+  });
+
+  if (existingAdmin) {
+    console.log(
+      `[seed] Admin already exists (${existingAdmin.email}) — skipping password bootstrap.`,
+    );
+    return;
+  }
+
+  await bootstrapAdminUser();
 }
 
 main()

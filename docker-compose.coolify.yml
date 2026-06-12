@@ -58,6 +58,7 @@ services:
       LDAP_SEARCH_FILTER: '${LDAP_SEARCH_FILTER:-(|(mail={email})(userPrincipalName={email}))}'
       ADMIN_EMAIL: '${ADMIN_EMAIL:-admin@svnhub.local}'
       ADMIN_USERNAME: '${ADMIN_USERNAME:-admin}'
+      SERVICE_PASSWORD_ADMIN: '${SERVICE_PASSWORD_ADMIN}'
       ADMIN_INITIAL_PASSWORD: '${SERVICE_PASSWORD_ADMIN}'
       ADMIN_DISPLAY_NAME: '${ADMIN_DISPLAY_NAME:-SVNHUB Admin}'
     volumes:
