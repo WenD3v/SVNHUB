@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -17,6 +17,8 @@ import {
 
 @Injectable()
 export class AuthzService implements OnModuleInit {
+  private readonly logger = new Logger(AuthzService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
@@ -27,7 +29,12 @@ export class AuthzService implements OnModuleInit {
       return;
     }
 
-    await this.rebuildAll();
+    try {
+      await this.rebuildAll();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to rebuild authz on startup: ${message}`);
+    }
   }
 
   async rebuildAll(): Promise<void> {

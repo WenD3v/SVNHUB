@@ -28,4 +28,8 @@ async function bootstrap() {
   await app.listen(port, host);
 }
 
-bootstrap();
+bootstrap().catch((error: unknown) => {
+  const message = error instanceof Error ? error.stack ?? error.message : String(error);
+  console.error("[api] Fatal bootstrap error:", message);
+  process.exit(1);
+});

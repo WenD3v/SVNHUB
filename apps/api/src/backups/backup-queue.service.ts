@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Queue, Worker } from "bullmq";
 
@@ -9,6 +9,7 @@ export type BackupJobName = "hotcopy-all" | "hotcopy-repo" | "verify-all" | "ver
 
 @Injectable()
 export class BackupQueueService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(BackupQueueService.name);
   private readonly queue: Queue;
   private worker: Worker | null = null;
 
@@ -28,31 +29,36 @@ export class BackupQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    const redisUrl = this.configService.get<string>("REDIS_URL") ?? "redis://localhost:6379";
-    this.worker = new Worker(
-      BACKUPS_QUEUE,
-      async (job) => {
-        switch (job.name as BackupJobName) {
-          case "hotcopy-all":
-            await this.backupsService.runHotcopyForAllRepositories();
-            break;
-          case "hotcopy-repo":
-            await this.backupsService.runHotcopy(job.data.repositoryId as string);
-            break;
-          case "verify-all":
-            await this.backupsService.runVerifyForAllRepositories();
-            break;
-          case "verify-repo":
-            await this.backupsService.runVerify(job.data.repositoryId as string);
-            break;
-          default:
-            throw new Error(`Unknown backup job: ${job.name}`);
-        }
-      },
-      { connection: { url: redisUrl, maxRetriesPerRequest: null } },
-    );
+    try {
+      const redisUrl = this.configService.get<string>("REDIS_URL") ?? "redis://localhost:6379";
+      this.worker = new Worker(
+        BACKUPS_QUEUE,
+        async (job) => {
+          switch (job.name as BackupJobName) {
+            case "hotcopy-all":
+              await this.backupsService.runHotcopyForAllRepositories();
+              break;
+            case "hotcopy-repo":
+              await this.backupsService.runHotcopy(job.data.repositoryId as string);
+              break;
+            case "verify-all":
+              await this.backupsService.runVerifyForAllRepositories();
+              break;
+            case "verify-repo":
+              await this.backupsService.runVerify(job.data.repositoryId as string);
+              break;
+            default:
+              throw new Error(`Unknown backup job: ${job.name}`);
+          }
+        },
+        { connection: { url: redisUrl, maxRetriesPerRequest: null } },
+      );
 
-    await this.syncRepeatableJobs();
+      await this.syncRepeatableJobs();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to initialize backup queue on startup: ${message}`);
+    }
   }
 
   async syncRepeatableJobs(): Promise<void> {

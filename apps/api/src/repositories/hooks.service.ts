@@ -18,7 +18,12 @@ export class HooksService implements OnModuleInit {
       return;
     }
 
-    await this.reinstallAllHooks();
+    try {
+      await this.reinstallAllHooks();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[hooks] Failed to reinstall hooks on startup: ${message}`);
+    }
   }
 
   async reinstallAllHooks(): Promise<void> {

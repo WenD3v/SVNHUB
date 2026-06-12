@@ -26,7 +26,12 @@ export class HtpasswdService implements OnModuleInit {
       return;
     }
 
-    await this.reconcileWithDatabase();
+    try {
+      await this.reconcileWithDatabase();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to reconcile htpasswd on startup: ${message}`);
+    }
   }
 
   async reconcileWithDatabase(): Promise<void> {

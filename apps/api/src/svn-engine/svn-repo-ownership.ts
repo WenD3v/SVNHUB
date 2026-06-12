@@ -23,8 +23,8 @@ export function ensureApacheRepoOwnership(repoPath: string): void {
   });
 
   if (result.status !== 0) {
-    throw new Error(
-      `Failed to chown SVN repo for Apache (${repoPath}): ${result.stderr || result.stdout}`,
+    console.warn(
+      `[svn] Failed to chown SVN repo for Apache (${repoPath}): ${result.stderr || result.stdout}`,
     );
   }
 }
@@ -40,9 +40,10 @@ export async function ensureApacheSvnFileOwnership(filePath: string): Promise<vo
   });
 
   if (result.status !== 0) {
-    throw new Error(
-      `Failed to chown SVN config file (${filePath}): ${result.stderr || result.stdout}`,
+    console.warn(
+      `[svn] Failed to chown SVN config file (${filePath}): ${result.stderr || result.stdout}`,
     );
+    return;
   }
 
   await chmod(filePath, 0o640);

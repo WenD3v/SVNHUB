@@ -1,8 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import * as argon2 from "argon2";
+import { config } from "dotenv";
 import { existsSync } from "node:fs";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+config({ path: path.resolve(__dirname, "../../../.env") });
 
 import {
   formatHtpasswdLine,

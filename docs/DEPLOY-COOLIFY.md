@@ -71,9 +71,20 @@ Opcional (valores padrão já existem no compose):
 
 Clique em **Deploy**. Na primeira subida, a API executa:
 
-1. `pnpm db:migrate`
-2. `pnpm db:seed` (cria admin + arquivos SVN)
-3. Inicia o NestJS
+1. `pnpm db:migrate` (`prisma migrate deploy`)
+2. `pnpm db:seed` (`tsx prisma/seed.ts` — cria admin + arquivos SVN)
+3. Inicia o NestJS via `pnpm start`
+
+Confirme que estas variáveis existem no resource (Coolify gera automaticamente ou defina manualmente):
+
+| Variável | Obrigatória |
+|---|---|
+| `SERVICE_USER_POSTGRES` | Sim |
+| `SERVICE_PASSWORD_POSTGRES` | Sim |
+| `SERVICE_PASSWORD_JWT` | Sim |
+| `SERVICE_PASSWORD_HOOK` | Sim |
+| `SERVICE_PASSWORD_RUNNER` | Sim |
+| `SERVICE_PASSWORD_ADMIN` | Sim (primeiro deploy) |
 
 ### 5. Login inicial
 
@@ -142,7 +153,7 @@ Deixe `LDAP_URL` vazio para contas locais apenas.
 
 | Sintoma | Verificação |
 |---|---|
-| API unhealthy | Logs do serviço `api`. Procure `[api] ERROR:` — migrate, seed ou prisma CLI. Primeiro deploy exige `SERVICE_PASSWORD_ADMIN`. Redeploys com admin existente não redefinem senha. |
+| API unhealthy | Logs do serviço `api`. Procure `[api] ERROR:` ou `Fatal bootstrap error`. Verifique variáveis `SERVICE_PASSWORD_*` (especialmente `SERVICE_PASSWORD_ADMIN` no primeiro deploy). |
 | SVN 401 no healthcheck | Normal (Apache exige auth); healthcheck aceita 401 ou 200 |
 | CORS na web | `WEB_ORIGIN` deve ser exatamente `SERVICE_URL_WEB` |
 | Checkout SVN falha | `SVN_HTTP_URL` = `{SERVICE_URL_SVN}/svn` |
