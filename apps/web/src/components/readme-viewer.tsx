@@ -1,15 +1,14 @@
 "use client";
 
-import { Link as LinkIcon } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
-import ReactMarkdown, { type Components } from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { type Components } from "react-markdown";
 import { createHighlighter, type Highlighter } from "shiki";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarkdownContent } from "@/components/markdown-content";
+import { Card, CardContent } from "@/components/ui/card";
 import type { ReadmeFormat } from "@/lib/readme";
-import { cn } from "@/lib/utils";
 
 interface ReadmeViewerProps {
   content: string;
@@ -18,73 +17,6 @@ interface ReadmeViewerProps {
   slug: string;
   branchRef: string;
   revision?: number;
-}
-
-function slugifyHeading(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
-function getPlainText(children: React.ReactNode): string {
-  if (typeof children === "string") return children;
-  if (Array.isArray(children)) return children.map(getPlainText).join("");
-  if (children && typeof children === "object" && "props" in children) {
-    return getPlainText((children as React.ReactElement<{ children?: React.ReactNode }>).props.children);
-  }
-  return "";
-}
-
-function resolveImageUrl(
-  src: string | undefined,
-  slug: string,
-  ref: string,
-  revision?: number,
-): string | undefined {
-  if (!src) return undefined;
-  if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("data:")) {
-    return src;
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-  const normalized = src.replace(/^\.\//, "");
-  const revisionQuery = revision ? `&revision=${revision}` : "";
-  return `${baseUrl}/repositories/${slug}/content?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(normalized)}${revisionQuery}`;
-}
-
-function CodeBlock({
-  className,
-  children,
-  highlighter,
-  isDark,
-}: {
-  className?: string;
-  children: React.ReactNode;
-  highlighter: Highlighter | null;
-  isDark: boolean;
-}) {
-  const match = /language-(\w+)/.exec(className ?? "");
-  const code = String(children).replace(/\n$/, "");
-  const lang = match?.[1] ?? "text";
-
-  if (!highlighter) {
-    return (
-      <pre className="overflow-x-auto p-4">
-        <code>{code}</code>
-      </pre>
-    );
-  }
-
-  const safeLang = highlighter.getLoadedLanguages().includes(lang) ? lang : "text";
-  const theme = isDark ? "github-dark" : "github-light";
-
-  const html = highlighter.codeToHtml(code, { lang: safeLang, theme });
-
-  return (
-    <div className="shiki-wrapper" dangerouslySetInnerHTML={{ __html: html }} />
-  );
 }
 
 export function ReadmeViewer({
@@ -130,64 +62,8 @@ export function ReadmeViewer({
     };
   }, []);
 
-  const components = useMemo<Components>(
+  const readmeComponents = useMemo<Components>(
     () => ({
-      h1: ({ children }) => {
-        const id = slugifyHeading(getPlainText(children));
-        return (
-          <h1 id={id}>
-            {children}
-            <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
-              <LinkIcon className="inline size-3.5" />
-            </a>
-          </h1>
-        );
-      },
-      h2: ({ children }) => {
-        const id = slugifyHeading(getPlainText(children));
-        return (
-          <h2 id={id}>
-            {children}
-            <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
-              <LinkIcon className="inline size-3.5" />
-            </a>
-          </h2>
-        );
-      },
-      h3: ({ children }) => {
-        const id = slugifyHeading(getPlainText(children));
-        return (
-          <h3 id={id}>
-            {children}
-            <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
-              <LinkIcon className="inline size-3.5" />
-            </a>
-          </h3>
-        );
-      },
-      h4: ({ children }) => {
-        const id = slugifyHeading(getPlainText(children));
-        return (
-          <h4 id={id}>
-            {children}
-            <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
-              <LinkIcon className="inline size-3.5" />
-            </a>
-          </h4>
-        );
-      },
-      a: ({ href, children }) => {
-        const isExternal = href?.startsWith("http");
-        return (
-          <a
-            href={href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-          >
-            {children}
-          </a>
-        );
-      },
       img: ({ src, alt }) => {
         const srcString = typeof src === "string" ? src : undefined;
         const resolved = resolveImageUrl(srcString, slug, branchRef, revision);
@@ -216,21 +92,77 @@ export function ReadmeViewer({
   );
 
   return (
-    <Card>
-      <CardHeader className="border-b border-border py-3">
-        <CardTitle className="font-mono text-sm font-semibold">{filename}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-4">
+    <Card className="overflow-hidden py-0">
+      <div className="flex items-center gap-2 border-b border-border bg-secondary px-4 py-2.5 sm:px-5">
+        <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        <span className="font-mono text-xs font-semibold text-foreground">{filename}</span>
+      </div>
+      <CardContent className="px-5 py-5 sm:px-6 sm:py-6">
         {format === "text" ? (
-          <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-sm">{content}</pre>
+          <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-sm text-foreground">
+            {content}
+          </pre>
         ) : (
-          <article className={cn("markdown-body max-w-none")}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-              {content}
-            </ReactMarkdown>
-          </article>
+          <MarkdownContent
+            content={content}
+            slug={slug}
+            className="readme-markdown"
+            extraComponents={readmeComponents}
+          />
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function resolveImageUrl(
+  src: string | undefined,
+  slug: string,
+  ref: string,
+  revision?: number,
+): string | undefined {
+  if (!src) return undefined;
+  if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("data:")) {
+    return src;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  const normalized = src.replace(/^\.\//, "");
+  const revisionQuery = revision ? `&revision=${revision}` : "";
+  return `${baseUrl}/repositories/${slug}/content?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(normalized)}${revisionQuery}`;
+}
+
+function CodeBlock({
+  className,
+  children,
+  highlighter,
+  isDark,
+}: {
+  className?: string;
+  children: React.ReactNode;
+  highlighter: Highlighter | null;
+  isDark: boolean;
+}) {
+  const match = /language-(\w+)/.exec(className ?? "");
+  const code = String(children).replace(/\n$/, "");
+  const lang = match?.[1] ?? "text";
+
+  if (!highlighter) {
+    return (
+      <pre className="overflow-x-auto rounded-md border border-border bg-secondary p-4">
+        <code className="font-mono text-xs">{code}</code>
+      </pre>
+    );
+  }
+
+  const safeLang = highlighter.getLoadedLanguages().includes(lang) ? lang : "text";
+  const theme = isDark ? "github-dark" : "github-light";
+  const html = highlighter.codeToHtml(code, { lang: safeLang, theme });
+
+  return (
+    <div
+      className="shiki-wrapper overflow-x-auto rounded-md border border-border bg-secondary"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

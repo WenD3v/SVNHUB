@@ -1,13 +1,13 @@
 "use client";
 
-import { ChevronDown, GitBranch, GitCommitHorizontal, Tag } from "lucide-react";
+import { Copy, GitBranch, GitCommitHorizontal, Tag } from "lucide-react";
 import { useState } from "react";
 
 import { CheckoutInstructions } from "@/components/checkout-instructions";
 import { HealthStatusBadge } from "@/components/health-status-badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 
 interface RepoAboutCardProps {
   slug: string;
@@ -35,17 +35,14 @@ export function RepoAboutCard({
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   return (
-    <aside className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>About</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <aside>
+      <Card className="py-0">
+        <CardContent className="space-y-4 p-5">
+          <h3 className="font-display text-sm font-semibold text-foreground">Sobre</h3>
+
           {description ? (
             <p className="text-sm text-muted-foreground">{description}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">Sem descrição.</p>
-          )}
+          ) : null}
 
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Saúde</span>
@@ -54,44 +51,42 @@ export function RepoAboutCard({
 
           <Separator />
 
-          <dl className="grid grid-cols-1 gap-2 text-sm">
+          <dl className="space-y-2.5 text-sm">
             <div className="flex items-center justify-between">
               <dt className="flex items-center gap-2 text-muted-foreground">
-                <GitBranch className="size-4" aria-hidden />
+                <GitBranch className="size-4 shrink-0" aria-hidden />
                 Branches
               </dt>
-              <dd className="font-medium">{branchCount}</dd>
+              <dd className="font-bold text-foreground">{branchCount}</dd>
             </div>
             <div className="flex items-center justify-between">
               <dt className="flex items-center gap-2 text-muted-foreground">
-                <Tag className="size-4" aria-hidden />
+                <Tag className="size-4 shrink-0" aria-hidden />
                 Tags
               </dt>
-              <dd className="font-medium">{tagCount}</dd>
+              <dd className="font-bold text-foreground">{tagCount}</dd>
             </div>
             <div className="flex items-center justify-between">
               <dt className="flex items-center gap-2 text-muted-foreground">
-                <GitCommitHorizontal className="size-4" aria-hidden />
+                <GitCommitHorizontal className="size-4 shrink-0" aria-hidden />
                 Revisões
               </dt>
-              <dd className="font-medium">{revisionCount}</dd>
+              <dd className="font-bold text-foreground">
+                {revisionCount.toLocaleString("pt-BR")}
+              </dd>
             </div>
           </dl>
 
-          <Separator />
-
-          <button
+          <Button
             type="button"
-            className="flex w-full items-center justify-between text-sm font-medium hover:text-primary"
+            variant="secondary"
+            className="w-full"
             onClick={() => setCheckoutOpen((open) => !open)}
             aria-expanded={checkoutOpen}
           >
-            Checkout
-            <ChevronDown
-              className={cn("size-4 transition-transform", checkoutOpen && "rotate-180")}
-              aria-hidden
-            />
-          </button>
+            <Copy className="size-4" />
+            Instruções de checkout
+          </Button>
 
           {checkoutOpen ? (
             <CheckoutInstructions

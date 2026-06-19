@@ -58,8 +58,8 @@ function CodeBlock({
 
   if (!highlighter) {
     return (
-      <pre className="overflow-x-auto p-4">
-        <code>{code}</code>
+      <pre className="overflow-x-auto rounded-md border border-border bg-secondary p-4">
+        <code className="font-mono text-xs">{code}</code>
       </pre>
     );
   }
@@ -68,16 +68,27 @@ function CodeBlock({
   const theme = isDark ? "github-dark" : "github-light";
   const html = highlighter.codeToHtml(code, { lang: safeLang, theme });
 
-  return <div className="shiki-wrapper" dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div
+      className="shiki-wrapper overflow-x-auto rounded-md border border-border bg-secondary"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
 
 interface MarkdownContentProps {
   content: string;
   slug: string;
   className?: string;
+  extraComponents?: Components;
 }
 
-export function MarkdownContent({ content, slug, className }: MarkdownContentProps) {
+export function MarkdownContent({
+  content,
+  slug,
+  className,
+  extraComponents,
+}: MarkdownContentProps) {
   const { resolvedTheme } = useTheme();
   const [highlighter, setHighlighter] = useState<Highlighter | null>(null);
   const isDark = resolvedTheme === "dark";
@@ -122,7 +133,7 @@ export function MarkdownContent({ content, slug, className }: MarkdownContentPro
       h1: ({ children }) => {
         const id = slugifyHeading(getPlainText(children));
         return (
-          <h1 id={id}>
+          <h1 id={id} className="font-display text-2xl font-bold tracking-tight">
             {children}
             <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
               <LinkIcon className="inline size-3.5" />
@@ -133,7 +144,7 @@ export function MarkdownContent({ content, slug, className }: MarkdownContentPro
       h2: ({ children }) => {
         const id = slugifyHeading(getPlainText(children));
         return (
-          <h2 id={id}>
+          <h2 id={id} className="font-display text-lg font-semibold tracking-tight">
             {children}
             <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
               <LinkIcon className="inline size-3.5" />
@@ -144,7 +155,7 @@ export function MarkdownContent({ content, slug, className }: MarkdownContentPro
       h3: ({ children }) => {
         const id = slugifyHeading(getPlainText(children));
         return (
-          <h3 id={id}>
+          <h3 id={id} className="font-display text-base font-semibold">
             {children}
             <a href={`#${id}`} className="heading-anchor" aria-label="Link para seção">
               <LinkIcon className="inline size-3.5" />
@@ -163,7 +174,7 @@ export function MarkdownContent({ content, slug, className }: MarkdownContentPro
         }
         if (href?.startsWith("/")) {
           return (
-            <Link href={href} className="text-primary hover:underline">
+            <Link href={href} className="text-brand hover:underline">
               {children}
             </Link>
           );
@@ -185,8 +196,20 @@ export function MarkdownContent({ content, slug, className }: MarkdownContentPro
           </CodeBlock>
         );
       },
+      code: ({ className, children }) => {
+        const isBlock = className?.includes("language-");
+        if (isBlock) {
+          return <code className={className}>{children}</code>;
+        }
+        return (
+          <code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[0.85em]">
+            {children}
+          </code>
+        );
+      },
+      ...extraComponents,
     }),
-    [highlighter, isDark],
+    [highlighter, isDark, extraComponents],
   );
 
   return (

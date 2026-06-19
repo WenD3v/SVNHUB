@@ -165,7 +165,7 @@
 .markdown-body h4,
 .markdown-body h5,
 .markdown-body h6 {
-  @apply scroll-mt-20 font-semibold tracking-tight;
+  @apply scroll-mt-20 font-display font-semibold tracking-tight;
 }
 
 .markdown-body h1 {
@@ -252,7 +252,7 @@
 }
 
 .markdown-body pre {
-  @apply overflow-x-auto rounded-md border border-border bg-muted/50 p-0 text-xs;
+  @apply overflow-x-auto rounded-md border border-border bg-secondary p-0 text-xs;
 }
 
 .markdown-body pre code {
@@ -260,7 +260,7 @@
 }
 
 .markdown-body :not(pre) > code {
-  @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em];
+  @apply rounded bg-secondary px-1.5 py-0.5 font-mono text-[0.85em];
 }
 
 .markdown-body .shiki-wrapper {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { UserAvatar } from "@/components/user-avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { RepositoryContributor } from "@svnhub/shared";
 
 interface RepoContributorsProps {
@@ -18,51 +18,52 @@ export function RepoContributors({
   showViewAll = true,
 }: RepoContributorsProps) {
   const visible = contributors.slice(0, limit);
-  const maxCommits = Math.max(1, ...visible.map((contributor) => contributor.commits));
 
   if (visible.length === 0) {
     return null;
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base">Contributors</CardTitle>
-        {showViewAll ? (
-          <Link href={`/repos/${slug}/insights`} className="text-sm text-primary hover:underline">
-            Ver todos
-          </Link>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {visible.map((contributor) => (
-          <div key={contributor.author} className="flex items-center gap-3">
-            <UserAvatar username={contributor.author} className="size-8" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2 text-sm">
+    <Card className="py-0">
+      <CardContent className="p-5">
+        <div className="mb-3.5 flex items-center gap-2">
+          <h3 className="font-display text-sm font-semibold text-foreground">Contribuidores</h3>
+          <span className="text-xs text-muted-foreground">{contributors.length}</span>
+          {showViewAll ? (
+            <Link
+              href={`/repos/${slug}/insights`}
+              className="ml-auto text-xs text-brand hover:underline"
+            >
+              Ver todos
+            </Link>
+          ) : null}
+        </div>
+
+        <ul className="space-y-3">
+          {visible.map((contributor) => (
+            <li key={contributor.author} className="flex items-center gap-3">
+              <UserAvatar username={contributor.author} className="size-8" />
+              <div className="min-w-0 flex-1">
                 {contributor.hasProfile ? (
                   <Link
                     href={`/users/${contributor.author}`}
-                    className="truncate font-medium hover:underline"
+                    className="block truncate text-sm font-semibold text-foreground hover:text-brand hover:underline"
                   >
                     {contributor.author}
                   </Link>
                 ) : (
-                  <span className="truncate font-medium">{contributor.author}</span>
+                  <span className="block truncate text-sm font-semibold text-foreground">
+                    {contributor.author}
+                  </span>
                 )}
-                <span className="shrink-0 text-muted-foreground">
-                  {contributor.commits} commit{contributor.commits === 1 ? "" : "s"}
-                </span>
+                <span className="text-[11.5px] text-muted-foreground">@{contributor.author}</span>
               </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(contributor.commits / maxCommits) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+              <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">
+                {contributor.commits}
+              </span>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );

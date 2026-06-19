@@ -39,33 +39,37 @@ export default async function TreePage({ params, searchParams }: TreePageProps) 
     })),
   ]);
 
+  const latestCommit = log.entries[0] ?? null;
+
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        <div className="space-y-2">
-          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
-          <h1 className="text-xl font-semibold">{repo.name}</h1>
-        </div>
+        <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
         <RepoNav slug={slug} active="code" />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           <FileBrowser
             slug={slug}
+            repoName={repo.name}
             branchRef={ref}
             path={uiPath}
             revision={tree.revision}
             entries={tree.entries}
+            branches={branches.refs}
+            latestCommit={latestCommit}
           />
-          <RepoAboutCard
-            slug={slug}
-            description={repo.description}
-            checkoutUrl={repo.checkoutUrl}
-            svnUrl={repo.svnUrl}
-            branchRef={ref}
-            healthStatus={repo.health.status}
-            branchCount={branches.refs.length}
-            tagCount={tags.refs.length}
-            revisionCount={log.total}
-          />
+          <div className="lg:sticky lg:top-[7.75rem] lg:self-start">
+            <RepoAboutCard
+              slug={slug}
+              description={repo.description}
+              checkoutUrl={repo.checkoutUrl}
+              svnUrl={repo.svnUrl}
+              branchRef={ref}
+              healthStatus={repo.health.status}
+              branchCount={branches.refs.length}
+              tagCount={tags.refs.length}
+              revisionCount={log.total}
+            />
+          </div>
         </div>
       </section>
     </PageShell>

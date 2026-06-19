@@ -1,8 +1,16 @@
 "use client";
 
 import { Copy, Download } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { getExportUrl } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -29,14 +37,15 @@ export function CheckoutInstructions({
   }
 
   return (
-    <section className={cn("space-y-3", !compact && "rounded-lg border border-border p-4")}>
-      {!compact ? <h2 className="text-sm font-semibold">Clone (checkout)</h2> : null}
+    <section className={cn("space-y-3", !compact && "rounded-lg border border-border bg-card p-4")}>
+      {!compact ? <h2 className="font-display text-sm font-semibold">Clone (checkout)</h2> : null}
       <p className="text-xs text-muted-foreground">
-        Branch <strong>{branchRef}</strong> corresponde a <code className="rounded bg-muted px-1">/trunk</code> no SVN.
+        Branch <strong>{branchRef}</strong> corresponde a{" "}
+        <code className="rounded bg-secondary px-1 font-mono text-[11px]">/trunk</code> no SVN.
       </p>
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <code className="flex-1 overflow-x-auto rounded-md bg-muted px-2 py-1.5 font-mono text-xs">
+          <code className="flex-1 overflow-x-auto rounded-md border border-border bg-secondary px-2 py-1.5 font-mono text-xs">
             {httpsCommand}
           </code>
           <Button
@@ -49,7 +58,7 @@ export function CheckoutInstructions({
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <code className="flex-1 overflow-x-auto rounded-md bg-muted px-2 py-1.5 font-mono text-xs">
+          <code className="flex-1 overflow-x-auto rounded-md border border-border bg-secondary px-2 py-1.5 font-mono text-xs">
             {svnCommand}
           </code>
           <Button
@@ -69,5 +78,45 @@ export function CheckoutInstructions({
         </Button>
       </a>
     </section>
+  );
+}
+
+interface CheckoutDialogButtonProps {
+  slug: string;
+  checkoutUrl: string;
+  svnUrl: string;
+  branchRef: string;
+  className?: string;
+}
+
+export function CheckoutDialogButton({
+  slug,
+  checkoutUrl,
+  svnUrl,
+  branchRef,
+  className,
+}: CheckoutDialogButtonProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className={className}>
+          <Download className="size-4" />
+          Checkout
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="font-display">Instruções de checkout</DialogTitle>
+        </DialogHeader>
+        <CheckoutInstructions
+          slug={slug}
+          checkoutUrl={checkoutUrl}
+          svnUrl={svnUrl}
+          branchRef={branchRef}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

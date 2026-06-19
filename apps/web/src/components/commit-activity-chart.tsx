@@ -3,7 +3,7 @@
 import { BarChart3 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -24,7 +24,11 @@ function formatWeekLabel(weekStart: string): string {
   const end = new Date(date);
   end.setDate(end.getDate() + 6);
   const startLabel = date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
-  const endLabel = end.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
+  const endLabel = end.toLocaleDateString("pt-BR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
   return `${startLabel} – ${endLabel}`;
 }
 
@@ -37,12 +41,10 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Atividade de commits</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-24 w-full" />
+      <Card className="py-0">
+        <CardContent className="p-4 sm:p-5">
+          <Skeleton className="mb-3.5 h-5 w-48" />
+          <Skeleton className="h-[60px] w-full" />
         </CardContent>
       </Card>
     );
@@ -59,48 +61,36 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
     );
   }
 
-  const chartHeight = 80;
-  const barWidth = 100 / data.weeks.length;
+  const chartHeight = 60;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Atividade de commits</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{data.total}</span> commits no período
-        </p>
-      </CardHeader>
-      <CardContent>
+    <Card className="py-0">
+      <CardContent className="p-4 sm:p-5">
+        <div className="mb-3.5 flex items-center gap-2.5">
+          <h3 className="font-display text-sm font-semibold text-foreground">
+            Atividade de commits
+          </h3>
+          <span className="text-xs text-muted-foreground">52 semanas</span>
+        </div>
         <TooltipProvider delayDuration={0}>
-          <svg
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            className="h-24 w-full"
+          <div
+            className="flex h-[60px] items-end gap-[3px]"
             role="img"
             aria-label="Gráfico de commits por semana"
           >
             {data.weeks.map((week, index) => {
-              const height = (week.count / maxCount) * chartHeight;
-              const x = index * barWidth;
-              const y = 100 - height;
+              const height = Math.max(2, (week.count / maxCount) * chartHeight);
               const isHovered = hoveredIndex === index;
 
               return (
                 <Tooltip key={week.weekStart}>
                   <TooltipTrigger asChild>
-                    <rect
-                      x={x + barWidth * 0.15}
-                      y={y}
-                      width={barWidth * 0.7}
-                      height={height}
-                      rx={1}
-                      className={
-                        isHovered
-                          ? "fill-primary"
-                          : week.count > 0
-                            ? "fill-primary/70"
-                            : "fill-muted"
-                      }
+                    <div
+                      className="min-w-[3px] flex-1 rounded-t-sm bg-brand transition-opacity"
+                      style={{
+                        height: `${height}px`,
+                        opacity: isHovered ? 1 : week.count > 0 ? 0.85 : 0.25,
+                      }}
                       onMouseEnter={() => setHoveredIndex(index)}
                       onMouseLeave={() => setHoveredIndex(null)}
                     />
@@ -114,7 +104,7 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
                 </Tooltip>
               );
             })}
-          </svg>
+          </div>
         </TooltipProvider>
       </CardContent>
     </Card>

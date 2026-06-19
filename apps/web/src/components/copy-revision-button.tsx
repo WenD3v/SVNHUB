@@ -4,6 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CopyRevisionButtonProps {
   revision: number;
@@ -26,7 +27,7 @@ export function CopyRevisionButton({ revision, className }: CopyRevisionButtonPr
       type="button"
       variant="ghost"
       size="icon"
-      className={className}
+      className={cn("size-7 text-foreground-subtle hover:text-foreground", className)}
       onClick={handleCopy}
       aria-label={copied ? "Revisão copiada" : `Copiar revisão r${revision}`}
     >

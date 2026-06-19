@@ -32,14 +32,12 @@ export default async function BlamePage({ params, searchParams }: BlamePageProps
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        <div className="space-y-2">
-          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/repos/${slug}/blob/${uiPath}?ref=${ref}`}>Ver arquivo</Link>
-          </Button>
-        </div>
+        <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/repos/${slug}/blob/${uiPath}?ref=${ref}`}>Ver arquivo</Link>
+        </Button>
         <RepoNav slug={slug} active="code" />
-        <BlameViewer slug={slug} lines={blame.lines} />
+        <BlameViewer slug={slug} lines={blame.lines} path={uiPath} />
       </section>
     </PageShell>
   );

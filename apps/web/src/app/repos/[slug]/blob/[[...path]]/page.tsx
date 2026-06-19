@@ -35,34 +35,36 @@ export default async function BlobPage({ params, searchParams }: BlobPageProps) 
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        <div className="space-y-2">
-          <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/repos/${slug}/blame/${uiPath}?ref=${ref}`}>Blame</Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={
-                  parentPath
-                    ? `/repos/${slug}/tree/${parentPath}?ref=${ref}`
-                    : `/repos/${slug}?ref=${ref}`
-                }
-              >
-                Voltar
-              </Link>
-            </Button>
-          </div>
+        <RepoBreadcrumbs slug={slug} repoName={repo.name} path={uiPath} />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/repos/${slug}/blame/${uiPath}?ref=${ref}`}>Blame</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={
+                parentPath
+                  ? `/repos/${slug}/tree/${parentPath}?ref=${ref}`
+                  : `/repos/${slug}?ref=${ref}`
+              }
+            >
+              Voltar
+            </Link>
+          </Button>
         </div>
         <RepoNav slug={slug} active="code" />
         {file.isBinary ? (
-          <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+          <Card className="py-0">
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
               Arquivo binário ({file.size.toLocaleString("pt-BR")} bytes).
             </CardContent>
           </Card>
         ) : (
-          <CodeViewer content={file.content} language={extensionToLanguage(uiPath)} />
+          <CodeViewer
+            content={file.content}
+            language={extensionToLanguage(uiPath)}
+            path={uiPath}
+          />
         )}
       </section>
     </PageShell>

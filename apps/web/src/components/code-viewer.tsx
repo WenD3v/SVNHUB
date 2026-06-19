@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 import { createHighlighter, type Highlighter } from "shiki";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface CodeViewerProps {
   content: string;
   language?: string;
+  path?: string;
+  className?: string;
 }
 
-export function CodeViewer({ content, language = "typescript" }: CodeViewerProps) {
+export function CodeViewer({ content, language = "typescript", path, className }: CodeViewerProps) {
   const { resolvedTheme } = useTheme();
   const [html, setHtml] = useState<string>("");
   const [highlighter, setHighlighter] = useState<Highlighter | null>(null);
@@ -55,13 +58,24 @@ export function CodeViewer({ content, language = "typescript" }: CodeViewerProps
   }, [content, highlighter, language, isDark]);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={cn("overflow-hidden py-0", className)}>
+      {path ? (
+        <div className="border-b border-border bg-secondary px-4 py-2.5 font-mono text-xs text-muted-foreground sm:px-5">
+          {path}
+        </div>
+      ) : null}
       <CardContent className="p-0">
         {!html ? (
-          <pre className="overflow-x-auto p-4 font-mono text-xs">{content}</pre>
+          <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-foreground">
+            {content}
+          </pre>
         ) : (
           <div
-            className="overflow-x-auto text-xs [&_pre]:m-0 [&_pre]:p-4"
+            className={cn(
+              "code-viewer overflow-x-auto text-xs leading-relaxed",
+              "[&_pre]:m-0 [&_pre]:bg-transparent [&_pre]:p-4",
+              "[&_.line]:opacity-100",
+            )}
             dangerouslySetInnerHTML={{ __html: html }}
           />
         )}
