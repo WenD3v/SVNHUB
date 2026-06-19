@@ -28,3 +28,9 @@ Thumbs.db
 .claude/skills/
 .claude/agents/
 .claude/rules/
+.agkit-attach.json
+.cursor/mcp.json
+.mcp.json
+.claude/*
+.cursor
+.claude
