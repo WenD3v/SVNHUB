@@ -9,9 +9,10 @@ const alertVariants = cva(
     variants: {
       variant: {
         default: "border-border bg-card text-foreground",
-        destructive: "border-destructive/40 bg-destructive/5 text-destructive [&>svg]:text-destructive",
-        success: "border-success/40 bg-success/5 text-success [&>svg]:text-success",
-        warning: "border-warning/40 bg-warning/5 text-warning [&>svg]:text-warning",
+        destructive:
+          "border-destructive/40 bg-destructive-soft text-destructive [&>svg]:text-destructive",
+        success: "border-success/40 bg-success-soft text-success [&>svg]:text-success",
+        warning: "border-warning/40 bg-warning-soft text-warning [&>svg]:text-warning",
       },
     },
     defaultVariants: {
@@ -29,7 +30,9 @@ export function Alert({
 }
 
 export function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h5 className={cn("mb-1 font-medium leading-none tracking-tight", className)} {...props} />;
+  return (
+    <h5 className={cn("mb-1 font-display font-medium leading-none tracking-tight", className)} {...props} />
+  );
 }
 
 export function AlertDescription({

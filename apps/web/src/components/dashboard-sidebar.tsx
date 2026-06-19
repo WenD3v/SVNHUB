@@ -51,7 +51,7 @@ export function DashboardSidebar({ user, repositories, loading }: DashboardSideb
         <div className="min-w-0">
           <Link
             href={`/users/${encodeURIComponent(user.username)}`}
-            className="block truncate font-semibold hover:text-primary"
+            className="block truncate font-display font-semibold hover:text-primary"
           >
             {user.displayName ?? user.username}
           </Link>
@@ -61,7 +61,7 @@ export function DashboardSidebar({ user, repositories, loading }: DashboardSideb
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Repositórios</h2>
+          <h2 className="font-display text-sm font-semibold">Repositórios</h2>
           <Link
             href="/repos"
             className="text-xs text-primary hover:underline"
@@ -103,7 +103,7 @@ export function DashboardSidebar({ user, repositories, loading }: DashboardSideb
             <Link
               key={repo.id}
               href={`/repos/${repo.slug}`}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-accent"
             >
               <FolderGit2 className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               <span className="truncate">{repo.name}</span>

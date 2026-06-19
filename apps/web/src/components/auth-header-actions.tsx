@@ -48,7 +48,7 @@ export function AuthHeaderActions() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium">{user.username}</p>
+            <p className="font-display text-sm font-medium">{user.username}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>

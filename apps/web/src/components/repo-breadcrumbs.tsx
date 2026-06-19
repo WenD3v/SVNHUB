@@ -15,7 +15,7 @@ export function RepoBreadcrumbs({ slug, repoName, path, className }: RepoBreadcr
 
   return (
     <nav aria-label="Breadcrumb" className={cn("flex flex-wrap items-center gap-1 text-sm", className)}>
-      <Link href={`/repos/${slug}`} className="font-semibold text-primary hover:underline">
+      <Link href={`/repos/${slug}`} className="font-display font-semibold text-primary hover:underline">
         {repoName}
       </Link>
       {segments.map((segment, index) => {
@@ -23,7 +23,7 @@ export function RepoBreadcrumbs({ slug, repoName, path, className }: RepoBreadcr
         const isLast = index === segments.length - 1;
         return (
           <span key={segmentPath} className="inline-flex items-center gap-1">
-            <ChevronRight className="size-3.5 text-muted-foreground" aria-hidden />
+            <ChevronRight className="size-3.5 text-foreground-subtle" aria-hidden />
             {isLast ? (
               <span className="font-mono text-foreground">{segment}</span>
             ) : (

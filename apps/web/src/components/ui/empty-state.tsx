@@ -15,14 +15,14 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border px-6 py-12 text-center",
+        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card px-6 py-12 text-center shadow-[var(--card-shadow)]",
         className,
       )}
     >
-      <div className="mb-4 rounded-full bg-muted p-3">
-        <Icon className="size-6 text-muted-foreground" aria-hidden />
+      <div className="mb-4 flex size-7 items-center justify-center rounded-lg bg-brand-soft">
+        <Icon className="size-4 text-brand" aria-hidden />
       </div>
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h3 className="font-display text-sm font-semibold">{title}</h3>
       {description ? (
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
       ) : null}

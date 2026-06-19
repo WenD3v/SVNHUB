@@ -12,7 +12,10 @@ export function Avatar({
 }: React.ComponentProps<typeof AvatarPrimitive.Root>) {
   return (
     <AvatarPrimitive.Root
-      className={cn("relative flex size-8 shrink-0 overflow-hidden rounded-full", className)}
+      className={cn(
+        "relative flex size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-border",
+        className,
+      )}
       {...props}
     />
   );

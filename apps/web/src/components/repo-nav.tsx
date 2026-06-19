@@ -114,14 +114,14 @@ export function RepoNav({ slug, active, openIssueCount }: RepoNavProps) {
                 "inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon className="size-4" aria-hidden />
               {tab.label}
               {"showOpenCount" in tab && tab.showOpenCount && openIssueCount !== undefined ? (
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-normal">
+                <span className="rounded-full bg-brand-soft px-1.5 py-0.5 text-xs font-normal text-brand">
                   {openIssueCount}
                 </span>
               ) : null}
