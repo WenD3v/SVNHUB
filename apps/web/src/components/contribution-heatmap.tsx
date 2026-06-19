@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Activity } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,8 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { UserHeatmapResponse } from "@svnhub/shared";
-import { CalendarDays } from "lucide-react";
 
 interface ContributionHeatmapProps {
   data: UserHeatmapResponse | null;
@@ -21,6 +22,7 @@ interface ContributionHeatmapProps {
 
 const WEEKS = 53;
 const DAYS = 7;
+const HEAT_LEVELS = ["var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)"] as const;
 
 function formatDayLabel(date: string, count: number): string {
   const formatted = new Date(date).toLocaleDateString("pt-BR", {
@@ -30,22 +32,30 @@ function formatDayLabel(date: string, count: number): string {
   return `${count} contribuiç${count === 1 ? "ão" : "ões"} em ${formatted}`;
 }
 
-function getIntensityClass(count: number, maxCount: number): string {
+function getHeatLevel(count: number, maxCount: number): (typeof HEAT_LEVELS)[number] {
   if (count <= 0) {
-    return "fill-muted";
+    return HEAT_LEVELS[0];
   }
 
   const ratio = count / maxCount;
   if (ratio <= 0.25) {
-    return "fill-success/25";
+    return HEAT_LEVELS[1];
   }
   if (ratio <= 0.5) {
-    return "fill-success/45";
+    return HEAT_LEVELS[2];
   }
   if (ratio <= 0.75) {
-    return "fill-success/70";
+    return HEAT_LEVELS[3];
   }
-  return "fill-success";
+  return HEAT_LEVELS[4];
+}
+
+function CardSectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+      {children}
+    </span>
+  );
 }
 
 export function ContributionHeatmap({ data, loading = false }: ContributionHeatmapProps) {
@@ -95,11 +105,14 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Contribuições</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-row items-center gap-2.5 pb-3">
+          <CardSectionIcon>
+            <Activity className="size-3.5" aria-hidden />
+          </CardSectionIcon>
+          <CardTitle>Contribuições</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5 pb-5">
           <Skeleton className="h-28 w-full" />
         </CardContent>
       </Card>
@@ -108,32 +121,46 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
 
   if (!data || data.total === 0) {
     return (
-      <EmptyState
-        icon={CalendarDays}
-        title="Sem contribuições recentes"
-        description="Nenhuma revisão indexada no período selecionado."
-        className="py-8"
-      />
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-row items-center gap-2.5 pb-3">
+          <CardSectionIcon>
+            <Activity className="size-3.5" aria-hidden />
+          </CardSectionIcon>
+          <CardTitle>Contribuições</CardTitle>
+        </CardHeader>
+        <CardContent className="px-5 pb-5">
+          <EmptyState
+            icon={Activity}
+            title="Sem contribuições recentes"
+            description="Nenhuma revisão indexada no período selecionado."
+            className="py-6"
+          />
+        </CardContent>
+      </Card>
     );
   }
 
-  const cellSize = 100 / WEEKS;
-  const cellGap = cellSize * 0.15;
+  const cellGap = 1.5;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Contribuições</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{data.total}</span> contribuições no
-          período
+    <Card className="overflow-hidden">
+      <CardHeader className="flex-row items-center gap-2.5 pb-3">
+        <CardSectionIcon>
+          <Activity className="size-3.5" aria-hidden />
+        </CardSectionIcon>
+        <CardTitle>Contribuições</CardTitle>
+        <p className="ml-auto text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">
+            {data.total.toLocaleString("pt-BR")}
+          </span>{" "}
+          commits no último ano
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto px-5 pb-5">
         <TooltipProvider delayDuration={0}>
           <svg
             viewBox={`0 0 ${WEEKS * 10} ${DAYS * 10 + 10}`}
-            className="h-28 w-full"
+            className="h-28 w-full min-w-[640px]"
             role="img"
             aria-label="Heatmap de contribuições"
           >
@@ -146,6 +173,7 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
                 const x = weekIndex * 10 + 1;
                 const y = dayIndex * 10 + 1;
                 const isHovered = hoveredKey === cell.key;
+                const fill = isHovered ? HEAT_LEVELS[4] : getHeatLevel(cell.count, maxCount);
 
                 return (
                   <Tooltip key={cell.key}>
@@ -156,11 +184,7 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
                         width={10 - cellGap}
                         height={10 - cellGap}
                         rx={1.5}
-                        className={
-                          isHovered
-                            ? "fill-success"
-                            : getIntensityClass(cell.count, maxCount)
-                        }
+                        fill={fill}
                         onMouseEnter={() => setHoveredKey(cell.key)}
                         onMouseLeave={() => setHoveredKey(null)}
                       />
@@ -174,6 +198,19 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
             )}
           </svg>
         </TooltipProvider>
+
+        <div className="mt-3.5 flex items-center gap-1.5 text-[11px] text-foreground-subtle">
+          <span>Menos</span>
+          {HEAT_LEVELS.map((level, index) => (
+            <span
+              key={level}
+              className={cn("size-[11px] rounded-[2.5px]", index === 0 && "ml-0.5")}
+              style={{ backgroundColor: level }}
+              aria-hidden
+            />
+          ))}
+          <span>Mais</span>
+        </div>
       </CardContent>
     </Card>
   );

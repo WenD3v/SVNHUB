@@ -7,13 +7,28 @@ interface UserAvatarProps {
   avatarUrl?: string | null;
   className?: string;
   alt?: string;
+  /** When true, initials render on brand background instead of hashed color. */
+  brandFallback?: boolean;
 }
 
-export function UserAvatar({ username, avatarUrl, className, alt }: UserAvatarProps) {
+export function UserAvatar({
+  username,
+  avatarUrl,
+  className,
+  alt,
+  brandFallback = false,
+}: UserAvatarProps) {
   return (
     <Avatar className={cn("size-8", className)}>
       <AvatarImage src={resolveAvatarUrl(username, avatarUrl)} alt={alt ?? username} />
-      <AvatarFallback username={username} />
+      <AvatarFallback
+        username={username}
+        className={
+          brandFallback
+            ? "bg-brand font-display text-lg font-bold text-primary-foreground"
+            : undefined
+        }
+      />
     </Avatar>
   );
 }
