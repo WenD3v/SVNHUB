@@ -3,11 +3,14 @@
 import type { AuditLogDomain, AuditLogResponse } from "@svnhub/shared";
 import { AUDIT_LOG_DOMAINS } from "@svnhub/shared/permissions";
 import { useEffect, useState } from "react";
+import { ClipboardList, UserRound } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api-client";
 
 const PAGE_SIZE = 50;
@@ -60,6 +63,7 @@ export function AdminAuditLogPanel() {
   if (loading && !data) {
     return (
       <div className="space-y-3">
+        <Skeleton className="h-10 w-full max-w-xl" />
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />
@@ -73,6 +77,7 @@ export function AdminAuditLogPanel() {
         <Button
           size="sm"
           variant={domain === "all" ? "default" : "outline"}
+          className={cn(domain !== "all" && "border-border-strong")}
           onClick={() => void load(0, "all")}
         >
           Todos
@@ -82,6 +87,7 @@ export function AdminAuditLogPanel() {
             key={entry}
             size="sm"
             variant={domain === entry ? "default" : "outline"}
+            className={cn(domain !== entry && "border-border-strong")}
             onClick={() => void load(0, entry)}
           >
             {DOMAIN_LABELS[entry]}
@@ -89,36 +95,48 @@ export function AdminAuditLogPanel() {
         ))}
       </div>
 
-      <Card className="divide-y divide-border overflow-hidden">
-        {(data?.entries ?? []).map((entry) => (
-          <div key={entry.id} className="px-4 py-3 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{entry.action}</span>
-              <span className="text-muted-foreground">
-                {entry.resourceType}
-                {entry.resourceId ? ` / ${entry.resourceId}` : ""}
+      <Card className="overflow-hidden">
+        <CardContent className="divide-y divide-border p-0">
+          {(data?.entries ?? []).map((entry) => (
+            <div key={entry.id} className="flex gap-3 px-4 py-3 text-sm">
+              <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+                <ClipboardList className="size-3.5" aria-hidden />
               </span>
-              {entry.repositorySlug ? (
-                <span className="text-xs text-muted-foreground">· {entry.repositorySlug}</span>
-              ) : null}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-foreground">{entry.action}</span>
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    {entry.resourceType}
+                    {entry.resourceId ? ` / ${entry.resourceId}` : ""}
+                  </Badge>
+                  {entry.repositorySlug ? (
+                    <span className="text-xs text-muted-foreground">{entry.repositorySlug}</span>
+                  ) : null}
+                </div>
+                <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-foreground-subtle">
+                  <UserRound className="size-3 shrink-0" aria-hidden />
+                  <span>{entry.username ?? "sistema"}</span>
+                  <span aria-hidden>·</span>
+                  <time dateTime={entry.createdAt}>
+                    {new Date(entry.createdAt).toLocaleString("pt-BR")}
+                  </time>
+                </p>
+                {entry.metadata ? (
+                  <pre className="mt-2 overflow-x-auto rounded-md bg-secondary p-2 font-mono text-xs text-muted-foreground">
+                    {JSON.stringify(entry.metadata, null, 2)}
+                  </pre>
+                ) : null}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {entry.username ?? "sistema"} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
-            </p>
-            {entry.metadata ? (
-              <pre className="mt-1 overflow-x-auto rounded-md bg-muted p-2 font-mono text-xs text-muted-foreground">
-                {JSON.stringify(entry.metadata, null, 2)}
-              </pre>
-            ) : null}
-          </div>
-        ))}
-        {(data?.entries.length ?? 0) === 0 && !loading ? (
-          <p className="px-4 py-8 text-center text-muted-foreground">Nenhum evento registrado.</p>
-        ) : null}
+          ))}
+          {(data?.entries.length ?? 0) === 0 && !loading ? (
+            <p className="px-4 py-8 text-center text-muted-foreground">Nenhum evento registrado.</p>
+          ) : null}
+        </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-foreground-subtle">
           {total > 0
             ? `Mostrando ${offset + 1}–${Math.min(offset + PAGE_SIZE, total)} de ${total}`
             : "0 eventos"}

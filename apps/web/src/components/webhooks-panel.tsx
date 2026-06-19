@@ -3,8 +3,14 @@
 import type { WebhookEventType, WebhookSummary } from "@svnhub/shared";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Webhook } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api-client";
 
 const EVENT_OPTIONS: WebhookEventType[] = [
@@ -106,90 +112,112 @@ export function WebhooksPanel({ slug }: WebhooksPanelProps) {
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-border p-4">
-      <div>
-        <h3 className="font-medium">Webhooks de saída</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Notificações HMAC para revisão indexada, pipeline concluído e PR merged.
-        </p>
-      </div>
-
-      <form onSubmit={createWebhook} className="grid gap-3 md:grid-cols-2">
-        <label className="space-y-1 text-sm">
-          <span>URL</span>
-          <input
-            className="w-full rounded-md border border-border bg-background px-3 py-2"
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            required
-          />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span>Secret</span>
-          <input
-            className="w-full rounded-md border border-border bg-background px-3 py-2"
-            value={secret}
-            onChange={(event) => setSecret(event.target.value)}
-            required
-          />
-        </label>
-        <div className="md:col-span-2">
-          <span className="text-sm">Eventos</span>
-          <div className="mt-2 flex flex-wrap gap-3">
-            {EVENT_OPTIONS.map((event) => (
-              <label key={event} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={events.includes(event)}
-                  onChange={() => toggleEvent(event)}
-                />
-                {event}
-              </label>
-            ))}
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+            <Webhook className="size-4" aria-hidden />
+          </span>
+          <div>
+            <CardTitle>Webhooks de saída</CardTitle>
+            <CardDescription className="mt-1">
+              Notificações HMAC para revisão indexada, pipeline concluído e PR merged.
+            </CardDescription>
           </div>
         </div>
-        <div className="md:col-span-2">
-          <Button type="submit" size="sm" disabled={loading}>
-            Adicionar webhook
-          </Button>
-        </div>
-      </form>
-
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-      <ul className="divide-y divide-border text-sm">
-        {webhooks.map((webhook) => (
-          <li key={webhook.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <div>
-              <p className="font-medium">{webhook.url}</p>
-              <p className="text-xs text-muted-foreground">
-                {webhook.events.join(", ")} · {webhook.isActive ? "ativo" : "inativo"}
-              </p>
+      </CardHeader>
+      <CardContent className="space-y-4 p-4">
+        <form onSubmit={createWebhook} className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="webhook-url">URL</Label>
+            <Input
+              id="webhook-url"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="webhook-secret">Secret</Label>
+            <Input
+              id="webhook-secret"
+              value={secret}
+              onChange={(event) => setSecret(event.target.value)}
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label>Eventos</Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {EVENT_OPTIONS.map((event) => (
+                <label
+                  key={event}
+                  className={cn(
+                    "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    events.includes(event)
+                      ? "border-primary bg-brand-soft text-brand"
+                      : "border-border-strong text-muted-foreground hover:bg-accent",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={events.includes(event)}
+                    onChange={() => toggleEvent(event)}
+                  />
+                  {event}
+                </label>
+              ))}
             </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={loading}
-                onClick={() => toggleActive(webhook)}
-              >
-                {webhook.isActive ? "Desativar" : "Ativar"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={loading}
-                onClick={() => removeWebhook(webhook.id)}
-              >
-                Remover
-              </Button>
-            </div>
-          </li>
-        ))}
-        {webhooks.length === 0 ? (
-          <li className="py-3 text-muted-foreground">Nenhum webhook configurado.</li>
-        ) : null}
-      </ul>
-    </div>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" size="sm" disabled={loading}>
+              Adicionar webhook
+            </Button>
+          </div>
+        </form>
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <ul className="divide-y divide-border text-sm">
+          {webhooks.map((webhook) => (
+            <li key={webhook.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground">{webhook.url}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Badge variant={webhook.isActive ? "success" : "muted"}>
+                    {webhook.isActive ? "Ativo" : "Inativo"}
+                  </Badge>
+                  <span className="text-xs text-foreground-subtle">
+                    {webhook.events.join(", ")}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => toggleActive(webhook)}
+                >
+                  {webhook.isActive ? "Desativar" : "Ativar"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => removeWebhook(webhook.id)}
+                >
+                  Remover
+                </Button>
+              </div>
+            </li>
+          ))}
+          {webhooks.length === 0 ? (
+            <li className="py-3 text-muted-foreground">Nenhum webhook configurado.</li>
+          ) : null}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }

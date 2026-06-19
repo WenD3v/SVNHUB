@@ -239,7 +239,7 @@ export function AdminUsersPanel() {
         <Button onClick={openCreate}>Novo usuário</Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[var(--card-shadow)]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -273,7 +273,7 @@ export function AdminUsersPanel() {
                   <Badge variant="outline">{user.isLocal ? "Local" : "LDAP"}</Badge>
                 </TableCell>
                 <TableCell>
-                  {user.isAdmin ? <Badge variant="secondary">Admin</Badge> : "—"}
+                  {user.isAdmin ? <Badge variant="brand">Admin</Badge> : "—"}
                 </TableCell>
                 <TableCell>
                   <Badge variant={user.isActive ? "success" : "destructive"}>

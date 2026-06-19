@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import {
+  AlertCircle,
+  AtSign,
+  Bell,
+  GitPullRequest,
+  Workflow,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth-context";
 import type {
@@ -67,6 +74,22 @@ function notificationHref(notification: NotificationSummary): string {
     }
     default:
       return "/";
+  }
+}
+
+function NotificationIcon({ type }: { type: NotificationSummary["type"] }) {
+  const className = "size-4 shrink-0";
+  switch (type) {
+    case "PR_REVIEW_REQUESTED":
+      return <GitPullRequest className={cn(className, "text-brand")} aria-hidden />;
+    case "ISSUE_ASSIGNED":
+      return <AlertCircle className={cn(className, "text-warning")} aria-hidden />;
+    case "PIPELINE_FAILED":
+      return <Workflow className={cn(className, "text-destructive")} aria-hidden />;
+    case "MENTION":
+      return <AtSign className={cn(className, "text-brand")} aria-hidden />;
+    default:
+      return <Bell className={cn(className, "text-muted-foreground")} aria-hidden />;
   }
 }
 
@@ -137,44 +160,67 @@ export function NotificationsBell() {
         >
           <Bell className="size-4" />
           {unreadCount > 0 ? (
-            <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
+            <span
+              className="absolute right-1 top-1 size-2 rounded-full bg-brand ring-2 ring-[var(--header-bg)]"
+              aria-hidden
+            />
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notificações</span>
+      <DropdownMenuContent
+        align="end"
+        className="w-80 rounded-[var(--radius)] border-border bg-popover p-0 shadow-[var(--card-shadow)]"
+      >
+        <DropdownMenuLabel className="flex items-center justify-between border-b border-border bg-secondary px-3 py-2.5">
+          <span className="font-display text-sm font-semibold">Notificações</span>
           {unreadCount > 0 ? (
             <button
               type="button"
-              className="text-xs font-normal text-primary hover:underline"
+              className="text-xs font-normal text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => void markAllRead()}
             >
               Marcar todas como lidas
             </button>
           ) : null}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="m-0" />
         {(data?.items.length ?? 0) === 0 ? (
-          <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+          <p className="px-3 py-6 text-center text-sm text-muted-foreground">
             {loading ? "Carregando..." : "Nenhuma notificação."}
           </p>
         ) : (
           data?.items.map((notification) => (
-            <DropdownMenuItem key={notification.id} asChild>
+            <DropdownMenuItem key={notification.id} asChild className="p-0">
               <Link
                 href={notificationHref(notification)}
-                className={notification.readAt ? "opacity-70" : "font-medium"}
+                className={cn(
+                  "flex w-full items-start gap-3 px-3 py-3 focus-visible:outline-none",
+                  notification.readAt ? "opacity-70" : "bg-brand-soft/30",
+                )}
                 onClick={() => void markRead(notification)}
               >
-                <div className="space-y-1">
-                  <p className="text-sm leading-snug">{formatNotificationLabel(notification)}</p>
-                  <p className="text-xs text-muted-foreground">
+                <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                  <NotificationIcon type={notification.type} />
+                </span>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p
+                    className={cn(
+                      "text-sm leading-snug text-foreground",
+                      !notification.readAt && "font-medium",
+                    )}
+                  >
+                    {formatNotificationLabel(notification)}
+                  </p>
+                  <p className="text-xs text-foreground-subtle">
                     {new Date(notification.createdAt).toLocaleString("pt-BR")}
                   </p>
                 </div>
+                {!notification.readAt ? (
+                  <span
+                    className="mt-2 size-2 shrink-0 rounded-full bg-brand"
+                    aria-label="Não lida"
+                  />
+                ) : null}
               </Link>
             </DropdownMenuItem>
           ))

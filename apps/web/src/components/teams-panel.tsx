@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { FolderGit2, UsersRound } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -103,41 +105,50 @@ export function TeamsListPanel({ initialTeams }: TeamsListPanelProps) {
         </div>
       ) : null}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Slug</TableHead>
-            <TableHead>Membros</TableHead>
-            <TableHead>Descrição</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {teams.map((team) => (
-            <TableRow key={team.id}>
-              <TableCell>
-                <Link href={`/teams/${team.slug}`} className="font-medium hover:underline">
-                  {team.name}
-                </Link>
-              </TableCell>
-              <TableCell>
-                <code className="text-xs">{team.slug}</code>
-              </TableCell>
-              <TableCell>{team.memberCount}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {team.description ?? "—"}
-              </TableCell>
-            </TableRow>
-          ))}
-          {teams.length === 0 ? (
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[var(--card-shadow)]">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={4} className="text-muted-foreground">
-                Nenhum team cadastrado.
-              </TableCell>
+              <TableHead>Nome</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Membros</TableHead>
+              <TableHead>Descrição</TableHead>
             </TableRow>
-          ) : null}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {teams.map((team) => (
+              <TableRow key={team.id}>
+                <TableCell>
+                  <Link
+                    href={`/teams/${team.slug}`}
+                    className="font-medium text-foreground hover:text-primary hover:underline"
+                  >
+                    {team.name}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-xs">
+                    {team.slug}
+                  </code>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="brand">{team.memberCount}</Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {team.description ?? "—"}
+                </TableCell>
+              </TableRow>
+            ))}
+            {teams.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                  Nenhum team cadastrado.
+                </TableCell>
+              </TableRow>
+            ) : null}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -232,85 +243,103 @@ export function TeamDetailPanel({ slug, initialTeam, users }: TeamDetailPanelPro
         </Alert>
       ) : null}
 
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">{team.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          <code>{team.slug}</code>
-          {team.description ? ` · ${team.description}` : ""}
-        </p>
+      <div className="flex items-start gap-4">
+        <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
+          <UsersRound className="size-8" aria-hidden />
+        </span>
+        <div className="min-w-0 space-y-1">
+          <h1 className="font-display text-2xl font-semibold text-foreground">{team.name}</h1>
+          <p className="font-mono text-sm text-muted-foreground">@{team.slug}</p>
+          {team.description ? (
+            <p className="max-w-2xl text-sm text-foreground">{team.description}</p>
+          ) : null}
+        </div>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Membros</h2>
-        {canManageMembers ? (
-          <div className="flex flex-wrap gap-2">
-            <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-              value={userId}
-              onChange={(event) => setUserId(event.target.value)}
-            >
-              {users.map((entry) => (
-                <option key={entry.id} value={entry.id}>
-                  {entry.username} ({entry.email})
-                </option>
-              ))}
-            </select>
-            <select
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-              value={memberRole}
-              onChange={(event) => setMemberRole(event.target.value as GroupRole)}
-            >
-              <option value="MEMBER">Member</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-            <Button size="sm" onClick={() => void handleAddMember()} disabled={!userId}>
-              Adicionar membro
-            </Button>
-          </div>
-        ) : null}
-        <ul className="divide-y divide-border text-sm">
-          {team.members.map((member) => (
-            <li key={member.id} className="flex items-center justify-between py-2">
-              <span>
-                {member.displayName ?? member.username}{" "}
-                <span className="text-muted-foreground">@{member.username}</span>
-              </span>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">{member.role}</Badge>
-                {canManageMembers ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void handleRemoveMember(member.id)}
-                  >
-                    Remover
-                  </Button>
-                ) : null}
-              </div>
-            </li>
-          ))}
-          {team.members.length === 0 ? (
-            <li className="py-2 text-muted-foreground">Nenhum membro.</li>
+      <Card>
+        <CardHeader>
+          <CardTitle>Membros</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 p-4">
+          {canManageMembers ? (
+            <div className="flex flex-wrap gap-2">
+              <select
+                className="h-9 rounded-md border border-input bg-card px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={userId}
+                onChange={(event) => setUserId(event.target.value)}
+              >
+                {users.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.username} ({entry.email})
+                  </option>
+                ))}
+              </select>
+              <select
+                className="h-9 rounded-md border border-input bg-card px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={memberRole}
+                onChange={(event) => setMemberRole(event.target.value as GroupRole)}
+              >
+                <option value="MEMBER">Member</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+              <Button size="sm" onClick={() => void handleAddMember()} disabled={!userId}>
+                Adicionar membro
+              </Button>
+            </div>
           ) : null}
-        </ul>
-      </section>
+          <ul className="divide-y divide-border text-sm">
+            {team.members.map((member) => (
+              <li key={member.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-foreground">
+                  {member.displayName ?? member.username}{" "}
+                  <span className="text-foreground-subtle">@{member.username}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="brand">{member.role}</Badge>
+                  {canManageMembers ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void handleRemoveMember(member.id)}
+                    >
+                      Remover
+                    </Button>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+            {team.members.length === 0 ? (
+              <li className="py-3 text-muted-foreground">Nenhum membro.</li>
+            ) : null}
+          </ul>
+        </CardContent>
+      </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Repositórios vinculados</h2>
-        <ul className="divide-y divide-border text-sm">
-          {team.repositories.map((repo) => (
-            <li key={repo.id} className="flex items-center justify-between py-2">
-              <Link href={`/repos/${repo.slug}`} className="font-medium hover:underline">
-                {repo.name}
-              </Link>
-              <Badge variant="outline">{repo.role}</Badge>
-            </li>
-          ))}
-          {team.repositories.length === 0 ? (
-            <li className="py-2 text-muted-foreground">Nenhum repositório vinculado.</li>
-          ) : null}
-        </ul>
-      </section>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand">
+              <FolderGit2 className="size-4" aria-hidden />
+            </span>
+            <CardTitle>Repositórios vinculados</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          <ul className="divide-y divide-border text-sm">
+            {team.repositories.map((repo) => (
+              <li key={repo.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <Link href={`/repos/${repo.slug}`} className="font-medium text-primary hover:underline">
+                  {repo.name}
+                </Link>
+                <Badge variant="outline">{repo.role}</Badge>
+              </li>
+            ))}
+            {team.repositories.length === 0 ? (
+              <li className="py-3 text-muted-foreground">Nenhum repositório vinculado.</li>
+            ) : null}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -351,7 +380,7 @@ export function RepoTeamManager({ slug, teams, allTeams }: RepoTeamManagerProps)
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         <select
-          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          className="h-9 rounded-md border border-input bg-card px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={teamSlug}
           onChange={(event) => setTeamSlug(event.target.value)}
         >
@@ -362,7 +391,7 @@ export function RepoTeamManager({ slug, teams, allTeams }: RepoTeamManagerProps)
           ))}
         </select>
         <select
-          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          className="h-9 rounded-md border border-input bg-card px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={role}
           onChange={(event) => setRole(event.target.value as RepoRole)}
         >
@@ -377,16 +406,16 @@ export function RepoTeamManager({ slug, teams, allTeams }: RepoTeamManagerProps)
       </div>
       <ul className="divide-y divide-border text-sm">
         {teams.map((team) => (
-          <li key={team.id} className="flex items-center justify-between py-2">
+          <li key={team.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
             <span>
-              <Link href={`/teams/${team.teamSlug}`} className="font-medium hover:underline">
+              <Link href={`/teams/${team.teamSlug}`} className="font-medium text-primary hover:underline">
                 {team.teamName}
               </Link>{" "}
-              <span className="text-muted-foreground">({team.teamSlug})</span>
+              <span className="font-mono text-xs text-muted-foreground">({team.teamSlug})</span>
             </span>
             <div className="flex items-center gap-2">
               <select
-                className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                className="h-8 rounded-md border border-input bg-card px-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={team.role}
                 onChange={(event) =>
                   void handleUpdate(team.teamSlug, event.target.value as RepoRole)
@@ -404,7 +433,7 @@ export function RepoTeamManager({ slug, teams, allTeams }: RepoTeamManagerProps)
           </li>
         ))}
         {teams.length === 0 ? (
-          <li className="py-2 text-muted-foreground">Nenhum team vinculado.</li>
+          <li className="py-3 text-muted-foreground">Nenhum team vinculado.</li>
         ) : null}
       </ul>
     </div>

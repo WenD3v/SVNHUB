@@ -37,7 +37,7 @@ export default function TeamsPage() {
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Teams</h1>
+            <h1 className="font-display text-2xl font-semibold text-foreground">Teams</h1>
             <p className="text-sm text-muted-foreground">
               Grupos de usuários com acesso compartilhado a repositórios.
             </p>

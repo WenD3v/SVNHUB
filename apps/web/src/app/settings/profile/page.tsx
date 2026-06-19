@@ -51,7 +51,7 @@ export default function ProfileSettingsPage() {
       <section className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Perfil</h1>
+            <h1 className="font-display text-2xl font-semibold text-foreground">Perfil</h1>
             <p className="text-sm text-muted-foreground">
               Atualize suas informações públicas, avatar e senha.
             </p>

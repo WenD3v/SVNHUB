@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { AtSign, KeyRound, UserRound } from "lucide-react";
 
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,14 @@ import type { UserProfile } from "@svnhub/shared";
 
 interface ProfileSettingsFormProps {
   initialProfile: UserProfile;
+}
+
+function SectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+      {children}
+    </span>
+  );
 }
 
 export function ProfileSettingsForm({ initialProfile }: ProfileSettingsFormProps) {
@@ -122,54 +131,54 @@ export function ProfileSettingsForm({ initialProfile }: ProfileSettingsFormProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Avatar</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-4">
-          <UserAvatar
-            username={initialProfile.username}
-            avatarUrl={avatarUrl}
-            className="size-20 text-lg"
-          />
-          <div className="flex flex-wrap gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) {
-                  void uploadAvatar(file);
-                }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={loading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Enviar imagem
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={loading || !avatarUrl}
-              onClick={() => void removeAvatar()}
-            >
-              Remover
-            </Button>
+          <div className="flex items-center gap-2">
+            <SectionIcon>
+              <UserRound className="size-4" aria-hidden />
+            </SectionIcon>
+            <CardTitle>Informações públicas</CardTitle>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Informações públicas</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6 p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <UserAvatar
+              username={initialProfile.username}
+              avatarUrl={avatarUrl}
+              className="size-20 text-lg"
+            />
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) {
+                    void uploadAvatar(file);
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Enviar imagem
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading || !avatarUrl}
+                onClick={() => void removeAvatar()}
+              >
+                Remover
+              </Button>
+            </div>
+          </div>
+
           <form className="space-y-4" onSubmit={saveProfile}>
             <div className="space-y-2">
               <Label htmlFor="displayName">Nome de exibição</Label>
@@ -180,6 +189,19 @@ export function ProfileSettingsForm({ initialProfile }: ProfileSettingsFormProps
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="handle" className="flex items-center gap-1.5">
+                <AtSign className="size-3.5 text-muted-foreground" aria-hidden />
+                Handle
+              </Label>
+              <Input
+                id="handle"
+                value={`@${initialProfile.username}`}
+                readOnly
+                className="font-mono text-muted-foreground"
+                aria-readonly
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
               <textarea
                 id="bio"
@@ -187,7 +209,7 @@ export function ProfileSettingsForm({ initialProfile }: ProfileSettingsFormProps
                 onChange={(event) => setBio(event.target.value)}
                 rows={4}
                 className={cn(
-                  "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                  "flex min-h-[80px] w-full rounded-md border border-input bg-card px-3 py-2 text-sm",
                   "ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 )}
               />
@@ -201,9 +223,14 @@ export function ProfileSettingsForm({ initialProfile }: ProfileSettingsFormProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Senha</CardTitle>
+          <div className="flex items-center gap-2">
+            <SectionIcon>
+              <KeyRound className="size-4" aria-hidden />
+            </SectionIcon>
+            <CardTitle>Senha</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <form className="space-y-4" onSubmit={changePassword}>
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Senha atual</Label>

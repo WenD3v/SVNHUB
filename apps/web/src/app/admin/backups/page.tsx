@@ -9,6 +9,7 @@ import { AdminNav } from "@/components/admin-nav";
 import { PageShell } from "@/components/page-shell";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,7 +89,7 @@ export default function AdminBackupsPage() {
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Backups</h1>
+            <h1 className="font-display text-2xl font-semibold text-foreground">Backups</h1>
             <p className="text-sm text-muted-foreground">
               Configurações globais de agendamento. Backups por repositório ficam em Settings.
             </p>
@@ -100,7 +101,14 @@ export default function AdminBackupsPage() {
 
         <AdminNav />
 
-        <div className="max-w-xl space-y-4 rounded-lg border border-border p-4">
+        <Card className="max-w-xl">
+          <CardHeader>
+            <CardTitle>Agendamento global</CardTitle>
+            <CardDescription>
+              Cron de backup e verificação para toda a instância.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 p-4">
           <div className="space-y-1">
             <Label htmlFor="backup-cron">Cron de backup</Label>
             <Input
@@ -143,7 +151,8 @@ export default function AdminBackupsPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : null}
-        </div>
+          </CardContent>
+        </Card>
       </section>
     </PageShell>
   );

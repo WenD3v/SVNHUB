@@ -41,7 +41,7 @@ export default function AdminUsersPage() {
       <section className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Usuários</h1>
+            <h1 className="font-display text-2xl font-semibold text-foreground">Usuários</h1>
             <p className="text-sm text-muted-foreground">
               Gestão de contas locais e LDAP da instância SVNHUB.
             </p>
