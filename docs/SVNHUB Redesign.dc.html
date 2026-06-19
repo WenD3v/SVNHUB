@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:rgba(120,120,120,.35);border-radius:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  @keyframes svnpulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+
+<div style="{{ themeVars }}">
+
+  <!-- ===== COMPARISON CHROME ===== -->
+  <div style="position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:11px 20px;background:#0B0F17;border-bottom:1px solid #1C2230;color:#E2E8F0;font-family:'Inter',sans-serif;">
+    <div style="display:flex;align-items:center;gap:9px;font-weight:600;font-size:13px;letter-spacing:.01em;">
+      <span style="display:inline-flex;width:9px;height:9px;border-radius:50%;background:#F97316;"></span>
+      SVNHUB · Estudo de layout
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#64748B;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Direção</span>
+      <div style="display:flex;gap:3px;padding:3px;background:#161C28;border-radius:9px;">
+        <button onClick="{{ setDirA }}" style="{{ dirASeg }}">A · Heritage</button>
+        <button onClick="{{ setDirB }}" style="{{ dirBSeg }}">B · Modern</button>
+      </div>
+      <span style="width:1px;height:22px;background:#222B3A;margin:0 4px;"></span>
+      <span style="font-size:11px;color:#64748B;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Tema</span>
+      <div style="display:flex;gap:3px;padding:3px;background:#161C28;border-radius:9px;">
+        <button onClick="{{ setLight }}" style="{{ lightSeg }}">Claro</button>
+        <button onClick="{{ setDark }}" style="{{ darkSeg }}">Escuro</button>
+      </div>
+      <span style="width:1px;height:22px;background:#222B3A;margin:0 4px;"></span>
+      <span style="font-size:11px;color:#64748B;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Tela</span>
+      <div style="display:flex;gap:3px;padding:3px;background:#161C28;border-radius:9px;">
+        <button onClick="{{ setDash }}" style="{{ dashSeg }}">Dashboard</button>
+        <button onClick="{{ setRepo }}" style="{{ repoSeg }}">Repositório</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== APP ===== -->
+  <div style="min-height:calc(100vh - 47px);background:var(--page,#FAF7F2);color:var(--ink,#1C1917);font-family:var(--font-body),system-ui,sans-serif;">
+
+    <!-- App header -->
+    <header style="position:sticky;top:47px;z-index:30;background:var(--header-bg,#fff);border-bottom:1px solid var(--border,#E9E2D7);backdrop-filter:saturate(140%);">
+      <div style="display:flex;align-items:center;gap:16px;max-width:1240px;margin:0 auto;padding:0 28px;height:58px;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="6" fill="var(--brand,#C2410C)"></rect>
+            <g stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none">
+              <path d="M8 7.6 V16.4"></path>
+              <path d="M8 12 C8 9.4, 11 9, 15.6 9"></path>
+            </g>
+            <circle cx="8" cy="6.7" r="1.8" fill="#fff"></circle>
+            <circle cx="8" cy="17.3" r="1.8" fill="#fff"></circle>
+            <circle cx="15.9" cy="9" r="1.8" fill="#fff"></circle>
+          </svg>
+          <span style="font-family:var(--font-display),sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em;color:var(--ink,#1C1917);">SVNHUB</span>
+        </div>
+        <div style="position:relative;flex:1;max-width:440px;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+          <div style="display:flex;align-items:center;height:34px;padding:0 11px 0 32px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink-3,#A8A29E);">Buscar repositórios, commits, issues…</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button onClick="{{ toggleTheme }}" title="Alternar tema" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--radius-sm,8px);border:1px solid var(--border,#E9E2D7);background:var(--surface,#fff);color:var(--ink-2,#57534E);cursor:pointer;">
+            <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path></svg></sc-if>
+            <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg></sc-if>
+          </button>
+          <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:var(--radius-sm,8px);border:1px solid var(--border,#E9E2D7);background:var(--surface,#fff);color:var(--ink-2,#57534E);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--brand,#C2410C);border:2px solid var(--surface,#fff);"></span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--brand,#C2410C);color:#fff;font-weight:600;font-size:13px;font-family:var(--font-display),sans-serif;">MA</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ DASHBOARD ============ -->
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="Dashboard" style="max-width:1240px;margin:0 auto;padding:30px 28px 56px;">
+
+      <!-- page header -->
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px;">
+        <div>
+          <div style="font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand,#C2410C);font-weight:600;margin-bottom:7px;">Visão geral</div>
+          <h1 style="margin:0;font-family:var(--font-display),sans-serif;font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--ink,#1C1917);">Bom dia, Marina</h1>
+          <p style="margin:6px 0 0;font-size:14px;color:var(--ink-2,#57534E);">Sua atividade recente, pull requests e pipelines em um só lugar.</p>
+        </div>
+        <button style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.12);">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Novo repositório
+        </button>
+      </div>
+
+      <!-- stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap,24px);margin-bottom:var(--gap,24px);">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:16px 18px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--ink-2,#57534E);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:var(--brand-soft);color:var(--brand,#C2410C);">{{ s.icon }}</span>
+              {{ s.label }}
+            </div>
+            <div style="margin-top:10px;font-family:var(--font-display),sans-serif;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--ink,#1C1917);line-height:1;">{{ s.value }}</div>
+            <div style="margin-top:6px;font-size:11.5px;font-weight:500;color: {{ s.subColor }};">{{ s.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- two col -->
+      <div style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:var(--gap,24px);align-items:start;">
+
+        <!-- sidebar -->
+        <div style="display:flex;flex-direction:column;gap:var(--gap,24px);position:sticky;top:124px;">
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+            <div style="display:flex;align-items:center;gap:13px;">
+              <div style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:var(--brand,#C2410C);color:#fff;font-family:var(--font-display),sans-serif;font-weight:700;font-size:20px;">MA</div>
+              <div style="min-width:0;">
+                <div style="font-family:var(--font-display),sans-serif;font-weight:600;font-size:16px;color:var(--ink,#1C1917);">Marina Alves</div>
+                <div style="font-size:13px;color:var(--ink-2,#57534E);">@marina</div>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand,#C2410C);font-size:11.5px;font-weight:600;">Mantenedora · Lukos</div>
+          </div>
+
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Repositórios</h3>
+              <a style="margin-left:auto;font-size:12px;font-weight:500;color:var(--brand,#C2410C);cursor:pointer;text-decoration:none;">Ver todos</a>
+            </div>
+            <div style="padding:12px var(--pad,22px) var(--pad,22px);">
+              <div style="position:relative;margin-bottom:8px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+                <div style="height:32px;display:flex;align-items:center;padding:0 10px 0 28px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:12.5px;color:var(--ink-3,#A8A29E);">Filtrar repositórios…</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <sc-for list="{{ repos }}" as="r" hint-placeholder-count="6">
+                  <a style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--radius-sm,8px);text-decoration:none;cursor:pointer;color:var(--ink,#1C1917);" style-hover="background:var(--surface-2,#F4EFE7);">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
+                    <span style="font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.name }}</span>
+                    <span style="font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ink-3,#A8A29E);">{{ r.rev }}</span>
+                  </a>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- main column -->
+        <div style="display:flex;flex-direction:column;gap:var(--gap,24px);min-width:0;">
+
+          <!-- heatmap -->
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand,#C2410C);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg></span>
+              <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Contribuições</h3>
+              <span style="margin-left:auto;font-size:12.5px;color:var(--ink-2,#57534E);"><strong style="color:var(--ink,#1C1917);">1.482</strong> commits no último ano</span>
+            </div>
+            <div style="padding:18px var(--pad,22px);overflow-x:auto;">
+              <div style="display:grid;grid-template-rows:repeat(7,11px);grid-auto-flow:column;gap:3px;width:max-content;">
+                <sc-for list="{{ heat }}" as="c" hint-placeholder-count="120">
+                  <div style="width:11px;height:11px;border-radius:2.5px;background: {{ c.bg }};"></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:14px;font-size:11px;color:var(--ink-3,#A8A29E);">
+                Menos
+                <span style="width:11px;height:11px;border-radius:2.5px;background:var(--heat-0);"></span>
+                <span style="width:11px;height:11px;border-radius:2.5px;background:var(--heat-1);"></span>
+                <span style="width:11px;height:11px;border-radius:2.5px;background:var(--heat-2);"></span>
+                <span style="width:11px;height:11px;border-radius:2.5px;background:var(--heat-3);"></span>
+                <span style="width:11px;height:11px;border-radius:2.5px;background:var(--heat-4);"></span>
+                Mais
+              </div>
+            </div>
+          </div>
+
+          <!-- PRs -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap,24px);">
+            <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand,#C2410C);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="18" r="3"></circle><path d="M6 9v6M18 15V9a4 4 0 0 0-4-4h-2"></path><path d="M9 8l3-3-3-3" transform="translate(2 1)"></path></svg></span>
+                <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Seus PRs abertos</h3>
+              </div>
+              <div>
+                <sc-for list="{{ myPrs }}" as="p" hint-placeholder-count="2">
+                  <div style="padding:12px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                    <a style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;display:block;" style-hover="color:var(--brand,#C2410C);">{{ p.title }}</a>
+                    <div style="margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2,#57534E);font-family:var(--font-mono),monospace;">
+                      <span>{{ p.repo }} #{{ p.num }}</span>
+                      <span style="display:inline-flex;align-items:center;gap:5px;"><span style="padding:1px 6px;border-radius:5px;background:var(--surface-2,#F4EFE7);">{{ p.src }}</span>→<span style="padding:1px 6px;border-radius:5px;background:var(--surface-2,#F4EFE7);">{{ p.tgt }}</span></span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand,#C2410C);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Aguardando seu review</h3>
+                <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--brand,#C2410C);color:#fff;font-size:11px;font-weight:700;">1</span>
+              </div>
+              <div>
+                <sc-for list="{{ reviewPrs }}" as="p" hint-placeholder-count="1">
+                  <div style="padding:12px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                    <a style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;display:block;" style-hover="color:var(--brand,#C2410C);">{{ p.title }}</a>
+                    <div style="margin-top:5px;font-size:11.5px;color:var(--ink-2,#57534E);font-family:var(--font-mono),monospace;">{{ p.repo }} #{{ p.num }}</div>
+                    <div style="margin-top:5px;font-size:12px;color:var(--ink-2,#57534E);">por {{ p.author }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <!-- pipelines -->
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand,#C2410C);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="15" width="6" height="6" rx="1"></rect><path d="M9 6h6a3 3 0 0 1 3 3v6"></path></svg></span>
+              <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Pipelines recentes</h3>
+            </div>
+            <div>
+              <sc-for list="{{ pipelines }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:13px;padding:12px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:9px;height:9px;border-radius:50%;background: {{ p.dot }}; {{ p.pulse }}"></span>
+                  <div style="min-width:0;flex:1;">
+                    <a style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;" style-hover="color:var(--brand,#C2410C);">{{ p.repo }} · <span style="font-family:var(--font-mono),monospace;font-weight:500;">{{ p.rev }}</span></a>
+                    <div style="margin-top:3px;font-size:11.5px;color:var(--ink-2,#57534E);">{{ p.meta }}</div>
+                  </div>
+                  <span style="padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background: {{ p.badgeBg }};color: {{ p.badgeFg }};">{{ p.statusLabel }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- activity -->
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand,#C2410C);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
+              <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Feed de atividade</h3>
+            </div>
+            <div style="padding:6px var(--pad,22px);">
+              <sc-for list="{{ activity }}" as="a" hint-placeholder-count="5">
+                <div style="display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--border,#E9E2D7);">
+                  <span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background: {{ a.iconBg }};color: {{ a.iconFg }};">{{ a.icon }}</span>
+                  <div style="min-width:0;">
+                    <div style="font-size:13.5px;color:var(--ink,#1C1917);"><span style="font-weight:600;">{{ a.who }}</span> {{ a.text }}</div>
+                    <div style="margin-top:3px;font-size:12px;color:var(--ink-2,#57534E);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ a.sub }}</div>
+                    <div style="margin-top:4px;font-size:11px;color:var(--ink-3,#A8A29E);">{{ a.time }}</div>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="padding:14px 0 8px;">
+                <button style="width:100%;height:36px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;color:var(--ink-2,#57534E);cursor:pointer;">Carregar mais</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+    </sc-if>
+
+    <!-- ============ REPOSITORY ============ -->
+    <sc-if value="{{ isRepo }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Repositório" style="max-width:1240px;margin:0 auto;padding:24px 28px 56px;">
+
+      <!-- repo header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:18px;font-family:var(--font-display),sans-serif;letter-spacing:-.01em;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
+            <a style="color:var(--brand,#C2410C);text-decoration:none;font-weight:500;cursor:pointer;">marina</a>
+            <span style="color:var(--ink-3,#A8A29E);">/</span>
+            <a style="color:var(--ink,#1C1917);text-decoration:none;font-weight:700;cursor:pointer;">core-erp</a>
+            <span style="margin-left:4px;padding:2px 9px;border-radius:999px;border:1px solid var(--border-strong,#D9CFC0);font-size:11px;font-weight:600;color:var(--ink-2,#57534E);">Privado</span>
+          </div>
+          <p style="margin:10px 0 0;max-width:560px;font-size:14px;color:var(--ink-2,#57534E);line-height:1.5;">ERP modular da Lukos — núcleo de faturamento, estoque e fiscal. Repositório principal versionado em Subversion.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;background:var(--surface,#fff);border:1px solid var(--border-strong,#D9CFC0);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;color:var(--ink,#1C1917);cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Observar <span style="color:var(--ink-3,#A8A29E);font-weight:500;">14</span>
+          </button>
+          <button style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.12);">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+            Checkout
+          </button>
+        </div>
+      </div>
+
+      <!-- meta chips -->
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--ink-2,#57534E);">
+        <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--brand,#C2410C);"></span>Java</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>7 branches</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h7Z"></path><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"></circle></svg>23 tags</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono),monospace;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M3 12h6M15 12h6"></path></svg>r4821 · 4.821 revisões</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;color:var(--success,#15803D);font-weight:600;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>CI passou</span>
+      </div>
+
+      <!-- nav tabs -->
+      <nav style="margin-top:18px;border-bottom:1px solid var(--border,#E9E2D7);">
+        <div style="display:flex;gap:2px;overflow-x:auto;margin-bottom:-1px;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="10">
+            <a onClick="{{ t.onClick }}" style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:10px 13px;border-bottom:2px solid {{ t.border }};font-size:13px;font-weight:600;color: {{ t.color }};text-decoration:none;cursor:pointer;">
+              {{ t.icon }}{{ t.label }}
+              <sc-if value="{{ t.count }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--surface-2,#F4EFE7);font-size:10.5px;font-weight:700;color:var(--ink-2,#57534E);">{{ t.count }}</span></sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </nav>
+
+      <!-- ===== CODE TAB ===== -->
+      <sc-if value="{{ isCode }}" hint-placeholder-val="{{ true }}">
+      <!-- commit activity strip -->
+      <div style="margin-top:var(--gap,24px);background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:16px var(--pad,22px);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:13px;font-weight:600;color:var(--ink,#1C1917);">Atividade de commits</h3>
+          <span style="font-size:12px;color:var(--ink-2,#57534E);">52 semanas</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:60px;">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="40">
+            <div style="flex:1;min-width:3px;border-radius:2px 2px 0 0;background:var(--brand,#C2410C);opacity:.85;height: {{ b.h }};"></div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- main two col -->
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--gap,24px);align-items:start;margin-top:var(--gap,24px);">
+        <div style="display:flex;flex-direction:column;gap:var(--gap,24px);min-width:0;">
+
+          <!-- file browser -->
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:11px;padding:11px var(--pad,22px);background:var(--surface-2,#F4EFE7);border-bottom:1px solid var(--border,#E9E2D7);">
+              <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:var(--radius-sm,8px);background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink,#1C1917);">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                trunk
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+              </span>
+              <span style="font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink-2,#57534E);">core-erp / <span style="color:var(--brand,#C2410C);">@ r4821</span></span>
+              <span style="margin-left:auto;font-size:12px;color:var(--ink-2,#57534E);">9 itens</span>
+            </div>
+            <!-- latest commit ribbon -->
+            <div style="display:flex;align-items:center;gap:10px;padding:10px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);background:var(--brand-soft);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--brand,#C2410C);color:#fff;font-size:10px;font-weight:700;">CM</span>
+              <span style="font-size:12.5px;color:var(--ink,#1C1917);"><strong>Carlos M.</strong> ci: ajusta pipeline de staging</span>
+              <span style="margin-left:auto;font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--ink-2,#57534E);">r4821 · há 12 min</span>
+            </div>
+            <div>
+              <sc-for list="{{ files }}" as="f" hint-placeholder-count="9">
+                <div style="display:flex;align-items:center;gap:11px;padding:9px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                  <sc-if value="{{ f.isDir }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brand,#C2410C)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg></sc-if>
+                  <sc-if value="{{ f.isFile }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg></sc-if>
+                  <a style="font-family:var(--font-mono),monospace;font-size:13px;font-weight:500;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;flex-shrink:0;width:160px;overflow:hidden;text-overflow:ellipsis;" style-hover="color:var(--brand,#C2410C);text-decoration:underline;">{{ f.name }}</a>
+                  <span style="flex:1;font-size:12.5px;color:var(--ink-2,#57534E);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ f.msg }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3,#A8A29E);white-space:nowrap;">{{ f.age }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- README -->
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:9px;padding:11px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);background:var(--surface-2,#F4EFE7);">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-2,#57534E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"></path></svg>
+              <span style="font-family:var(--font-mono),monospace;font-size:12.5px;font-weight:600;color:var(--ink,#1C1917);">README.md</span>
+            </div>
+            <div style="padding:var(--pad,22px) 26px 28px;">
+              <h1 style="margin:0 0 4px;font-family:var(--font-display),sans-serif;font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink,#1C1917);">core-erp</h1>
+              <p style="margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--border,#E9E2D7);font-size:14px;color:var(--ink-2,#57534E);">Núcleo do ERP da Lukos: faturamento, estoque, fiscal e integrações bancárias.</p>
+              <h2 style="margin:0 0 10px;font-family:var(--font-display),sans-serif;font-size:17px;font-weight:600;color:var(--ink,#1C1917);">Como obter o código</h2>
+              <pre style="margin:0 0 18px;padding:14px 16px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);overflow-x:auto;"><code style="font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink,#1C1917);">svn checkout https://svn.lukos.com/core-erp/trunk core-erp</code></pre>
+              <h2 style="margin:0 0 10px;font-family:var(--font-display),sans-serif;font-size:17px;font-weight:600;color:var(--ink,#1C1917);">Estrutura</h2>
+              <ul style="margin:0;padding-left:20px;font-size:14px;color:var(--ink-2,#57534E);line-height:1.9;">
+                <li><code style="font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--surface-2,#F4EFE7);padding:1px 6px;border-radius:5px;">src/</code> — código-fonte dos módulos</li>
+                <li><code style="font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--surface-2,#F4EFE7);padding:1px 6px;border-radius:5px;">docs/</code> — documentação técnica e ADRs</li>
+                <li><code style="font-family:var(--font-mono),monospace;font-size:12.5px;background:var(--surface-2,#F4EFE7);padding:1px 6px;border-radius:5px;">deploy/</code> — manifestos e pipelines</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- right rail -->
+        <div style="display:flex;flex-direction:column;gap:var(--gap,24px);position:sticky;top:124px;">
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+            <h3 style="margin:0 0 14px;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Sobre</h3>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:13px;">
+              <span style="color:var(--ink-2,#57534E);">Saúde</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--success-soft);color:var(--success,#15803D);font-size:11.5px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:var(--success,#15803D);"></span>Saudável</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px;padding-top:16px;border-top:1px solid var(--border,#E9E2D7);font-size:13px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-2,#57534E);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>Branches</span><span style="font-weight:600;color:var(--ink,#1C1917);">7</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-2,#57534E);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h7Z"></path></svg>Tags</span><span style="font-weight:600;color:var(--ink,#1C1917);">23</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-2,#57534E);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M3 12h6M15 12h6"></path></svg>Revisões</span><span style="font-weight:600;color:var(--ink,#1C1917);">4.821</span></div>
+            </div>
+            <button style="margin-top:16px;width:100%;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;color:var(--ink,#1C1917);cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Instruções de checkout
+            </button>
+          </div>
+
+          <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+              <h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Contribuidores</h3>
+              <span style="margin-left:auto;font-size:12px;color:var(--ink-2,#57534E);">12</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:13px;">
+              <sc-for list="{{ contributors }}" as="c" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background: {{ c.color }};color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">{{ c.initials }}</span>
+                  <div style="min-width:0;flex:1;">
+                    <div style="font-size:13px;font-weight:600;color:var(--ink,#1C1917);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.name }}</div>
+                    <div style="font-size:11.5px;color:var(--ink-2,#57534E);">@{{ c.handle }}</div>
+                  </div>
+                  <span style="font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--ink-2,#57534E);">{{ c.commits }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== COMMITS TAB ===== -->
+      <sc-if value="{{ isCommits }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div style="flex:1;min-width:200px;position:relative;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+            <div style="height:36px;display:flex;align-items:center;padding:0 12px 0 32px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink-3,#A8A29E);">Buscar na mensagem do commit…</div>
+          </div>
+          <div style="height:36px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:500;color:var(--ink-2,#57534E);cursor:pointer;">Todos os autores<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></div>
+          <div style="height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;color:var(--ink,#1C1917);cursor:pointer;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>trunk</div>
+        </div>
+        <sc-for list="{{ commitGroups }}" as="g" hint-placeholder-count="2">
+          <div>
+            <div style="display:flex;align-items:center;gap:9px;padding:4px 2px 12px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M3 12h6M15 12h6"></path></svg>
+              <span style="font-family:var(--font-display),sans-serif;font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);text-transform:capitalize;">{{ g.day }}</span>
+            </div>
+            <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+              <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background: {{ c.color }};color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">{{ c.initials }}</span>
+                  <div style="min-width:0;flex:1;">
+                    <a style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;" style-hover="color:var(--brand,#C2410C);">{{ c.msg }}</a>
+                    <div style="margin-top:3px;font-size:11.5px;color:var(--ink-2,#57534E);"><strong style="font-weight:600;">{{ c.who }}</strong> commitou às {{ c.time }} · {{ c.files }} arquivos</div>
+                  </div>
+                  <span style="font-family:var(--font-mono),monospace;font-size:11.5px;font-weight:500;color:var(--ink-2,#57534E);padding:3px 8px;border:1px solid var(--border,#E9E2D7);border-radius:6px;">{{ c.rev }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <!-- ===== INSIGHTS TAB ===== -->
+      <sc-if value="{{ isInsights }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:grid;grid-template-columns:1fr 1fr;gap:var(--gap,24px);">
+        <!-- commit activity -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+          <h3 style="margin:0 0 4px;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Atividade de commits</h3>
+          <p style="margin:0 0 16px;font-size:12px;color:var(--ink-2,#57534E);">Últimas 52 semanas</p>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:90px;">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="40">
+              <div style="flex:1;min-width:3px;border-radius:2px 2px 0 0;background:var(--brand,#C2410C);opacity:.85;height: {{ b.h }};"></div>
+            </sc-for>
+          </div>
+        </div>
+        <!-- monthly trend -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+          <h3 style="margin:0 0 4px;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Tendência mensal</h3>
+          <p style="margin:0 0 16px;font-size:12px;color:var(--ink-2,#57534E);">Commits por mês · 12 meses</p>
+          <svg viewBox="0 0 460 120" width="100%" height="90" preserveAspectRatio="none" style="overflow:visible;">
+            <polyline points="{{ monthlyPts }}" fill="none" stroke="var(--brand,#C2410C)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          </svg>
+        </div>
+        <!-- author distribution -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);">
+          <h3 style="margin:0 0 16px;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Distribuição por autor</h3>
+          <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:16px;">
+            <sc-for list="{{ authorDist }}" as="a" hint-placeholder-count="4">
+              <div style="width: {{ a.w }};background: {{ a.color }};"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ authorDist }}" as="a" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;">
+                <span style="width:10px;height:10px;border-radius:3px;background: {{ a.color }};flex-shrink:0;"></span>
+                <span style="font-weight:500;color:var(--ink,#1C1917);">{{ a.name }}</span>
+                <span style="margin-left:auto;font-family:var(--font-mono),monospace;color:var(--ink-2,#57534E);">{{ a.commits }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <!-- contributors -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);"><h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">12 contribuidores</h3></div>
+          <div>
+            <sc-for list="{{ contribBars }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;align-items:flex-start;gap:11px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background: {{ c.color }};color:#fff;font-size:11px;font-weight:700;flex-shrink:0;">{{ c.initials }}</span>
+                <div style="min-width:0;flex:1;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;"><span style="font-weight:600;color:var(--ink,#1C1917);">{{ c.name }}</span><span style="color:var(--ink-2,#57534E);">{{ c.commits }} commits</span></div>
+                  <div style="margin-top:6px;height:6px;border-radius:3px;background:var(--surface-2,#F4EFE7);overflow:hidden;"><div style="height:100%;border-radius:3px;background:var(--brand,#C2410C);width: {{ c.w }};"></div></div>
+                  <p style="margin:5px 0 0;font-size:11px;color:var(--ink-3,#A8A29E);">{{ c.range }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== ISSUES TAB ===== -->
+      <sc-if value="{{ isIssues }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div style="display:flex;gap:3px;padding:3px;background:var(--surface-2,#F4EFE7);border-radius:var(--radius-sm,8px);">
+            <span style="padding:5px 12px;border-radius:6px;background:var(--surface,#fff);font-size:12.5px;font-weight:600;color:var(--ink,#1C1917);box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer;">Abertas <span style="color:var(--ink-3,#A8A29E);">3</span></span>
+            <span style="padding:5px 12px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink-2,#57534E);cursor:pointer;">Fechadas <span style="color:var(--ink-3,#A8A29E);">2</span></span>
+          </div>
+          <div style="flex:1;min-width:160px;position:relative;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+            <div style="height:34px;display:flex;align-items:center;padding:0 12px 0 32px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink-3,#A8A29E);">Buscar por título</div>
+          </div>
+          <button style="height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nova issue</button>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <sc-for list="{{ issues }}" as="i" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:13px;padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="{{ i.statusFg }}" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="2.5" fill="{{ i.statusFg }}" stroke="none"></circle></svg>
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <a style="font-size:14px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;" style-hover="color:var(--brand,#C2410C);">{{ i.title }}</a>
+                  <sc-for list="{{ i.labels }}" as="l" hint-placeholder-count="2">
+                    <span style="padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:600;color:#fff;background: {{ l.c }};">{{ l.name }}</span>
+                  </sc-for>
+                </div>
+                <div style="margin-top:4px;font-size:11.5px;color:var(--ink-2,#57534E);">#{{ i.num }} · {{ i.statusLabel }} por {{ i.author }}</div>
+              </div>
+              <sc-if value="{{ i.assignee }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background: {{ i.assignee.color }};color:#fff;font-size:10.5px;font-weight:700;flex-shrink:0;">{{ i.assignee.initials }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== PULL REQUESTS TAB ===== -->
+      <sc-if value="{{ isPulls }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="height:32px;display:inline-flex;align-items:center;padding:0 13px;border-radius:var(--radius-sm,8px);background:var(--brand,#C2410C);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;">Todos</span>
+          <span style="height:32px;display:inline-flex;align-items:center;padding:0 13px;border-radius:var(--radius-sm,8px);background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);color:var(--ink-2,#57534E);font-size:12.5px;font-weight:600;cursor:pointer;">Abertos</span>
+          <span style="height:32px;display:inline-flex;align-items:center;padding:0 13px;border-radius:var(--radius-sm,8px);background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);color:var(--ink-2,#57534E);font-size:12.5px;font-weight:600;cursor:pointer;">Mergeados</span>
+          <span style="height:32px;display:inline-flex;align-items:center;padding:0 13px;border-radius:var(--radius-sm,8px);background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);color:var(--ink-2,#57534E);font-size:12.5px;font-weight:600;cursor:pointer;">Fechados</span>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <sc-for list="{{ pulls }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:13px;padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="{{ p.fg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="18" r="3"></circle><path d="M6 9v6M18 15V9a4 4 0 0 0-4-4h-3"></path></svg>
+              <div style="min-width:0;flex:1;">
+                <a style="font-size:14px;font-weight:600;color:var(--ink,#1C1917);text-decoration:none;cursor:pointer;" style-hover="color:var(--brand,#C2410C);">{{ p.title }}</a>
+                <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2,#57534E);">
+                  <span>#{{ p.num }} · por {{ p.author }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono),monospace;"><span style="padding:1px 6px;border-radius:5px;background:var(--surface-2,#F4EFE7);">{{ p.src }}</span>→<span style="padding:1px 6px;border-radius:5px;background:var(--surface-2,#F4EFE7);">{{ p.tgt }}</span></span>
+                </div>
+              </div>
+              <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background: {{ p.bg }};color: {{ p.fg }};">{{ p.label }}</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background: {{ p.color }};color:#fff;font-size:10.5px;font-weight:700;flex-shrink:0;">{{ p.initials }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== PIPELINES TAB ===== -->
+      <sc-if value="{{ isPipelines }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2,#57534E);">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>
+          CI/CD automatizado via <code style="font-family:var(--font-mono),monospace;background:var(--surface-2,#F4EFE7);padding:1px 7px;border-radius:5px;color:var(--ink,#1C1917);">.svnhub-ci.yml</code>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <sc-for list="{{ runs }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:13px;padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background: {{ p.dot }};flex-shrink:0; {{ p.pulse }}"></span>
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);">{{ p.branch }} · <span style="font-family:var(--font-mono),monospace;font-weight:500;">{{ p.rev }}</span></div>
+                <div style="margin-top:3px;font-size:11.5px;color:var(--ink-2,#57534E);">{{ p.trigger }} · {{ p.dur }} · {{ p.time }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <sc-for list="{{ p.stages }}" as="st" hint-placeholder-count="3">
+                  <span style="padding:2px 8px;border-radius:6px;background:var(--surface-2,#F4EFE7);font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ink-2,#57534E);">{{ st }}</span>
+                </sc-for>
+              </div>
+              <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background: {{ p.badgeBg }};color: {{ p.badgeFg }};">{{ p.statusLabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== BRANCHES TAB ===== -->
+      <sc-if value="{{ isBranches }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2,#57534E);"><code style="font-family:var(--font-mono),monospace;background:var(--surface-2,#F4EFE7);padding:1px 7px;border-radius:5px;color:var(--ink,#1C1917);">main</code> = <code style="font-family:var(--font-mono),monospace;background:var(--surface-2,#F4EFE7);padding:1px 7px;border-radius:5px;color:var(--ink,#1C1917);">/trunk</code></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;height:36px;display:flex;align-items:center;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink-3,#A8A29E);">Nome da nova branch (ex: feat/minha-feature)</div>
+          <button style="height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;">Criar branch</button>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1.7fr 1fr 0.9fr 0.9fr 44px;gap:12px;padding:11px var(--pad,22px);background:var(--surface-2,#F4EFE7);border-bottom:1px solid var(--border,#E9E2D7);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2,#57534E);">
+            <span>Branch</span><span>Criada</span><span>Último commit</span><span>Autor</span><span></span>
+          </div>
+          <sc-for list="{{ branchRows }}" as="b" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 0.9fr 0.9fr 44px;gap:12px;align-items:center;padding:12px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <div style="min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><a style="font-family:var(--font-mono),monospace;font-size:13px;font-weight:600;color:var(--brand,#C2410C);text-decoration:none;cursor:pointer;">{{ b.name }}</a><sc-if value="{{ b.def }}" hint-placeholder-val="{{ false }}"><span style="padding:1px 7px;border-radius:999px;background:var(--brand-soft);color:var(--brand,#C2410C);font-size:10px;font-weight:600;">default</span></sc-if></div>
+                <div style="margin-top:2px;font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ink-3,#A8A29E);">{{ b.path }}</div>
+              </div>
+              <div style="font-size:12px;"><span style="font-family:var(--font-mono),monospace;color:var(--ink,#1C1917);">{{ b.createdRev }}</span><div style="font-size:10.5px;color:var(--ink-3,#A8A29E);">{{ b.createdBy }}</div></div>
+              <span style="font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink,#1C1917);">{{ b.lastRev }}</span>
+              <span style="font-size:12px;color:var(--ink-2,#57534E);">{{ b.lastBy }}</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-sm,8px);color:var(--ink-3,#A8A29E);cursor:pointer;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== RELEASES TAB ===== -->
+      <sc-if value="{{ isReleases }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2,#57534E);">Tags · <code style="font-family:var(--font-mono),monospace;background:var(--surface-2,#F4EFE7);padding:1px 7px;border-radius:5px;color:var(--ink,#1C1917);">/tags/*</code></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;height:36px;display:flex;align-items:center;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink-3,#A8A29E);">Nome da tag (ex: v3.2.1)</div>
+          <button style="height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;">Criar release</button>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1.7fr 1fr 0.9fr 0.9fr 44px;gap:12px;padding:11px var(--pad,22px);background:var(--surface-2,#F4EFE7);border-bottom:1px solid var(--border,#E9E2D7);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2,#57534E);">
+            <span>Tag</span><span>Criada</span><span>Revisão</span><span>Autor</span><span></span>
+          </div>
+          <sc-for list="{{ releases }}" as="t" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 0.9fr 0.9fr 44px;gap:12px;align-items:center;padding:12px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <div style="min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--brand,#C2410C)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h7Z"></path></svg><span style="font-family:var(--font-mono),monospace;font-size:13px;font-weight:600;color:var(--ink,#1C1917);">{{ t.name }}</span></div>
+                <div style="margin-top:2px;font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ink-3,#A8A29E);">{{ t.path }}</div>
+              </div>
+              <div style="font-size:12px;"><span style="font-family:var(--font-mono),monospace;color:var(--ink,#1C1917);">{{ t.createdRev }}</span><div style="font-size:10.5px;color:var(--ink-3,#A8A29E);">{{ t.createdBy }}</div></div>
+              <span style="font-family:var(--font-mono),monospace;font-size:12px;color:var(--ink,#1C1917);">{{ t.lastRev }}</span>
+              <span style="font-size:12px;color:var(--ink-2,#57534E);">{{ t.createdBy }}</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-sm,8px);color:var(--ink-3,#A8A29E);cursor:pointer;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== COMPARE TAB ===== -->
+      <sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);display:flex;flex-direction:column;gap:var(--gap,24px);">
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);padding:var(--pad,22px);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink-2,#57534E);">Base</span>
+          <div style="height:34px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink,#1C1917);cursor:pointer;">trunk<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></div>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink-2,#57534E);">Comparar</span>
+          <div style="height:34px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:var(--surface-2,#F4EFE7);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink,#1C1917);cursor:pointer;">feat/faturamento<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></div>
+          <button style="margin-left:auto;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;">Comparar</button>
+        </div>
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:13px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);font-size:12.5px;color:var(--ink-2,#57534E);">
+            <span style="font-family:var(--font-mono),monospace;color:var(--ink,#1C1917);">trunk ← feat/faturamento</span>
+            <span>· 4 arquivos</span>
+            <span style="margin-left:auto;color:var(--success,#15803D);font-weight:600;">+84</span>
+            <span style="color:var(--danger,#B42318);font-weight:600;">−19</span>
+          </div>
+          <sc-for list="{{ diffFiles }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:13px;padding:11px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-3,#A8A29E)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>
+              <span style="flex:1;font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink,#1C1917);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ d.path }}</span>
+              <span style="font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--success,#15803D);">+{{ d.add }}</span>
+              <span style="font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--danger,#B42318);">−{{ d.del }}</span>
+              <div style="display:flex;gap:2px;width:54px;flex-shrink:0;"><div style="height:9px;border-radius:2px;background:var(--success,#15803D);width: {{ d.addW }};"></div><div style="height:9px;border-radius:2px;background:var(--danger,#B42318);width: {{ d.delW }};"></div></div>
+            </div>
+          </sc-for>
+          <div style="padding:14px var(--pad,22px);"><button style="height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="18" r="3"></circle><path d="M6 9v6M18 15V9a4 4 0 0 0-4-4h-3"></path></svg>Criar pull request</button></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:var(--gap,24px);max-width:720px;display:flex;flex-direction:column;gap:var(--gap,24px);">
+        <!-- geral -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);"><h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Geral</h3></div>
+          <div style="padding:var(--pad,22px);display:flex;flex-direction:column;gap:16px;">
+            <div><label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2,#57534E);margin-bottom:6px;">Nome do repositório</label><div style="height:36px;display:flex;align-items:center;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border-strong,#D8CDBC);border-radius:var(--radius-sm,8px);font-family:var(--font-mono),monospace;font-size:13px;color:var(--ink,#1C1917);">core-erp</div></div>
+            <div><label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2,#57534E);margin-bottom:6px;">Descrição</label><div style="min-height:60px;padding:9px 12px;background:var(--surface,#fff);border:1px solid var(--border-strong,#D8CDBC);border-radius:var(--radius-sm,8px);font-size:13px;color:var(--ink,#1C1917);line-height:1.5;">ERP modular da Lukos — núcleo de faturamento, estoque e fiscal.</div></div>
+            <div><label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2,#57534E);margin-bottom:6px;">Visibilidade</label>
+              <div style="display:flex;gap:10px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--brand,#C2410C);border-radius:var(--radius-sm,8px);background:var(--brand-soft);font-size:13px;font-weight:600;color:var(--brand,#C2410C);cursor:pointer;"><span style="width:14px;height:14px;border-radius:50%;border:4px solid var(--brand,#C2410C);"></span>Privado</span>
+                <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--border,#E9E2D7);border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;color:var(--ink-2,#57534E);cursor:pointer;"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink-3,#A8A29E);"></span>Público</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- politicas -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--border,#E9E2D7);border-radius:var(--radius,12px);box-shadow:var(--card-shadow);overflow:hidden;">
+          <div style="padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);"><h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--ink,#1C1917);">Proteção de paths (pre-commit)</h3></div>
+          <div style="padding:var(--pad,22px);display:flex;flex-direction:column;gap:14px;">
+            <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink,#1C1917);cursor:pointer;"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:var(--brand,#C2410C);flex-shrink:0;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>Bloquear commit direto em main (/trunk)</label>
+            <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink,#1C1917);cursor:pointer;"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:var(--brand,#C2410C);flex-shrink:0;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>Bloquear escrita em /tags/*</label>
+            <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink,#1C1917);cursor:pointer;"><span style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border-strong,#D8CDBC);flex-shrink:0;"></span>Mensagem de commit obrigatória</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-top:6px;">
+              <div><label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2,#57534E);margin-bottom:6px;">Regex da mensagem</label><div style="height:34px;display:flex;align-items:center;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border-strong,#D8CDBC);border-radius:var(--radius-sm,8px);font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--ink-3,#A8A29E);">^\[SVNHUB-\d+\]</div></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2,#57534E);margin-bottom:6px;">Aprovações mínimas p/ merge</label><div style="height:34px;display:flex;align-items:center;padding:0 12px;background:var(--surface,#fff);border:1px solid var(--border-strong,#D8CDBC);border-radius:var(--radius-sm,8px);font-family:var(--font-mono),monospace;font-size:13px;color:var(--ink,#1C1917);">2</div></div>
+            </div>
+            <button style="align-self:flex-start;height:36px;padding:0 16px;background:var(--brand,#C2410C);color:#fff;border:none;border-radius:var(--radius-sm,8px);font-size:13px;font-weight:600;cursor:pointer;">Salvar políticas</button>
+          </div>
+        </div>
+        <!-- danger -->
+        <div style="background:var(--surface,#fff);border:1px solid var(--danger,#B42318);border-radius:var(--radius,12px);overflow:hidden;">
+          <div style="padding:14px var(--pad,22px);border-bottom:1px solid var(--border,#E9E2D7);"><h3 style="margin:0;font-family:var(--font-display),sans-serif;font-size:14px;font-weight:600;color:var(--danger,#B42318);">Zona de perigo</h3></div>
+          <div style="padding:var(--pad,22px);display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;"><div style="flex:1;"><div style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);">Arquivar repositório</div><div style="font-size:12px;color:var(--ink-2,#57534E);">Torna o repositório somente-leitura.</div></div><button style="height:34px;padding:0 14px;background:transparent;border:1px solid var(--danger,#B42318);color:var(--danger,#B42318);border-radius:var(--radius-sm,8px);font-size:12.5px;font-weight:600;cursor:pointer;">Arquivar</button></div>
+            <div style="display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid var(--border,#E9E2D7);"><div style="flex:1;"><div style="font-size:13.5px;font-weight:600;color:var(--ink,#1C1917);">Excluir repositório</div><div style="font-size:12px;color:var(--ink-2,#57534E);">Ação permanente. Não pode ser desfeita.</div></div><button style="height:34px;padding:0 14px;background:var(--danger,#B42318);border:none;color:#fff;border-radius:var(--radius-sm,8px);font-size:12.5px;font-weight:600;cursor:pointer;">Excluir</button></div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+    </sc-if>
+
+    <!-- footer -->
+    <footer style="border-top:1px solid var(--border,#E9E2D7);background:var(--header-bg,#fff);">
+      <div style="max-width:1240px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-3,#A8A29E);">
+        <span style="display:inline-flex;align-items:center;gap:7px;color:var(--ink-2,#57534E);font-weight:600;">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="var(--brand,#C2410C)"></rect><g stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M8.5 7.6 V16.4"></path><path d="M8.5 12 C8.5 9.7, 11 9.3, 15 9.3"></path></g><circle cx="8.5" cy="6.9" r="1.5" fill="#fff"></circle><circle cx="8.5" cy="17.1" r="1.5" fill="#fff"></circle><circle cx="15.3" cy="9.3" r="1.5" fill="#fff"></circle></svg>
+          SVNHUB
+        </span>
+        <span>Subversion, com a cara de um hub moderno.</span>
+        <span style="margin-left:auto;">© 2026 Lukos · v2.0</span>
+      </div>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:960},&quot;direction&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A' | 'B'&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dashboard&quot;,&quot;repository&quot;],&quot;default&quot;:&quot;dashboard&quot;,&quot;tsType&quot;:&quot;'dashboard' | 'repository'&quot;}}">
+class Component extends DCLogic {
+  state = {};
+
+  eff() {
+    return {
+      direction: this.state.direction ?? this.props.direction ?? 'A',
+      theme: this.state.theme ?? this.props.theme ?? 'light',
+      screen: this.state.screen ?? this.props.screen ?? 'dashboard',
+    };
+  }
+
+  tokens(direction, theme) {
+    const radA = { '--radius': '13px', '--radius-sm': '8px', '--pad': '22px', '--gap': '24px' };
+    const radB = { '--radius': '9px', '--radius-sm': '6px', '--pad': '18px', '--gap': '18px' };
+    const T = {
+      A: {
+        light: {
+          '--brand': '#C2410C', '--brand-2': '#EA580C', '--brand-soft': '#FBEADF',
+          '--ink': '#1C1917', '--ink-2': '#5C544C', '--ink-3': '#A8A096',
+          '--page': '#FAF6F0', '--surface': '#FFFFFF', '--surface-2': '#F4EEE4',
+          '--border': '#E9E1D5', '--border-strong': '#D8CDBC',
+          '--success': '#15803D', '--success-soft': '#DCFCE7', '--warn': '#B45309', '--warn-soft': '#FDF1D8', '--danger': '#B42318', '--danger-soft': '#FBE3E0',
+          '--card-shadow': '0 1px 2px rgba(40,30,20,.05), 0 6px 18px -10px rgba(40,30,20,.12)',
+          '--heat-0': '#EDE6D9', '--heat-1': '#F6CBA6', '--heat-2': '#EFA063', '--heat-3': '#E0772E', '--heat-4': '#C2410C',
+          '--header-bg': '#FFFDFA',
+        },
+        dark: {
+          '--brand': '#FB923C', '--brand-2': '#F97316', '--brand-soft': '#3A2616',
+          '--ink': '#F6EEE3', '--ink-2': '#BBAF9D', '--ink-3': '#7E7363',
+          '--page': '#14100B', '--surface': '#1E1811', '--surface-2': '#271F16',
+          '--border': '#352A1E', '--border-strong': '#473828',
+          '--success': '#4ADE80', '--success-soft': '#10271A', '--warn': '#FBBF24', '--warn-soft': '#2A2110', '--danger': '#F87171', '--danger-soft': '#2C1614',
+          '--card-shadow': '0 1px 2px rgba(0,0,0,.5)',
+          '--heat-0': '#251D13', '--heat-1': '#5A3413', '--heat-2': '#8C4D17', '--heat-3': '#C4691F', '--heat-4': '#FB923C',
+          '--header-bg': '#1A140D',
+        },
+      },
+      B: {
+        light: {
+          '--brand': '#6366F1', '--brand-2': '#8B5CF6', '--brand-soft': '#ECEEFE',
+          '--ink': '#0F172A', '--ink-2': '#4A5568', '--ink-3': '#94A0B5',
+          '--page': '#F3F4FB', '--surface': '#FFFFFF', '--surface-2': '#F6F7FD',
+          '--border': '#E3E5F0', '--border-strong': '#CFD3E8',
+          '--success': '#16A34A', '--success-soft': '#DCFCE7', '--warn': '#D97706', '--warn-soft': '#FEF3C7', '--danger': '#DC2626', '--danger-soft': '#FEE2E2',
+          '--card-shadow': '0 1px 2px rgba(15,23,42,.05)',
+          '--heat-0': '#E7E9F7', '--heat-1': '#C5C9F4', '--heat-2': '#A0A4F0', '--heat-3': '#7B7FEC', '--heat-4': '#6366F1',
+          '--header-bg': '#FFFFFF',
+        },
+        dark: {
+          '--brand': '#818CF8', '--brand-2': '#A78BFA', '--brand-soft': '#1F2240',
+          '--ink': '#E9EDF8', '--ink-2': '#9BA6BE', '--ink-3': '#5E6A80',
+          '--page': '#0A0F1C', '--surface': '#111827', '--surface-2': '#161F30',
+          '--border': '#1F2937', '--border-strong': '#2C3850',
+          '--success': '#34D399', '--success-soft': '#0C2A20', '--warn': '#FBBF24', '--warn-soft': '#2A2310', '--danger': '#F87171', '--danger-soft': '#2A1518',
+          '--card-shadow': '0 1px 2px rgba(0,0,0,.5)',
+          '--heat-0': '#172033', '--heat-1': '#2B3470', '--heat-2': '#3E49A0', '--heat-3': '#5965D6', '--heat-4': '#818CF8',
+          '--header-bg': '#0D1424',
+        },
+      },
+    };
+    const rad = direction === 'A' ? radA : radB;
+    return { ...T[direction][theme], ...rad };
+  }
+
+  heat() {
+    const out = []; let s = 919;
+    const r = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+    for (let i = 0; i < 53 * 7; i++) {
+      const v = r(); let lvl = 0;
+      if (v > 0.55) lvl = 1; if (v > 0.72) lvl = 2; if (v > 0.86) lvl = 3; if (v > 0.95) lvl = 4;
+      out.push({ bg: `var(--heat-${lvl})` });
+    }
+    return out;
+  }
+
+  bars() {
+    const out = []; let s = 71;
+    const r = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+    for (let i = 0; i < 52; i++) out.push({ h: Math.round(8 + r() * r() * 52) + 'px' });
+    return out;
+  }
+
+  ic(path, fill) {
+    return React.createElement('svg', { viewBox: '0 0 24 24', width: 14, height: 14, fill: fill || 'none', stroke: fill ? 'none' : 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+      React.createElement('path', { d: path }));
+  }
+
+  renderVals() {
+    const { direction, theme, screen } = this.eff();
+    const themeVars = this.tokens(direction, theme);
+
+    const seg = (active) => ({
+      appearance: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+      fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '7px',
+      background: active ? '#fff' : 'transparent', color: active ? '#0B0F17' : '#94A3B8',
+      transition: 'all .15s', whiteSpace: 'nowrap',
+    });
+
+    const set = (k, v) => () => this.setState({ [k]: v });
+
+    const cpal = ['#C2410C', '#6366F1', '#0EA5E9', '#15803D', '#DB2777'];
+
+    // dashboard data
+    const stats = [
+      { label: 'Repositórios', value: '12', sub: '2 novos este mês', subColor: 'var(--ink-3)', icon: this.ic('M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z') },
+      { label: 'PRs abertas', value: '4', sub: '1 aguarda você', subColor: 'var(--brand)', icon: this.ic('M6 9v6 M6 6a3 3 0 1 0 0-.01 M18 18a3 3 0 1 0 0-.01 M18 15V9a4 4 0 0 0-4-4') },
+      { label: 'Pipelines hoje', value: '9', sub: '1 falhou', subColor: 'var(--danger)', icon: this.ic('M3 3h6v6H3z M15 15h6v6h-6z M9 6h6a3 3 0 0 1 3 3v6') },
+      { label: 'Commits / semana', value: '47', sub: '+12% vs. anterior', subColor: 'var(--success)', icon: this.ic('M22 12h-4l-3 9L9 3l-3 9H2') },
+    ];
+
+    const repos = [
+      { name: 'core-erp', rev: 'r4821' }, { name: 'app-mobile', rev: 'r982' },
+      { name: 'gateway-pagamentos', rev: 'r540' }, { name: 'infra-scripts', rev: 'r311' },
+      { name: 'design-tokens', rev: 'r88' }, { name: 'faturamento-legado', rev: 'r2210' },
+    ];
+
+    const myPrs = [
+      { title: 'Refatorar módulo de faturamento', repo: 'core-erp', num: '128', src: 'feat/faturamento', tgt: 'trunk' },
+      { title: 'Corrigir timezone nos relatórios fiscais', repo: 'core-erp', num: '131', src: 'fix/tz', tgt: 'trunk' },
+    ];
+    const reviewPrs = [
+      { title: 'Migrar autenticação para OIDC', repo: 'gateway-pagamentos', num: '42', author: 'João Pedro' },
+    ];
+
+    const pipe = (status) => {
+      const map = {
+        success: { dot: 'var(--success)', badgeBg: 'var(--success-soft)', badgeFg: 'var(--success)', statusLabel: 'Sucesso', pulse: '' },
+        running: { dot: 'var(--brand)', badgeBg: 'var(--brand-soft)', badgeFg: 'var(--brand)', statusLabel: 'Rodando', pulse: 'animation:svnpulse 1.2s ease-in-out infinite;' },
+        failed: { dot: 'var(--danger)', badgeBg: 'var(--danger-soft)', badgeFg: 'var(--danger)', statusLabel: 'Falhou', pulse: '' },
+      };
+      return map[status];
+    };
+    const pipelines = [
+      { repo: 'core-erp', rev: 'r4821', meta: 'commit · há 12 min', ...pipe('success') },
+      { repo: 'app-mobile', rev: 'r982', meta: 'manual · há 3 min', ...pipe('running') },
+      { repo: 'infra-scripts', rev: 'r311', meta: 'deploy-staging · há 1 h', ...pipe('failed') },
+    ];
+
+    const actIcon = {
+      commit: { icon: this.ic('M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6 M3 12h6 M15 12h6'), iconBg: 'var(--brand-soft)', iconFg: 'var(--brand)' },
+      merge: { icon: this.ic('M20 6 9 17l-5-5'), iconBg: 'var(--success-soft)', iconFg: 'var(--success)' },
+      fail: { icon: this.ic('M18 6 6 18 M6 6l12 12'), iconBg: 'var(--danger-soft)', iconFg: 'var(--danger)' },
+      open: { icon: this.ic('M12 5v14 M5 12h14'), iconBg: 'var(--brand-soft)', iconFg: 'var(--brand)' },
+    };
+    const activity = [
+      { who: 'Marina Alves', text: 'commitou r4821 em core-erp', sub: 'fix: corrige cálculo de ICMS em notas interestaduais', time: 'há 12 minutos', ...actIcon.commit },
+      { who: 'João Pedro', text: 'mergeou PR #126 em gateway-pagamentos', sub: 'Migração para conexão TLS 1.3', time: 'há 1 hora', ...actIcon.merge },
+      { who: '', text: 'Pipeline falhou em infra-scripts (r311)', sub: 'deploy-staging · etapa "migrate" retornou 1', time: 'há 1 hora', ...actIcon.fail },
+      { who: 'Ana Lima', text: 'abriu PR #133 em app-mobile', sub: 'Tela de onboarding offline-first', time: 'há 3 horas', ...actIcon.open },
+      { who: 'Carlos M.', text: 'commitou r4819 em core-erp', sub: 'chore: atualiza dependências do módulo fiscal', time: 'há 5 horas', ...actIcon.commit },
+    ];
+
+    // repo data
+    const rt = this.state.repoTab ?? 'code';
+    const tab = (id, label, path, count) => ({
+      id, label, count: count || false,
+      color: rt === id ? 'var(--brand)' : 'var(--ink-2)',
+      border: rt === id ? 'var(--brand)' : 'transparent',
+      onClick: () => this.setState({ repoTab: id }),
+      icon: React.createElement('svg', { viewBox: '0 0 24 24', width: 15, height: 15, fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: path })),
+    });
+    const tabs = [
+      tab('code', 'Code', 'm16 18 6-6-6-6 M8 6l-6 6 6 6'),
+      tab('commits', 'Commits', 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6 M3 12h6 M15 12h6'),
+      tab('insights', 'Insights', 'M3 3v18h18 M7 14l4-4 3 3 5-6'),
+      tab('issues', 'Issues', 'M12 8v4 M12 16h.01 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', '3'),
+      tab('pulls', 'Pull requests', 'M6 9v6 M6 6a3 3 0 1 0 0-.01 M18 18a3 3 0 1 0 0-.01 M18 15V9a4 4 0 0 0-4-4'),
+      tab('pipelines', 'Pipelines', 'M3 3h6v6H3z M15 15h6v6h-6z M9 6h6a3 3 0 0 1 3 3v6'),
+      tab('branches', 'Branches', 'M6 3v12 M6 18a3 3 0 1 0 0-.01 M18 6a3 3 0 1 0 0-.01 M18 9a9 9 0 0 1-9 9'),
+      tab('releases', 'Releases', 'M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h7Z'),
+      tab('compare', 'Compare', 'M16 3h5v5 M21 3l-7 7 M8 21H3v-5 M3 21l7-7'),
+      tab('settings', 'Settings', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 2h-4l-.4 2.4a7 7 0 0 0-1.7 1l-2.4-1-2 3.4L4 11a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.4h4l.4-2.4a7 7 0 0 0 1.7-1l2.4 1 2-3.4L19 13a7 7 0 0 0 0-1Z'),
+    ];
+    const repoTabBools = {
+      isCode: rt === 'code', isCommits: rt === 'commits', isInsights: rt === 'insights',
+      isIssues: rt === 'issues', isPulls: rt === 'pulls', isPipelines: rt === 'pipelines',
+      isBranches: rt === 'branches', isReleases: rt === 'releases', isCompare: rt === 'compare',
+      isSettings: rt === 'settings',
+    };
+
+    // commits grouped by day
+    const commitGroups = [
+      { day: 'quinta-feira, 19 de junho de 2026', items: [
+        { who: 'Carlos M.', initials: 'CM', color: cpal[3], msg: 'ci: ajusta pipeline de staging', time: '09:42', files: 3, rev: 'r4821' },
+        { who: 'Marina Alves', initials: 'MA', color: cpal[0], msg: 'fix: corrige cálculo de ICMS em notas interestaduais', time: '08:15', files: 7, rev: 'r4820' },
+      ] },
+      { day: 'quarta-feira, 18 de junho de 2026', items: [
+        { who: 'Ana Lima', initials: 'AL', color: cpal[2], msg: 'feat: novo serviço de conciliação bancária', time: '17:30', files: 12, rev: 'r4819' },
+        { who: 'João Pedro', initials: 'JP', color: cpal[1], msg: 'refactor: extrai cliente HTTP do módulo fiscal', time: '14:05', files: 5, rev: 'r4818' },
+        { who: 'Marina Alves', initials: 'MA', color: cpal[0], msg: 'chore: atualiza dependências do módulo fiscal', time: '11:20', files: 2, rev: 'r4817' },
+      ] },
+    ];
+
+    // issues
+    const issueStatus = (s) => s === 'OPEN'
+      ? { statusBg: 'var(--success-soft)', statusFg: 'var(--success)', statusLabel: 'Aberta' }
+      : { statusBg: 'var(--surface-2)', statusFg: 'var(--ink-2)', statusLabel: 'Fechada' };
+    const issues = [
+      { num: '142', title: 'Erro 500 ao gerar NF-e em lote', labels: [{ name: 'bug', c: '#B42318' }, { name: 'fiscal', c: '#6366F1' }], assignee: { initials: 'MA', color: cpal[0] }, author: 'ana', ...issueStatus('OPEN') },
+      { num: '139', title: 'Melhorar performance do relatório de estoque', labels: [{ name: 'melhoria', c: '#15803D' }], assignee: null, author: 'jpedro', ...issueStatus('OPEN') },
+      { num: '137', title: 'Adicionar suporte a PIX no checkout', labels: [{ name: 'feature', c: '#6366F1' }, { name: 'pagamentos', c: '#9A6700' }], assignee: { initials: 'CM', color: cpal[3] }, author: 'carlos', ...issueStatus('OPEN') },
+      { num: '131', title: 'Timezone incorreto em relatórios fiscais', labels: [{ name: 'bug', c: '#B42318' }], assignee: { initials: 'MA', color: cpal[0] }, author: 'marina', ...issueStatus('CLOSED') },
+      { num: '128', title: 'Documentar processo de deploy', labels: [{ name: 'docs', c: '#9A6700' }], assignee: null, author: 'ana', ...issueStatus('CLOSED') },
+    ];
+
+    // pulls
+    const prStatus = (s) => ({
+      OPEN: { bg: 'var(--success-soft)', fg: 'var(--success)', label: 'Aberto' },
+      MERGED: { bg: 'var(--brand-soft)', fg: 'var(--brand)', label: 'Mergeado' },
+      CLOSED: { bg: 'var(--danger-soft)', fg: 'var(--danger)', label: 'Fechado' },
+    }[s]);
+    const pulls = [
+      { num: '133', title: 'Tela de onboarding offline-first', src: 'feat/onboarding', tgt: 'trunk', author: 'ana', initials: 'AL', color: cpal[2], ...prStatus('OPEN') },
+      { num: '131', title: 'Corrigir timezone nos relatórios fiscais', src: 'fix/tz', tgt: 'trunk', author: 'marina', initials: 'MA', color: cpal[0], ...prStatus('OPEN') },
+      { num: '128', title: 'Refatorar módulo de faturamento', src: 'feat/faturamento', tgt: 'trunk', author: 'marina', initials: 'MA', color: cpal[0], ...prStatus('OPEN') },
+      { num: '126', title: 'Migração para conexão TLS 1.3', src: 'feat/tls', tgt: 'trunk', author: 'jpedro', initials: 'JP', color: cpal[1], ...prStatus('MERGED') },
+      { num: '120', title: 'Experimento de cache distribuído', src: 'spike/cache', tgt: 'trunk', author: 'carlos', initials: 'CM', color: cpal[3], ...prStatus('CLOSED') },
+    ];
+
+    // pipeline runs
+    const runs = [
+      { rev: 'r4821', branch: 'trunk', trigger: 'commit', dur: '2m 14s', time: 'há 12 min', stages: ['build', 'test', 'deploy'], ...pipe('success') },
+      { rev: 'r982', branch: 'app-mobile', trigger: 'manual', dur: '—', time: 'há 3 min', stages: ['build', 'test', 'deploy'], ...pipe('running') },
+      { rev: 'r4819', branch: 'trunk', trigger: 'commit', dur: '1m 58s', time: 'há 5 h', stages: ['build', 'test', 'deploy'], ...pipe('success') },
+      { rev: 'r311', branch: 'infra-scripts', trigger: 'commit', dur: '0m 47s', time: 'há 1 h', stages: ['build', 'test', 'migrate'], ...pipe('failed') },
+      { rev: 'r4810', branch: 'trunk', trigger: 'agendado', dur: '2m 02s', time: 'ontem', stages: ['build', 'test', 'deploy'], ...pipe('success') },
+    ];
+
+    // branches & releases
+    const branchRows = [
+      { name: 'main', path: '/trunk', def: true, createdRev: 'r1', createdBy: 'marina', lastRev: 'r4821', lastBy: 'carlos' },
+      { name: 'feat/faturamento', path: '/branches/feat/faturamento', def: false, createdRev: 'r4700', createdBy: 'marina', lastRev: 'r4815', lastBy: 'marina' },
+      { name: 'fix/tz', path: '/branches/fix/tz', def: false, createdRev: 'r4780', createdBy: 'marina', lastRev: 'r4790', lastBy: 'marina' },
+      { name: 'feat/onboarding', path: '/branches/feat/onboarding', def: false, createdRev: 'r4750', createdBy: 'ana', lastRev: 'r4812', lastBy: 'ana' },
+      { name: 'spike/cache', path: '/branches/spike/cache', def: false, createdRev: 'r4600', createdBy: 'carlos', lastRev: 'r4620', lastBy: 'carlos' },
+    ];
+    const releases = [
+      { name: 'v3.2.0', path: '/tags/v3.2.0', createdRev: 'r4800', createdBy: 'marina', lastRev: 'r4800' },
+      { name: 'v3.1.0', path: '/tags/v3.1.0', createdRev: 'r4500', createdBy: 'marina', lastRev: 'r4500' },
+      { name: 'v3.0.0', path: '/tags/v3.0.0', createdRev: 'r4000', createdBy: 'jpedro', lastRev: 'r4000' },
+      { name: 'v2.9.1', path: '/tags/v2.9.1', createdRev: 'r3800', createdBy: 'carlos', lastRev: 'r3800' },
+    ];
+
+    // compare diff
+    const diffFiles = [
+      { path: 'src/fiscal/IcmsCalculator.java', add: 48, del: 12, addW: '80%', delW: '20%' },
+      { path: 'src/fiscal/NfeBuilder.java', add: 20, del: 5, addW: '80%', delW: '20%' },
+      { path: 'docs/fiscal.md', add: 14, del: 0, addW: '100%', delW: '0%' },
+      { path: 'pom.xml', add: 2, del: 2, addW: '50%', delW: '50%' },
+    ];
+
+    // insights
+    const monthlyPts = (() => {
+      const vals = [42, 58, 51, 73, 66, 88, 79, 95, 71, 84, 102, 91];
+      const max = 110, w = 460, h = 120;
+      return vals.map((v, i) => `${(i / (vals.length - 1) * w).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`).join(' ');
+    })();
+    const authorDist = [
+      { name: 'marina', pct: 100, w: '38%', color: cpal[0], commits: '1.240' },
+      { name: 'jpedro', pct: 79, w: '30%', color: cpal[1], commits: '980' },
+      { name: 'ana', pct: 49, w: '19%', color: cpal[2], commits: '612' },
+      { name: 'carlos', pct: 37, w: '13%', color: cpal[3], commits: '455' },
+    ];
+    const contribBars = [
+      { name: 'Marina Alves', initials: 'MA', color: cpal[0], commits: '1.240', w: '100%', range: 'r1 – r4821 · último em 19/06/2026' },
+      { name: 'João Pedro', initials: 'JP', color: cpal[1], commits: '980', w: '79%', range: 'r120 – r4818 · último em 18/06/2026' },
+      { name: 'Ana Lima', initials: 'AL', color: cpal[2], commits: '612', w: '49%', range: 'r400 – r4812 · último em 18/06/2026' },
+      { name: 'Carlos M.', initials: 'CM', color: cpal[3], commits: '455', w: '37%', range: 'r60 – r4821 · último em 19/06/2026' },
+    ];
+
+    const files = [
+      { name: 'src', isDir: true, isFile: false, msg: 'feat: novo serviço de conciliação bancária', age: 'há 2 dias' },
+      { name: 'docs', isDir: true, isFile: false, msg: 'docs: atualiza guia de deploy', age: 'há 1 semana' },
+      { name: 'deploy', isDir: true, isFile: false, msg: 'ci: ajusta pipeline de staging', age: 'há 12 min' },
+      { name: 'scripts', isDir: true, isFile: false, msg: 'chore: script de backup incremental', age: 'há 3 dias' },
+      { name: 'README.md', isDir: false, isFile: true, msg: 'docs: revisa instruções de checkout', age: 'há 4 dias' },
+      { name: 'CHANGELOG.md', isDir: false, isFile: true, msg: 'release: r4800 — v3.2.0', age: 'há 1 semana' },
+      { name: 'pom.xml', isDir: false, isFile: true, msg: 'build: bump versão para 3.2.1', age: 'há 2 dias' },
+      { name: '.svnignore', isDir: false, isFile: true, msg: 'chore: ignora artefatos de build', age: 'há 1 mês' },
+      { name: 'LICENSE', isDir: false, isFile: true, msg: 'init: importação inicial', age: 'há 2 anos' },
+    ];
+
+    const contributors = [
+      { name: 'Marina Alves', handle: 'marina', commits: '1.240', initials: 'MA', color: cpal[0] },
+      { name: 'João Pedro', handle: 'jpedro', commits: '980', initials: 'JP', color: cpal[1] },
+      { name: 'Ana Lima', handle: 'ana', commits: '612', initials: 'AL', color: cpal[2] },
+      { name: 'Carlos M.', handle: 'carlos', commits: '455', initials: 'CM', color: cpal[3] },
+    ];
+
+    return {
+      themeVars, direction, theme, screen,
+      isDash: screen === 'dashboard', isRepo: screen === 'repository',
+      isLight: theme === 'light', isDark: theme === 'dark',
+      dirASeg: seg(direction === 'A'), dirBSeg: seg(direction === 'B'),
+      lightSeg: seg(theme === 'light'), darkSeg: seg(theme === 'dark'),
+      dashSeg: seg(screen === 'dashboard'), repoSeg: seg(screen === 'repository'),
+      setDirA: set('direction', 'A'), setDirB: set('direction', 'B'),
+      setLight: set('theme', 'light'), setDark: set('theme', 'dark'),
+      setDash: set('screen', 'dashboard'), setRepo: set('screen', 'repository'),
+      toggleTheme: () => this.setState({ theme: this.eff().theme === 'light' ? 'dark' : 'light' }),
+      heat: this.heat(), bars: this.bars(),
+      stats, repos, myPrs, reviewPrs, pipelines, activity,
+      tabs, files, contributors,
+      ...repoTabBools,
+      commitGroups, issues, pulls, runs, branchRows, releases, diffFiles,
+      monthlyPts, authorDist, contribBars,
+    };
+  }
+}
+</script>
+</body>
+</html>
