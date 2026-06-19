@@ -1,12 +1,11 @@
 "use client";
 
+import { GitBranch, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface CommitFiltersProps {
   slug: string;
@@ -17,41 +16,69 @@ export function CommitFilters({ slug }: CommitFiltersProps) {
   const searchParams = useSearchParams();
   const [author, setAuthor] = useState(searchParams.get("author") ?? "");
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [ref, setRef] = useState(searchParams.get("ref") ?? "main");
 
   function applyFilters() {
     const params = new URLSearchParams();
-    const ref = searchParams.get("ref");
-    if (ref) params.set("ref", ref);
+    params.set("ref", ref || "main");
     if (author) params.set("author", author);
     if (search) params.set("search", search);
     router.push(`/repos/${slug}/commits?${params.toString()}`);
   }
 
   return (
-    <Card>
-      <CardContent className="flex flex-wrap items-end gap-3 p-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="author-filter">Autor</Label>
-          <Input
-            id="author-filter"
-            className="w-48"
-            value={author}
-            onChange={(event) => setAuthor(event.target.value)}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="search-filter">Mensagem</Label>
-          <Input
-            id="search-filter"
-            className="w-64"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </div>
-        <Button size="sm" onClick={applyFilters}>
-          Filtrar
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center gap-2.5">
+      <div className="relative min-w-[200px] flex-1">
+        <Search
+          className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-foreground-subtle"
+          aria-hidden
+        />
+        <Input
+          id="search-filter"
+          className="h-9 pl-9"
+          placeholder="Buscar na mensagem do commit…"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              applyFilters();
+            }
+          }}
+        />
+      </div>
+      <Input
+        id="author-filter"
+        className="h-9 w-40"
+        placeholder="Autor"
+        value={author}
+        onChange={(event) => setAuthor(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            applyFilters();
+          }
+        }}
+      />
+      <div className="relative">
+        <GitBranch
+          className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
+        <Input
+          id="ref-filter"
+          className="h-9 w-36 pl-9 font-mono text-sm font-semibold"
+          value={ref}
+          onChange={(event) => setRef(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              applyFilters();
+            }
+          }}
+          aria-label="Branch"
+        />
+      </div>
+      <Button size="sm" className="h-9" onClick={applyFilters}>
+        Filtrar
+      </Button>
+    </div>
   );
 }

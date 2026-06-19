@@ -26,7 +26,7 @@ export function DiffViewer({ files }: DiffViewerProps) {
       .join("\n");
 
     if (!unified.trim()) {
-      return "<p>Nenhum diff textual disponível para esta revisão.</p>";
+      return "<p class=\"p-4 text-sm text-muted-foreground\">Nenhum diff textual disponível para esta revisão.</p>";
     }
 
     const rendered = diff2html(unified, {
@@ -47,11 +47,21 @@ export function DiffViewer({ files }: DiffViewerProps) {
     });
   }, [files, resolvedTheme]);
 
+  if (files.filter((file) => file.diff).length === 0) {
+    return (
+      <Card className="overflow-hidden py-0">
+        <CardContent className="p-4 text-sm text-muted-foreground">
+          Nenhum diff textual disponível para esta revisão.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0">
       <CardContent className="p-0">
         <div
-          className="diff-viewer overflow-x-auto [&_.d2h-wrapper]:text-xs"
+          className="diff-viewer overflow-x-auto [&_.d2h-file-wrapper]:border-b [&_.d2h-file-wrapper]:border-border [&_.d2h-file-wrapper:last-child]:border-b-0 [&_.d2h-wrapper]:text-xs"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </CardContent>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight, GitCommitHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { CopyRevisionButton } from "@/components/copy-revision-button";
 import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -48,7 +47,7 @@ function CommitMessage({ message }: { message: string }) {
   const rest = lines.slice(1).join("\n").trim();
 
   if (!rest) {
-    return <p className="font-medium leading-snug">{firstLine}</p>;
+    return <p className="font-semibold leading-snug text-foreground">{firstLine}</p>;
   }
 
   return (
@@ -68,7 +67,7 @@ function CommitMessage({ message }: { message: string }) {
         ) : (
           <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         )}
-        <span className="font-medium leading-snug">{firstLine}</span>
+        <span className="font-semibold leading-snug text-foreground">{firstLine}</span>
       </button>
       {expanded ? (
         <pre className="mt-2 whitespace-pre-wrap pl-5 text-sm text-muted-foreground">{rest}</pre>
@@ -91,43 +90,41 @@ export function CommitHistory({ slug, entries }: CommitHistoryProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {groups.map((group) => (
         <section key={group.day}>
-          <div className="sticky top-14 z-10 border-b border-border bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-            <h2 className="text-sm font-semibold capitalize text-foreground">
+          <div className="mb-3 flex items-center gap-2 px-0.5">
+            <GitCommitHorizontal className="size-3.5 text-foreground-subtle" aria-hidden />
+            <h2 className="font-display text-[13.5px] font-semibold capitalize text-foreground">
               {formatDayHeader(group.entries[0]!.date)}
             </h2>
           </div>
-          <Card className="divide-y divide-border overflow-hidden">
+          <Card className="divide-y divide-border overflow-hidden py-0">
             {group.entries.map((entry) => (
               <Link
                 key={entry.revision}
                 href={`/repos/${slug}/commit/${entry.revision}`}
-                className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+                className="group flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent/50 sm:px-5"
               >
-                <UserAvatar username={entry.author} className="mt-0.5 size-8" />
+                <UserAvatar username={entry.author} className="size-8 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <CommitMessage message={entry.message} />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {entry.author} commitou às{" "}
+                  <div className="transition-colors group-hover:[&_p]:text-brand group-hover:[&_span]:text-brand">
+                    <CommitMessage message={entry.message} />
+                  </div>
+                  <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+                    <span className="font-semibold text-muted-foreground">{entry.author}</span> commitou às{" "}
                     {new Date(entry.date).toLocaleTimeString("pt-BR", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                    {entry.paths.length > 0 ? ` · ${entry.paths.length} arquivo(s)` : ""}
+                    {entry.paths.length > 0
+                      ? ` · ${entry.paths.length} arquivo${entry.paths.length === 1 ? "" : "s"}`
+                      : ""}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  <CopyRevisionButton revision={entry.revision} className="size-7" />
-                  <Badge
-                    variant="outline"
-                    className="font-mono hover:bg-muted"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    r{entry.revision}
-                  </Badge>
-                </div>
+                <Badge variant="secondary" className="shrink-0 font-mono text-[11.5px] font-medium">
+                  r{entry.revision}
+                </Badge>
               </Link>
             ))}
           </Card>

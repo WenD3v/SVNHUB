@@ -26,6 +26,14 @@ function formatMonthLabel(monthStart: string): string {
   });
 }
 
+function CardSectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+      {children}
+    </span>
+  );
+}
+
 export function MonthlyTrendChart({ data, loading = false }: MonthlyTrendChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const maxCount = useMemo(
@@ -33,13 +41,35 @@ export function MonthlyTrendChart({ data, loading = false }: MonthlyTrendChartPr
     [data],
   );
 
+  const chartPoints = useMemo(() => {
+    if (!data?.months.length) {
+      return { line: "", area: "" };
+    }
+
+    const chartHeight = 80;
+    const topPadding = 10;
+    const points = data.months.map((month, index) => {
+      const x = data.months.length === 1 ? 50 : (index / (data.months.length - 1)) * 100;
+      const y = topPadding + chartHeight - (month.count / maxCount) * chartHeight;
+      return { x, y, month, index };
+    });
+
+    const line = points.map((point) => `${point.x},${point.y}`).join(" ");
+    const area = `${points.map((point) => `${point.x},${point.y}`).join(" ")} 100,${topPadding + chartHeight} 0,${topPadding + chartHeight}`;
+
+    return { line, area, points };
+  }, [data, maxCount]);
+
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Tendência mensal</CardTitle>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
+          <CardSectionIcon>
+            <TrendingUp className="size-3.5" aria-hidden />
+          </CardSectionIcon>
+          <CardTitle>Tendência mensal</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-5 pt-4 sm:px-5">
           <Skeleton className="h-24 w-full" />
         </CardContent>
       </Card>
@@ -57,56 +87,77 @@ export function MonthlyTrendChart({ data, loading = false }: MonthlyTrendChartPr
     );
   }
 
-  const chartHeight = 80;
-  const barWidth = 100 / data.months.length;
-
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Tendência mensal</CardTitle>
-        <p className="text-sm text-muted-foreground">
+    <Card className="overflow-hidden py-0">
+      <CardHeader className="flex-row flex-wrap items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
+        <CardSectionIcon>
+          <TrendingUp className="size-3.5" aria-hidden />
+        </CardSectionIcon>
+        <div className="min-w-0 flex-1">
+          <CardTitle>Tendência mensal</CardTitle>
+          <p className="text-xs text-muted-foreground">Commits por mês · 12 meses</p>
+        </div>
+        <p className="text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">{data.total}</span> commits no período
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-5 pt-4 sm:px-5">
         <TooltipProvider delayDuration={0}>
           <svg
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
-            className="h-24 w-full"
+            className="h-[90px] w-full overflow-visible"
             role="img"
             aria-label="Gráfico de commits por mês"
           >
-            {data.months.map((month, index) => {
-              const height = (month.count / maxCount) * chartHeight;
-              const x = index * barWidth;
-              const y = 100 - height;
-              const isHovered = hoveredIndex === index;
+            <line
+              x1="0"
+              y1="90"
+              x2="100"
+              y2="90"
+              stroke="var(--border)"
+              strokeWidth="0.5"
+              vectorEffect="non-scaling-stroke"
+            />
+            {chartPoints.area ? (
+              <polygon
+                points={chartPoints.area}
+                fill="color-mix(in oklab, var(--brand) 15%, transparent)"
+              />
+            ) : null}
+            {chartPoints.line ? (
+              <polyline
+                points={chartPoints.line}
+                fill="none"
+                stroke="var(--brand)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null}
+            {chartPoints.points?.map((point) => {
+              const isHovered = hoveredIndex === point.index;
 
               return (
-                <Tooltip key={month.monthStart}>
+                <Tooltip key={point.month.monthStart}>
                   <TooltipTrigger asChild>
-                    <rect
-                      x={x + barWidth * 0.15}
-                      y={y}
-                      width={barWidth * 0.7}
-                      height={height}
-                      rx={1}
-                      className={
-                        isHovered
-                          ? "fill-success"
-                          : month.count > 0
-                            ? "fill-success/70"
-                            : "fill-muted"
-                      }
-                      onMouseEnter={() => setHoveredIndex(index)}
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={isHovered ? 2.5 : 1.75}
+                      fill="var(--brand)"
+                      stroke="var(--card)"
+                      strokeWidth="0.75"
+                      vectorEffect="non-scaling-stroke"
+                      onMouseEnter={() => setHoveredIndex(point.index)}
                       onMouseLeave={() => setHoveredIndex(null)}
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="font-medium">{formatMonthLabel(month.monthStart)}</p>
+                    <p className="font-medium">{formatMonthLabel(point.month.monthStart)}</p>
                     <p>
-                      {month.count} commit{month.count === 1 ? "" : "s"}
+                      {point.month.count} commit{point.month.count === 1 ? "" : "s"}
                     </p>
                   </TooltipContent>
                 </Tooltip>

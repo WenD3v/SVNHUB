@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3 } from "lucide-react";
+import { Activity } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +32,14 @@ function formatWeekLabel(weekStart: string): string {
   return `${startLabel} – ${endLabel}`;
 }
 
+function CardSectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+      {children}
+    </span>
+  );
+}
+
 export function CommitActivityChart({ data, loading = false }: CommitActivityChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const maxCount = useMemo(
@@ -44,7 +52,7 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
       <Card className="py-0">
         <CardContent className="p-4 sm:p-5">
           <Skeleton className="mb-3.5 h-5 w-48" />
-          <Skeleton className="h-[60px] w-full" />
+          <Skeleton className="h-[90px] w-full" />
         </CardContent>
       </Card>
     );
@@ -53,7 +61,7 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
   if (!data || data.weeks.length === 0 || data.total === 0) {
     return (
       <EmptyState
-        icon={BarChart3}
+        icon={Activity}
         title="Sem atividade recente"
         description="Nenhum commit indexado no período selecionado."
         className="py-8"
@@ -61,20 +69,25 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
     );
   }
 
-  const chartHeight = 60;
+  const chartHeight = 90;
 
   return (
     <Card className="py-0">
       <CardContent className="p-4 sm:p-5">
-        <div className="mb-3.5 flex items-center gap-2.5">
-          <h3 className="font-display text-sm font-semibold text-foreground">
-            Atividade de commits
-          </h3>
-          <span className="text-xs text-muted-foreground">52 semanas</span>
+        <div className="mb-4 flex items-center gap-2.5">
+          <CardSectionIcon>
+            <Activity className="size-3.5" aria-hidden />
+          </CardSectionIcon>
+          <div>
+            <h3 className="font-display text-sm font-semibold text-foreground">
+              Atividade de commits
+            </h3>
+            <p className="text-xs text-muted-foreground">Últimas 52 semanas</p>
+          </div>
         </div>
         <TooltipProvider delayDuration={0}>
           <div
-            className="flex h-[60px] items-end gap-[3px]"
+            className="flex h-[90px] items-end gap-[3px]"
             role="img"
             aria-label="Gráfico de commits por semana"
           >
@@ -86,7 +99,7 @@ export function CommitActivityChart({ data, loading = false }: CommitActivityCha
                 <Tooltip key={week.weekStart}>
                   <TooltipTrigger asChild>
                     <div
-                      className="min-w-[3px] flex-1 rounded-t-sm bg-brand transition-opacity"
+                      className="min-w-[3px] flex-1 rounded-t-[2px] bg-brand transition-opacity"
                       style={{
                         height: `${height}px`,
                         opacity: isHovered ? 1 : week.count > 0 ? 0.85 : 0.25,

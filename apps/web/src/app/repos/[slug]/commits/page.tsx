@@ -34,7 +34,7 @@ export default async function CommitsPage({ params, searchParams }: CommitsPageP
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
           <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-          <h1 className="text-xl font-semibold">Commits</h1>
+          <h1 className="font-display text-xl font-semibold text-foreground">Commits</h1>
         </div>
         <RepoNav slug={slug} active="commits" />
         <Suspense fallback={<Skeleton className="h-20 w-full" />}>

@@ -20,72 +20,55 @@ interface AuthorDistributionChartProps {
   loading?: boolean;
 }
 
-const CHART_COLORS = [
-  "var(--primary)",
-  "color-mix(in oklab, var(--primary) 70%, var(--background))",
-  "color-mix(in oklab, var(--primary) 50%, var(--background))",
-  "color-mix(in oklab, var(--success) 80%, var(--background))",
-  "color-mix(in oklab, var(--success) 55%, var(--background))",
-  "var(--muted-foreground)",
-];
+const HEAT_COLORS = [
+  "var(--heat-4)",
+  "var(--heat-3)",
+  "var(--heat-2)",
+  "var(--heat-1)",
+  "var(--brand)",
+  "var(--brand-2)",
+] as const;
 
-function polarToCartesian(cx: number, cy: number, radius: number, angle: number) {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  return {
-    x: cx + radius * Math.cos(radians),
-    y: cy + radius * Math.sin(radians),
-  };
-}
-
-function describeArc(
-  cx: number,
-  cy: number,
-  radius: number,
-  startAngle: number,
-  endAngle: number,
-): string {
-  const start = polarToCartesian(cx, cy, radius, endAngle);
-  const end = polarToCartesian(cx, cy, radius, startAngle);
-  const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
-  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+function CardSectionIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+      {children}
+    </span>
+  );
 }
 
 export function AuthorDistributionChart({ data, loading = false }: AuthorDistributionChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const slices = useMemo(() => {
+  const authors = useMemo(() => {
     if (!data || data.total === 0) {
       return [];
     }
 
-    let cursor = 0;
-    return data.authors.map((author, index) => {
-      const angle = (author.commits / data.total) * 360;
-      const slice = {
-        ...author,
-        index,
-        startAngle: cursor,
-        endAngle: cursor + angle,
-        color: CHART_COLORS[index % CHART_COLORS.length],
-      };
-      cursor += angle;
-      return slice;
-    });
+    return data.authors.map((author, index) => ({
+      ...author,
+      index,
+      color: HEAT_COLORS[index % HEAT_COLORS.length],
+      width: `${author.percentage}%`,
+    }));
   }, [data]);
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Distribuição por autor</CardTitle>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
+          <CardSectionIcon>
+            <PieChart className="size-3.5" aria-hidden />
+          </CardSectionIcon>
+          <CardTitle>Distribuição por autor</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-5 pt-4 sm:px-5">
           <Skeleton className="h-48 w-full" />
         </CardContent>
       </Card>
     );
   }
 
-  if (!data || data.total === 0 || slices.length === 0) {
+  if (!data || data.total === 0 || authors.length === 0) {
     return (
       <EmptyState
         icon={PieChart}
@@ -97,55 +80,74 @@ export function AuthorDistributionChart({ data, loading = false }: AuthorDistrib
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Distribuição por autor</CardTitle>
-        <p className="text-sm text-muted-foreground">
+    <Card className="overflow-hidden py-0">
+      <CardHeader className="flex-row flex-wrap items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
+        <CardSectionIcon>
+          <PieChart className="size-3.5" aria-hidden />
+        </CardSectionIcon>
+        <CardTitle className="flex-1">Distribuição por autor</CardTitle>
+        <p className="text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">{data.total}</span> commits
         </p>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <CardContent className="space-y-4 px-4 pb-5 pt-4 sm:px-5">
         <TooltipProvider delayDuration={0}>
-          <svg viewBox="0 0 100 100" className="mx-auto h-48 w-full max-w-xs" role="img" aria-label="Gráfico de distribuição de commits por autor">
-            {slices.map((slice) => (
-              <Tooltip key={slice.author}>
+          <div
+            className="flex h-3.5 overflow-hidden rounded-full"
+            role="img"
+            aria-label="Distribuição proporcional de commits por autor"
+          >
+            {authors.map((author) => (
+              <Tooltip key={author.author}>
                 <TooltipTrigger asChild>
-                  <path
-                    d={describeArc(50, 50, 45, slice.startAngle, slice.endAngle)}
-                    fill={slice.color}
-                    className={hoveredIndex === slice.index ? "opacity-100" : "opacity-90"}
-                    onMouseEnter={() => setHoveredIndex(slice.index)}
+                  <div
+                    className="h-full transition-opacity"
+                    style={{
+                      width: author.width,
+                      backgroundColor: author.color,
+                      opacity: hoveredIndex === null || hoveredIndex === author.index ? 1 : 0.45,
+                    }}
+                    onMouseEnter={() => setHoveredIndex(author.index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="font-medium">{slice.author}</p>
+                  <p className="font-medium">{author.author}</p>
                   <p>
-                    {slice.commits} commit{slice.commits === 1 ? "" : "s"} ({slice.percentage}%)
+                    {author.commits} commit{author.commits === 1 ? "" : "s"} ({author.percentage}%)
                   </p>
                 </TooltipContent>
               </Tooltip>
             ))}
-          </svg>
+          </div>
         </TooltipProvider>
 
-        <ul className="space-y-2 text-sm">
-          {slices.map((slice) => (
-            <li key={slice.author} className="flex items-center justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <span
-                  className="size-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: slice.color }}
-                />
-                {slice.hasProfile ? (
-                  <Link href={`/users/${slice.author}`} className="truncate hover:underline">
-                    {slice.author}
-                  </Link>
-                ) : (
-                  <span className="truncate">{slice.author}</span>
-                )}
-              </div>
-              <span className="shrink-0 text-muted-foreground">{slice.percentage}%</span>
+        <ul className="space-y-2.5">
+          {authors.map((author) => (
+            <li
+              key={author.author}
+              className="flex items-center gap-2.5 text-[12.5px]"
+              onMouseEnter={() => setHoveredIndex(author.index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <span
+                className="size-2.5 shrink-0 rounded-[3px]"
+                style={{ backgroundColor: author.color }}
+                aria-hidden
+              />
+              {author.hasProfile ? (
+                <Link
+                  href={`/users/${author.author}`}
+                  className="min-w-0 flex-1 truncate font-medium text-foreground hover:text-brand hover:underline"
+                >
+                  {author.author}
+                </Link>
+              ) : (
+                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                  {author.author}
+                </span>
+              )}
+              <span className="shrink-0 font-mono text-muted-foreground">{author.commits}</span>
             </li>
           ))}
         </ul>

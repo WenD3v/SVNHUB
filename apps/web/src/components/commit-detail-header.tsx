@@ -27,8 +27,8 @@ export function CommitDetailHeader({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold">Revisão</h1>
-          <Badge variant="outline" className="font-mono">
+          <h1 className="font-display text-xl font-semibold text-foreground">Revisão</h1>
+          <Badge variant="secondary" className="font-mono">
             r{revision}
           </Badge>
           <CopyRevisionButton revision={revision} className="size-8" />
@@ -53,20 +53,25 @@ export function CommitDetailHeader({
         </div>
       </div>
       {entry ? (
-        <Card>
-          <CardContent className="flex items-start gap-3 p-4">
-            <UserAvatar username={entry.author} className="size-10" />
+        <Card className="overflow-hidden py-0">
+          <CardContent className="flex items-start gap-3 p-4 sm:p-5">
+            <UserAvatar username={entry.author} className="size-10 shrink-0" />
             <div className="min-w-0 flex-1 space-y-2">
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+              <pre className="whitespace-pre-wrap font-display text-sm font-semibold leading-relaxed text-foreground">
                 {entry.message || "(sem mensagem)"}
               </pre>
               <p className="text-sm text-muted-foreground">
-                <Link href={`/users/${entry.author}`} className="font-medium text-foreground hover:underline">
+                <Link
+                  href={`/users/${entry.author}`}
+                  className="font-semibold text-foreground hover:text-brand hover:underline"
+                >
                   {entry.author}
                 </Link>{" "}
                 commitou em{" "}
                 {new Date(entry.date).toLocaleString("pt-BR")}
-                {entry.paths.length > 0 ? ` · ${entry.paths.length} arquivo(s) alterado(s)` : ""}
+                {entry.paths.length > 0
+                  ? ` · ${entry.paths.length} arquivo${entry.paths.length === 1 ? "" : "s"} alterado${entry.paths.length === 1 ? "" : "s"}`
+                  : ""}
               </p>
             </div>
           </CardContent>

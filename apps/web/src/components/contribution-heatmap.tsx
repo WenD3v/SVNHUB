@@ -18,6 +18,9 @@ import type { UserHeatmapResponse } from "@svnhub/shared";
 interface ContributionHeatmapProps {
   data: UserHeatmapResponse | null;
   loading?: boolean;
+  title?: string;
+  subtitle?: string;
+  totalLabel?: string;
 }
 
 const WEEKS = 53;
@@ -58,7 +61,13 @@ function CardSectionIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ContributionHeatmap({ data, loading = false }: ContributionHeatmapProps) {
+export function ContributionHeatmap({
+  data,
+  loading = false,
+  title = "Contribuições",
+  subtitle,
+  totalLabel,
+}: ContributionHeatmapProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const grid = useMemo(() => {
@@ -105,14 +114,14 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
 
   if (loading) {
     return (
-      <Card className="overflow-hidden">
-        <CardHeader className="flex-row items-center gap-2.5 pb-3">
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
           <CardSectionIcon>
             <Activity className="size-3.5" aria-hidden />
           </CardSectionIcon>
-          <CardTitle>Contribuições</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="px-5 pb-5">
+        <CardContent className="px-4 pb-5 pt-4 sm:px-5">
           <Skeleton className="h-28 w-full" />
         </CardContent>
       </Card>
@@ -121,14 +130,14 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
 
   if (!data || data.total === 0) {
     return (
-      <Card className="overflow-hidden">
-        <CardHeader className="flex-row items-center gap-2.5 pb-3">
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
           <CardSectionIcon>
             <Activity className="size-3.5" aria-hidden />
           </CardSectionIcon>
-          <CardTitle>Contribuições</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="px-5 pb-5">
+        <CardContent className="px-4 pb-5 pt-4 sm:px-5">
           <EmptyState
             icon={Activity}
             title="Sem contribuições recentes"
@@ -141,22 +150,23 @@ export function ContributionHeatmap({ data, loading = false }: ContributionHeatm
   }
 
   const cellGap = 1.5;
+  const resolvedTotalLabel =
+    totalLabel ??
+    `${data.total.toLocaleString("pt-BR")} commit${data.total === 1 ? "" : "s"} no último ano`;
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex-row items-center gap-2.5 pb-3">
+    <Card className="overflow-hidden py-0">
+      <CardHeader className="flex-row flex-wrap items-center gap-2.5 border-b border-border bg-secondary px-4 py-3 sm:px-5">
         <CardSectionIcon>
           <Activity className="size-3.5" aria-hidden />
         </CardSectionIcon>
-        <CardTitle>Contribuições</CardTitle>
-        <p className="ml-auto text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            {data.total.toLocaleString("pt-BR")}
-          </span>{" "}
-          commits no último ano
-        </p>
+        <div className="min-w-0 flex-1">
+          <CardTitle>{title}</CardTitle>
+          {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}
+        </div>
+        <p className="text-xs text-muted-foreground">{resolvedTotalLabel}</p>
       </CardHeader>
-      <CardContent className="overflow-x-auto px-5 pb-5">
+      <CardContent className="overflow-x-auto px-4 pb-5 pt-4 sm:px-5">
         <TooltipProvider delayDuration={0}>
           <svg
             viewBox={`0 0 ${WEEKS * 10} ${DAYS * 10 + 10}`}

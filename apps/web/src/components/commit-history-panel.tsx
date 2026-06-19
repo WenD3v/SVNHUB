@@ -49,9 +49,9 @@ export function CommitHistoryPanel({
       <CommitHistory slug={slug} entries={entries} />
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {hasMore ? (
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-2">
           <Button variant="outline" onClick={loadMore} disabled={loading}>
-            {loading ? "Carregando..." : "Load more"}
+            {loading ? "Carregando..." : "Carregar mais"}
           </Button>
         </div>
       ) : null}

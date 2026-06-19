@@ -278,8 +278,16 @@
 }
 
 .diff-viewer .d2h-file-header {
-  background: var(--muted);
+  background: var(--secondary);
   border-color: var(--border);
+  color: var(--foreground);
+}
+
+.diff-viewer .d2h-file-name,
+.diff-viewer .d2h-file-header .d2h-file-name {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--foreground);
 }
 
 .diff-viewer .d2h-code-line,
@@ -287,6 +295,52 @@
   border-color: var(--border);
 }
 
+.diff-viewer .d2h-code-line-ctn,
+.diff-viewer .d2h-code-side-line {
+  color: var(--foreground);
+}
+
+.diff-viewer .d2h-ins,
+.diff-viewer .d2h-ins.d2h-change {
+  background-color: var(--success-soft);
+  border-color: color-mix(in oklab, var(--success) 35%, transparent);
+}
+
+.diff-viewer .d2h-del,
+.diff-viewer .d2h-del.d2h-change {
+  background-color: var(--destructive-soft);
+  border-color: color-mix(in oklab, var(--destructive) 35%, transparent);
+}
+
+.diff-viewer .d2h-code-linenumber,
+.diff-viewer .d2h-code-side-linenumber {
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+.diff-viewer .d2h-info {
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
 .dark .diff-viewer .d2h-dark-color-scheme {
   background: var(--card);
+  color: var(--foreground);
+}
+
+.dark .diff-viewer .d2h-dark-color-scheme .d2h-file-header {
+  background: var(--secondary);
+  border-color: var(--border);
+}
+
+.dark .diff-viewer .d2h-dark-color-scheme .d2h-ins,
+.dark .diff-viewer .d2h-dark-color-scheme .d2h-ins.d2h-change {
+  background-color: var(--success-soft);
+}
+
+.dark .diff-viewer .d2h-dark-color-scheme .d2h-del,
+.dark .diff-viewer .d2h-dark-color-scheme .d2h-del.d2h-change {
+  background-color: var(--destructive-soft);
 }
