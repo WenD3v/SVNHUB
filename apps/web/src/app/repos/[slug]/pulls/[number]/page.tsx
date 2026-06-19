@@ -34,9 +34,9 @@ export default async function PullRequestPage({ params }: PullRequestPageProps) 
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
           <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-          <h1 className="text-xl font-semibold">
-            {pullRequest.title}{" "}
-            <span className="text-muted-foreground">#{pullRequest.number}</span>
+          <h1 className="font-display text-xl font-semibold text-foreground">
+            Pull request{" "}
+            <span className="font-mono text-muted-foreground">#{pullRequest.number}</span>
           </h1>
         </div>
 

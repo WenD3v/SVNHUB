@@ -3,23 +3,19 @@
 import type { PipelineListResponse } from "@svnhub/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FileCode2, Workflow } from "lucide-react";
 import { useState } from "react";
 
 import {
   formatDuration,
+  formatPipelineTrigger,
   PipelineStatusBadge,
+  PipelineStatusDot,
 } from "@/components/pipeline-status-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { apiFetch } from "@/lib/api-client";
 
 interface PipelinesPanelProps {
@@ -50,9 +46,13 @@ export function PipelinesPanel({ slug, initial }: PipelinesPanelProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {initial.total} execução(ões) · disparo automático via `.svnhub-ci.yml`
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+          <FileCode2 className="size-3.5 text-foreground-subtle" aria-hidden />
+          {initial.total} execução(ões) · disparo automático via{" "}
+          <code className="rounded bg-secondary px-1.5 py-px font-mono text-foreground">
+            .svnhub-ci.yml
+          </code>
         </p>
         <Button size="sm" disabled={loading} onClick={runPipeline}>
           Rodar pipeline
@@ -65,54 +65,44 @@ export function PipelinesPanel({ slug, initial }: PipelinesPanelProps) {
         </Alert>
       ) : null}
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Revisão</TableHead>
-                <TableHead>Branch path</TableHead>
-                <TableHead>Gatilho</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Duração</TableHead>
-                <TableHead>Criado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {initial.pipelines.length === 0 ? (
+            <div className="px-5 py-8">
+              <EmptyState
+                icon={Workflow}
+                title="Nenhum pipeline"
+                description="Nenhum pipeline executado ainda."
+              />
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
               {initial.pipelines.map((pipeline) => (
-                <TableRow key={pipeline.id}>
-                  <TableCell>
+                <div
+                  key={pipeline.id}
+                  className="flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-accent/30"
+                >
+                  <PipelineStatusDot status={pipeline.status} />
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={`/repos/${slug}/pipelines/${pipeline.id}`}
-                      className="font-mono font-medium text-primary hover:underline"
+                      className="text-[13.5px] font-semibold text-foreground hover:text-brand"
                     >
-                      r{pipeline.revision}
+                      <span className="font-mono">{pipeline.branchPath}</span>
+                      {" · "}
+                      <span className="font-mono font-medium">r{pipeline.revision}</span>
                     </Link>
-                  </TableCell>
-                  <TableCell>
-                    <code className="rounded bg-muted px-1 font-mono text-xs">
-                      {pipeline.branchPath}
-                    </code>
-                  </TableCell>
-                  <TableCell>{pipeline.trigger}</TableCell>
-                  <TableCell>
-                    <PipelineStatusBadge status={pipeline.status} />
-                  </TableCell>
-                  <TableCell>{formatDuration(pipeline.durationMs)}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(pipeline.createdAt).toLocaleString("pt-BR")}
-                  </TableCell>
-                </TableRow>
+                    <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+                      {formatPipelineTrigger(pipeline.trigger)} ·{" "}
+                      {formatDuration(pipeline.durationMs)} ·{" "}
+                      {new Date(pipeline.createdAt).toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  <PipelineStatusBadge status={pipeline.status} />
+                </div>
               ))}
-              {initial.pipelines.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Nenhum pipeline executado ainda.
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </TableBody>
-          </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

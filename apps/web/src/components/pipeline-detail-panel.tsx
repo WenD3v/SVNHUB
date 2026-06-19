@@ -3,24 +3,43 @@
 import type {
   JobLogChunk,
   PipelineDetail,
+  PipelineJobStatus,
   PipelineRealtimeEvent,
 } from "@svnhub/shared";
+import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 
 import {
   formatDuration,
-  PipelineJobStatusBadge,
+  formatPipelineTrigger,
   PipelineStatusBadge,
 } from "@/components/pipeline-status-badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 
 interface PipelineDetailPanelProps {
   slug: string;
   pipeline: PipelineDetail;
   initialLogs: Record<string, JobLogChunk[]>;
+}
+
+function JobStatusIcon({ status }: { status: PipelineJobStatus }) {
+  switch (status) {
+    case "SUCCESS":
+      return <CheckCircle2 className="size-4 text-success" aria-hidden />;
+    case "FAILURE":
+      return <XCircle className="size-4 text-destructive" aria-hidden />;
+    case "RUNNING":
+      return <Loader2 className="size-4 animate-spin text-brand" aria-hidden />;
+    case "QUEUED":
+      return <Circle className="size-4 text-brand" aria-hidden />;
+    case "CANCELED":
+      return <Circle className="size-4 text-foreground-subtle" aria-hidden />;
+  }
 }
 
 export function PipelineDetailPanel({
@@ -117,14 +136,18 @@ export function PipelineDetailPanel({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">
-              Pipeline r{detail.revision} · {detail.branchPath}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="font-display text-lg font-semibold text-foreground">
+              Pipeline{" "}
+              <span className="font-mono">r{detail.revision}</span>
+              {" · "}
+              <span className="font-mono text-base">{detail.branchPath}</span>
             </h2>
             <PipelineStatusBadge status={detail.status} />
           </div>
           <p className="text-sm text-muted-foreground">
-            Gatilho {detail.trigger} · duração {formatDuration(detail.durationMs)}
+            Gatilho {formatPipelineTrigger(detail.trigger)} · duração{" "}
+            {formatDuration(detail.durationMs)}
           </p>
         </div>
         {canCancel ? (
@@ -134,52 +157,66 @@ export function PipelineDetailPanel({
         ) : null}
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-        <div className="space-y-2 rounded-lg border border-border p-3">
-          <h3 className="text-sm font-medium">Jobs</h3>
-          {detail.jobs.map((job) => (
-            <button
-              key={job.id}
-              type="button"
-              onClick={() => setActiveJobId(job.id)}
-              className={
-                activeJobId === job.id
-                  ? "flex w-full flex-col rounded-md border border-primary bg-muted/40 px-3 py-2 text-left"
-                  : "flex w-full flex-col rounded-md border border-transparent px-3 py-2 text-left hover:bg-muted/30"
-              }
+      <div className="grid gap-4 md:grid-cols-[260px_1fr]">
+        <Card className="overflow-hidden py-0">
+          <CardHeader className="px-4 py-3">
+            <CardTitle>Steps</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 p-2 pt-0">
+            {detail.jobs.map((job) => (
+              <button
+                key={job.id}
+                type="button"
+                onClick={() => setActiveJobId(job.id)}
+                className={cn(
+                  "flex w-full items-start gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors",
+                  activeJobId === job.id
+                    ? "border border-primary bg-brand-soft/50"
+                    : "border border-transparent hover:bg-accent/50",
+                )}
+              >
+                <JobStatusIcon status={job.status} />
+                <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
+                  {job.stageName} / {job.name}
+                </span>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden py-0">
+          <CardHeader className="px-4 py-3">
+            <CardTitle>Logs</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <pre
+              ref={logContainerRef}
+              className="max-h-[480px] overflow-auto bg-secondary p-4 font-mono text-xs leading-relaxed text-foreground"
             >
-              <span className="text-sm font-medium">
-                {job.stageName} / {job.name}
-              </span>
-              <PipelineJobStatusBadge status={job.status} />
-            </button>
-          ))}
-        </div>
-
-        <div className="rounded-lg border border-border">
-          <div className="border-b border-border px-4 py-2 text-sm font-medium">Logs</div>
-          <pre
-            ref={logContainerRef}
-            className="max-h-[480px] overflow-auto bg-black p-4 font-mono text-xs text-green-200"
-          >
-            {activeLogs.map((chunk) => chunk.content).join("") || "Aguardando logs..."}
-          </pre>
-        </div>
+              {activeLogs.map((chunk) => chunk.content).join("") || "Aguardando logs..."}
+            </pre>
+          </CardContent>
+        </Card>
       </div>
 
       {detail.artifacts.length > 0 ? (
-        <div className="rounded-lg border border-border p-4">
-          <h3 className="text-sm font-medium">Artefatos</h3>
-          <ul className="mt-2 space-y-1 text-sm">
-            {detail.artifacts.map((artifact) => (
-              <li key={artifact.id}>
-                <code>{artifact.name}</code> · {artifact.sizeBytes} bytes
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Card className="overflow-hidden py-0">
+          <CardHeader className="px-4 py-3">
+            <CardTitle>Artefatos</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0">
+            <ul className="space-y-1 text-sm text-muted-foreground">
+              {detail.artifacts.map((artifact) => (
+                <li key={artifact.id}>
+                  <code className="font-mono text-foreground">{artifact.name}</code> ·{" "}
+                  {artifact.sizeBytes} bytes
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );

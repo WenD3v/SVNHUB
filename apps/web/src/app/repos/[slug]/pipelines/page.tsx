@@ -22,8 +22,7 @@ export default async function PipelinesPage({ params }: PipelinesPageProps) {
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
           <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-          <h1 className="text-xl font-semibold">Pipelines</h1>
-          <p className="text-sm text-muted-foreground">CI/CD automatizado via `.svnhub-ci.yml`</p>
+          <h1 className="font-display text-xl font-semibold text-foreground">Pipelines</h1>
         </div>
 
         <RepoNav slug={slug} active="pipelines" />

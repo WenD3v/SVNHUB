@@ -31,7 +31,10 @@ export default async function PipelineDetailPage({ params }: PipelineDetailPageP
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
           <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-          <h1 className="text-xl font-semibold">Pipeline r{pipeline.revision}</h1>
+          <h1 className="font-display text-xl font-semibold text-foreground">
+            Pipeline{" "}
+            <span className="font-mono text-muted-foreground">r{pipeline.revision}</span>
+          </h1>
         </div>
 
         <RepoNav slug={slug} active="pipelines" />

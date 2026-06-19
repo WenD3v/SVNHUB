@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -26,23 +27,46 @@ export function CompareForm({ slug, initialSource, initialTarget }: CompareFormP
   }
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-          <div className="space-y-1.5">
-            <Label>Base (ex.: main)</Label>
-            <Input value={source} onChange={(e) => setSource(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Compare com</Label>
+    <Card className="overflow-hidden py-0">
+      <CardContent className="p-5">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-wrap items-center gap-3"
+        >
+          <Label htmlFor="compare-base" className="text-[12.5px] font-semibold text-muted-foreground">
+            Base
+          </Label>
+          <div className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-3 py-1.5 font-mono text-sm text-foreground">
             <Input
+              id="compare-base"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              className="h-7 min-w-[120px] border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
+            />
+          </div>
+
+          <ArrowRight className="size-4 text-foreground-subtle" aria-hidden />
+
+          <Label
+            htmlFor="compare-target"
+            className="text-[12.5px] font-semibold text-muted-foreground"
+          >
+            Comparar
+          </Label>
+          <div className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-3 py-1.5 font-mono text-sm text-foreground">
+            <Input
+              id="compare-target"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               placeholder="feature-x"
               required
+              className="h-7 min-w-[160px] border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
             />
           </div>
-          <Button type="submit">Comparar</Button>
+
+          <Button type="submit" className="ml-auto">
+            Comparar
+          </Button>
         </form>
       </CardContent>
     </Card>

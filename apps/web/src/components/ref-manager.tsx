@@ -44,31 +44,40 @@ export function CreateRefForm({ slug, kind }: CreateRefFormProps) {
     }
   }
 
-  const label = kind === "branch" ? "branch" : "tag";
+  const nameLabel = kind === "branch" ? "Nome da nova branch" : "Nome da tag";
+  const namePlaceholder =
+    kind === "branch" ? "feat/minha-feature" : "v3.2.1";
+  const submitLabel = kind === "branch" ? "Criar branch" : "Criar release";
 
   return (
-    <Card>
-      <CardContent className="flex flex-wrap items-end gap-3 p-4">
+    <Card className="overflow-hidden py-0">
+      <CardContent className="p-4">
         <form onSubmit={handleSubmit} className="flex w-full flex-wrap items-end gap-3">
-          <div className="space-y-1.5">
-            <Label>Nome da {label}</Label>
+          <div className="min-w-[220px] flex-1 space-y-1.5">
+            <Label htmlFor={`${kind}-name`}>{nameLabel}</Label>
             <Input
+              id={`${kind}-name`}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={kind === "branch" ? "feature-x" : "v1.0.0"}
+              placeholder={namePlaceholder}
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Origem</Label>
-            <Input value={sourceRef} onChange={(e) => setSourceRef(e.target.value)} />
+            <Label htmlFor={`${kind}-source`}>Origem</Label>
+            <Input
+              id={`${kind}-source`}
+              value={sourceRef}
+              onChange={(e) => setSourceRef(e.target.value)}
+              className="font-mono"
+            />
           </div>
           <Button type="submit" disabled={loading}>
-            {loading ? "Criando…" : `Criar ${label}`}
+            {loading ? "Criando…" : submitLabel}
           </Button>
         </form>
         {error ? (
-          <Alert variant="destructive" className="w-full">
+          <Alert variant="destructive" className="mt-3">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
@@ -103,7 +112,7 @@ export function DeleteRefButton({ slug, name, kind }: DeleteRefButtonProps) {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleDelete} disabled={loading}>
+    <Button variant="ghost" size="sm" onClick={handleDelete} disabled={loading}>
       Excluir
     </Button>
   );

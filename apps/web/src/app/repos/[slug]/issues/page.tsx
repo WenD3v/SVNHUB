@@ -1,19 +1,13 @@
 import Link from "next/link";
+import { CircleDot, Plus, Search } from "lucide-react";
 
 import { PageShell } from "@/components/page-shell";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { UserAvatar } from "@/components/user-avatar";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -39,6 +33,10 @@ function buildQuery(params: Record<string, string | undefined>) {
   return serialized ? `?${serialized}` : "";
 }
 
+function issueStatusLabel(status: "OPEN" | "CLOSED") {
+  return status === "OPEN" ? "aberta" : "fechada";
+}
+
 export default async function IssuesPage({ params, searchParams }: IssuesPageProps) {
   const { slug } = await params;
   const query = await searchParams;
@@ -53,15 +51,16 @@ export default async function IssuesPage({ params, searchParams }: IssuesPagePro
 
   const tabs = [
     {
-      label: "Open",
+      label: "Abertas",
       href: `/repos/${slug}/issues?status=OPEN`,
       active: status === "OPEN",
       count: issues.openCount,
     },
     {
-      label: "Closed",
+      label: "Fechadas",
       href: `/repos/${slug}/issues?status=CLOSED`,
       active: status === "CLOSED",
+      count: status === "CLOSED" ? issues.total : undefined,
     },
   ];
 
@@ -71,101 +70,123 @@ export default async function IssuesPage({ params, searchParams }: IssuesPagePro
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-2">
             <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-            <h1 className="text-xl font-semibold">Issues</h1>
+            <h1 className="font-display text-xl font-semibold text-foreground">Issues</h1>
           </div>
           <Button asChild>
-            <Link href={`/repos/${slug}/issues/new`}>Nova issue</Link>
+            <Link href={`/repos/${slug}/issues/new`}>
+              <Plus className="size-4" aria-hidden />
+              Nova issue
+            </Link>
           </Button>
         </div>
 
         <RepoNav slug={slug} active="issues" openIssueCount={issues.openCount} />
 
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((tab) => (
-            <Button
-              key={tab.label}
-              variant={tab.active ? "default" : "outline"}
-              size="sm"
-              asChild
-            >
-              <Link href={tab.href} className={cn(!tab.active && "text-muted-foreground")}>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="inline-flex gap-0.5 rounded-lg bg-secondary p-1">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-[12.5px] font-semibold transition-colors",
+                  tab.active
+                    ? "bg-card text-foreground shadow-[var(--card-shadow)]"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
                 {tab.label}
-                {tab.count !== undefined ? ` (${tab.count})` : ""}
+                {tab.count !== undefined ? (
+                  <span className="ml-1 text-foreground-subtle">{tab.count}</span>
+                ) : null}
               </Link>
-            </Button>
-          ))}
-        </div>
-
-        <form className="grid gap-3 md:grid-cols-4" action={`/repos/${slug}/issues`} method="get">
-          <input type="hidden" name="status" value={status} />
-          <input
-            name="search"
-            defaultValue={query.search ?? ""}
-            placeholder="Buscar por título"
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm md:col-span-2"
-          />
-          <select
-            name="label"
-            defaultValue={query.label ?? ""}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="">Todas as labels</option>
-            {labels.labels.map((label) => (
-              <option key={label.id} value={label.name}>
-                {label.name}
-              </option>
             ))}
-          </select>
-          <div className="flex gap-2">
-            <input
+          </div>
+
+          <form
+            className="flex min-w-[200px] flex-1 flex-wrap items-center gap-2"
+            action={`/repos/${slug}/issues`}
+            method="get"
+          >
+            <input type="hidden" name="status" value={status} />
+            <div className="relative min-w-[180px] flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-foreground-subtle"
+                aria-hidden
+              />
+              <Input
+                name="search"
+                defaultValue={query.search ?? ""}
+                placeholder="Buscar por título"
+                className="h-9 pl-9"
+              />
+            </div>
+            <select
+              name="label"
+              defaultValue={query.label ?? ""}
+              className="h-9 rounded-md border border-input bg-card px-3 text-sm"
+            >
+              <option value="">Todas as labels</option>
+              {labels.labels.map((label) => (
+                <option key={label.id} value={label.name}>
+                  {label.name}
+                </option>
+              ))}
+            </select>
+            <Input
               name="assignee"
               defaultValue={query.assignee ?? ""}
               placeholder="Assignee"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="h-9 w-32"
             />
-            <input
+            <Input
               name="author"
               defaultValue={query.author ?? ""}
               placeholder="Autor"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="h-9 w-32"
             />
-          </div>
-          <Button type="submit" size="sm" className="md:col-span-4 md:w-fit">
-            Filtrar
-          </Button>
-        </form>
+            <Button type="submit" size="sm" variant="outline" className="h-9">
+              Filtrar
+            </Button>
+          </form>
+        </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden py-0">
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead>#</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Labels</TableHead>
-                  <TableHead>Assignee</TableHead>
-                  <TableHead>Autor</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            {issues.issues.length === 0 ? (
+              <div className="px-5 py-8">
+                <EmptyState
+                  icon={CircleDot}
+                  title="Nenhuma issue"
+                  description="Nenhuma issue encontrada."
+                />
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
                 {issues.issues.map((issue) => (
-                  <TableRow key={issue.id}>
-                    <TableCell className="text-muted-foreground">{issue.number}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/repos/${slug}/issues/${issue.number}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {issue.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
+                  <div
+                    key={issue.id}
+                    className="flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-accent/30"
+                  >
+                    <CircleDot
+                      className={cn(
+                        "size-[17px] shrink-0",
+                        issue.status === "OPEN" ? "text-success" : "text-foreground-subtle",
+                      )}
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/repos/${slug}/issues/${issue.number}`}
+                          className="text-sm font-semibold text-foreground hover:text-brand"
+                        >
+                          {issue.title}
+                        </Link>
                         {issue.labels.map((label) => (
                           <span
                             key={label.id}
-                            className="rounded-full px-2 py-0.5 text-xs font-medium"
+                            className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
                             style={{
                               backgroundColor: `${label.color}22`,
                               color: label.color,
@@ -175,49 +196,23 @@ export default async function IssuesPage({ params, searchParams }: IssuesPagePro
                           </span>
                         ))}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {issue.assignee ? (
-                        <div className="flex items-center gap-2">
-                          <UserAvatar
-                            username={issue.assignee.username}
-                            avatarUrl={issue.assignee.avatarUrl}
-                            className="size-7"
-                          />
-                          <span>{issue.assignee.username}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <UserAvatar
-                          username={issue.author.username}
-                          avatarUrl={issue.author.avatarUrl}
-                          className="size-7"
-                        />
-                        <Link href={`/users/${issue.author.username}`} className="hover:underline">
-                          {issue.author.username}
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={issue.status === "OPEN" ? "default" : "muted"}>
-                        {issue.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
+                      <p className="mt-1 text-[11.5px] text-muted-foreground">
+                        <span className="font-mono">#{issue.number}</span>
+                        {" · "}
+                        {issueStatusLabel(issue.status)} por {issue.author.username}
+                      </p>
+                    </div>
+                    {issue.assignee ? (
+                      <UserAvatar
+                        username={issue.assignee.username}
+                        avatarUrl={issue.assignee.avatarUrl}
+                        className="size-7 shrink-0"
+                      />
+                    ) : null}
+                  </div>
                 ))}
-                {issues.issues.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      Nenhuma issue encontrada.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>

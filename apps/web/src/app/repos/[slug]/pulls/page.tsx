@@ -1,19 +1,12 @@
 import Link from "next/link";
+import { GitPullRequest } from "lucide-react";
 
 import { PageShell } from "@/components/page-shell";
 import { RepoBreadcrumbs } from "@/components/repo-breadcrumbs";
 import { RepoNav } from "@/components/repo-nav";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { UserAvatar } from "@/components/user-avatar";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -24,11 +17,25 @@ interface PullRequestsPageProps {
   searchParams: Promise<{ status?: string }>;
 }
 
-const STATUS_VARIANTS: Record<string, "default" | "success" | "destructive" | "muted"> = {
-  OPEN: "default",
-  MERGED: "success",
-  CLOSED: "destructive",
-};
+function getPullRequestPresentation(status: "OPEN" | "MERGED" | "CLOSED") {
+  switch (status) {
+    case "OPEN":
+      return { badgeVariant: "success" as const, label: "Aberto", iconClass: "text-success" };
+    case "MERGED":
+      return {
+        badgeVariant: "brand" as const,
+        label: "Mergeado",
+        iconClass: "text-[var(--brand-2)]",
+        badgeClassName: "text-[var(--brand-2)]",
+      };
+    case "CLOSED":
+      return {
+        badgeVariant: "destructive" as const,
+        label: "Fechado",
+        iconClass: "text-foreground-subtle",
+      };
+  }
+}
 
 export default async function PullRequestsPage({
   params,
@@ -45,14 +52,14 @@ export default async function PullRequestsPage({
 
   const filters = [
     { label: "Todos", href: `/repos/${slug}/pulls`, active: !query.status },
-    { label: "Open", href: `/repos/${slug}/pulls?status=OPEN`, active: query.status === "OPEN" },
+    { label: "Abertos", href: `/repos/${slug}/pulls?status=OPEN`, active: query.status === "OPEN" },
     {
-      label: "Merged",
+      label: "Mergeados",
       href: `/repos/${slug}/pulls?status=MERGED`,
       active: query.status === "MERGED",
     },
     {
-      label: "Closed",
+      label: "Fechados",
       href: `/repos/${slug}/pulls?status=CLOSED`,
       active: query.status === "CLOSED",
     },
@@ -63,84 +70,92 @@ export default async function PullRequestsPage({
       <section className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         <div className="space-y-2">
           <RepoBreadcrumbs slug={slug} repoName={repo.name} />
-          <h1 className="text-xl font-semibold">Pull requests</h1>
+          <h1 className="font-display text-xl font-semibold text-foreground">Pull requests</h1>
         </div>
 
         <RepoNav slug={slug} active="pulls" />
 
         <div className="flex flex-wrap gap-2">
           {filters.map((filter) => (
-            <Button
+            <Link
               key={filter.label}
-              variant={filter.active ? "default" : "outline"}
-              size="sm"
-              asChild
+              href={filter.href}
+              className={cn(
+                "inline-flex h-8 items-center rounded-md px-3.5 text-[12.5px] font-semibold transition-colors",
+                filter.active
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-card text-muted-foreground hover:text-foreground",
+              )}
             >
-              <Link href={filter.href} className={cn(!filter.active && "text-muted-foreground")}>
-                {filter.label}
-              </Link>
-            </Button>
+              {filter.label}
+            </Link>
           ))}
         </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden py-0">
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead>#</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>Autor</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pullRequests.pullRequests.map((pr) => (
-                  <TableRow key={pr.id}>
-                    <TableCell className="text-muted-foreground">{pr.number}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/repos/${slug}/pulls/${pr.number}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {pr.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <code className="rounded bg-muted px-1 font-mono text-xs">{pr.sourceRef}</code>
-                      {" → "}
-                      <code className="rounded bg-muted px-1 font-mono text-xs">{pr.targetRef}</code>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <UserAvatar
-                          username={pr.author.username}
-                          avatarUrl={pr.author.avatarUrl}
-                          className="size-7"
-                        />
+            {pullRequests.pullRequests.length === 0 ? (
+              <div className="px-5 py-8">
+                <EmptyState
+                  icon={GitPullRequest}
+                  title="Nenhum pull request"
+                  description="Nenhum pull request encontrado."
+                />
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {pullRequests.pullRequests.map((pr) => {
+                  const presentation = getPullRequestPresentation(pr.status);
+
+                  return (
+                    <div
+                      key={pr.id}
+                      className="flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-accent/30"
+                    >
+                      <GitPullRequest
+                        className={cn("size-[17px] shrink-0", presentation.iconClass)}
+                        aria-hidden
+                      />
+                      <div className="min-w-0 flex-1">
                         <Link
-                          href={`/users/${pr.author.username}`}
-                          className="hover:underline"
+                          href={`/repos/${slug}/pulls/${pr.number}`}
+                          className="text-sm font-semibold text-foreground hover:text-brand"
                         >
-                          {pr.author.username}
+                          {pr.title}
                         </Link>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11.5px] text-muted-foreground">
+                          <span>
+                            <span className="font-mono">#{pr.number}</span>
+                            {" · por "}
+                            {pr.author.username}
+                          </span>
+                          <span className="inline-flex items-center gap-1 font-mono">
+                            <span className="rounded bg-secondary px-1.5 py-px text-foreground">
+                              {pr.sourceRef}
+                            </span>
+                            <span aria-hidden>→</span>
+                            <span className="rounded bg-secondary px-1.5 py-px text-foreground">
+                              {pr.targetRef}
+                            </span>
+                          </span>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_VARIANTS[pr.status] ?? "muted"}>{pr.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {pullRequests.pullRequests.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      Nenhum pull request encontrado.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+                      <Badge
+                        variant={presentation.badgeVariant}
+                        className={cn("shrink-0 font-semibold", presentation.badgeClassName)}
+                      >
+                        {presentation.label}
+                      </Badge>
+                      <UserAvatar
+                        username={pr.author.username}
+                        avatarUrl={pr.author.avatarUrl}
+                        className="size-7 shrink-0"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>

@@ -55,20 +55,31 @@ export function CreatePullRequestForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Abrir Pull Request</CardTitle>
+    <Card className="overflow-hidden py-0">
+      <CardHeader className="px-5 py-4">
+        <CardTitle>Abrir pull request</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          <span className="rounded bg-secondary px-1.5 py-px font-mono">{sourceRef}</span>
+          {" → "}
+          <span className="rounded bg-secondary px-1.5 py-px font-mono">{targetRef}</span>
+        </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-5 pb-5 pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Título</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <Label htmlFor="pr-title">Título</Label>
+            <Input
+              id="pr-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
-            <Label>Descrição</Label>
+            <Label htmlFor="pr-description">Descrição</Label>
             <textarea
-              className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              id="pr-description"
+              className="flex min-h-24 w-full rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -79,7 +90,7 @@ export function CreatePullRequestForm({
             </Alert>
           ) : null}
           <Button type="submit" disabled={loading}>
-            Criar Pull Request
+            Criar pull request
           </Button>
         </form>
       </CardContent>
