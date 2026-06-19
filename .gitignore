@@ -34,3 +34,4 @@ Thumbs.db
 .claude/*
 .cursor
 .claude
+docs/db-schema*
